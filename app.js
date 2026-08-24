@@ -102,7 +102,8 @@ const filtry = {
   do: null,
   typDnia: 'wszystkie',
   osMacierzy: 'szop',
-  grupowanie: null      // null = bierzemy z konfiguracji
+  grupowanie: null,     // null = bierzemy z konfiguracji
+  tylkoPelne: false
 };
 
 function zeruj() {
@@ -229,8 +230,15 @@ function filtrujWpisy(wszystkie) {
     if (doo && dzien > doo) return false;
     if (filtry.typDnia === 'robocze' && czyWolny(dzien, dniWolne)) return false;
     if (filtry.typDnia === 'wolne' && !czyWolny(dzien, dniWolne)) return false;
+    if (filtry.tylkoPelne && !(w.bateria != null && (w.szop || []).length)) return false;
     return true;
   });
+}
+
+/* Wpis "pełny" = ma i baterię, i przynajmniej jeden czynnik SZOP.
+   Tylko takie niosą korelację między stanem a energią. */
+function czyPelny(w) {
+  return w.bateria != null && (w.szop || []).length > 0;
 }
 
 /* ===== widok: nowy wpis ===== */
@@ -567,6 +575,10 @@ function filtryHtml() {
       `<button data-preset="${id}" aria-pressed="${filtry.preset === id}">${n}</button>`).join('')}</div>
     <div class="grupa">${typy.map(([id, n]) =>
       `<button data-typdnia="${id}" aria-pressed="${filtry.typDnia === id}">${n}</button>`).join('')}</div>
+    <button class="przycisk ${filtry.tylkoPelne ? 'glowny' : 'cichy'}" id="tylko-pelne"
+      style="padding:6px 13px;font-size:13px" aria-pressed="${filtry.tylkoPelne}"
+      title="Zostaw tylko wpisy, które mają i baterię, i czynnik SZOP — czyli te niosące korelację">
+      ${filtry.tylkoPelne ? '✓ ' : ''}tylko pełne (bateria + SZOP)</button>
     <div class="rzad ${filtry.preset === 'zakres' ? '' : 'ukryty'}" id="zakres-dat">
       <input type="date" id="data-od" value="${filtry.od || ''}" aria-label="Data od">
       <span style="color:var(--slaby)">→</span>
@@ -589,6 +601,8 @@ function podepnijFiltry() {
   document.querySelectorAll('[data-typdnia]').forEach(b => {
     b.addEventListener('click', () => { filtry.typDnia = b.dataset.typdnia; rysujDashboard(); });
   });
+  const pelne = $('#tylko-pelne');
+  if (pelne) pelne.addEventListener('click', () => { filtry.tylkoPelne = !filtry.tylkoPelne; rysujDashboard(); });
   const od = $('#data-od'), doo = $('#data-do');
   if (od) od.addEventListener('change', e => { filtry.od = e.target.value; rysujDashboard(); });
   if (doo) doo.addEventListener('change', e => { filtry.do = e.target.value; rysujDashboard(); });
@@ -924,6 +938,178 @@ function macierz(dane, zmiany) {
   </table></div>`;
 }
 
+/* ===== widok: czerwone flagi ===== */
+
+function rysujFlagi() {
+  const wszystkie = Magazyn.wpisy();
+  const zFlaga = wszystkie.filter(w => w.czerwonaFlaga);
+
+  if (!wszystkie.length) {
+    $('#widok').innerHTML = `<div class="pusty-stan"><strong>Brak wpisów</strong>
+      Ta zakładka pokaże wzory czerwonych flag, gdy zaczniesz notować.</div>`;
+    return;
+  }
+  if (!zFlaga.length) {
+    $('#widok').innerHTML = `<div class="pusty-stan"><strong>Żadnej czerwonej flagi — na razie</strong>
+      Dobrze. Gdy przy którymś wpisie zaznaczysz „Tak, widziałem”, tutaj pojawi się rozkład:
+      o której godzinie, jak często i które sygnały wracają.</div>`;
+    return;
+  }
+
+  const udzial = zaokr(zFlaga.length / wszystkie.length * 100);
+
+  /* rozkład godzinowy */
+  const wgGodz = {};
+  zFlaga.forEach(w => { const g = new Date(w.ts).getHours(); wgGodz[g] = (wgGodz[g] || 0) + 1; });
+  const szczyt = Object.entries(wgGodz).sort((a, b) => b[1] - a[1])[0];
+
+  /* które sygnały */
+  const wgSygnalu = {};
+  zFlaga.forEach(w => (w.flagi || []).forEach(f => { wgSygnalu[f] = (wgSygnalu[f] || 0) + 1; }));
+  const sygnaly = Object.entries(wgSygnalu).sort((a, b) => b[1] - a[1]);
+  const maksSygnal = sygnaly.length ? sygnaly[0][1] : 1;
+
+  /* rozkład dzienny — ostatnie 14 dni */
+  const dni = [];
+  const dzis = new Date(); dzis.setHours(0, 0, 0, 0);
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(dzis); d.setDate(d.getDate() - i);
+    const iso = naDate(d);
+    dni.push({ iso, etykieta: d.getDate() + '.' + dwie(d.getMonth() + 1),
+               dzien: DNI_TYGODNIA[d.getDay()].slice(0, 2),
+               n: zFlaga.filter(w => w.ts.slice(0, 10) === iso).length });
+  }
+  const maksDzien = Math.max(1, ...dni.map(d => d.n));
+
+  /* dni tygodnia */
+  const wgTyg = [0, 0, 0, 0, 0, 0, 0];
+  zFlaga.forEach(w => { wgTyg[new Date(w.ts).getDay()]++; });
+  const kolejnoscTyg = [1, 2, 3, 4, 5, 6, 0];
+  const maksTyg = Math.max(1, ...wgTyg);
+
+  /* stan przy fladze: bateria i najczęstszy czynnik */
+  const baterie = zFlaga.map(w => w.bateria).filter(b => b != null);
+  const srBat = baterie.length ? zaokr(baterie.reduce((a, b) => a + b, 0) / baterie.length) : null;
+  const wgSzop = {};
+  zFlaga.forEach(w => (w.szop || []).forEach(c => { wgSzop[c.id] = (wgSzop[c.id] || 0) + 1; }));
+  const szopSort = Object.entries(wgSzop).sort((a, b) => b[1] - a[1]);
+
+  $('#widok').innerHTML = `
+    <div class="siatka3">
+      <div class="karta metryka">
+        <h3>Ile</h3>
+        <p class="liczba-duza">${zFlaga.length}</p>
+        <p class="pod">${zFlaga.length === 1 ? 'raz' : 'razy'} na ${wszystkie.length} wpisów · ${udzial}%</p>
+      </div>
+      <div class="karta metryka">
+        <h3>Kiedy najczęściej</h3>
+        <p class="liczba-duza">${szczyt[0]}:00</p>
+        <p class="pod">tu wybucha najczęściej — ${szczyt[1]}×</p>
+      </div>
+      <div class="karta metryka">
+        <h3>Stan przy fladze</h3>
+        <p class="liczba-duza ${srBat != null && srBat < 40 ? 'ujemny' : ''}">${srBat != null ? srBat : '—'}</p>
+        <p class="pod">średnia bateria${szopSort.length ? ' · najczęściej: ' + esc(kategoriaSzop(szopSort[0][0]).nazwa) : ''}</p>
+      </div>
+    </div>
+
+    <div class="karta">
+      <h2>O której godzinie</h2>
+      <p class="wskazowka">Rozkład czerwonych flag w ciągu doby — ze wszystkich wpisów, nie tylko z zakresu.</p>
+      ${histogramFlag(wgGodz)}
+    </div>
+
+    <div class="siatka2">
+      <div class="karta">
+        <h2>Które sygnały wracają</h2>
+        ${sygnaly.length ? sygnaly.map(([f, n]) => `
+          <div class="paskowy">
+            <span class="nazwa" style="width:auto;flex:1">${esc(f)}</span>
+            <span class="tor" style="max-width:120px"><i style="width:${zaokr(n / maksSygnal * 100)}%;background:var(--alarm)"></i></span>
+            <span class="wart">${n}×</span>
+          </div>`).join('') : '<p class="wskazowka">Flagi zaznaczone bez wskazania konkretnego sygnału.</p>'}
+      </div>
+
+      <div class="karta">
+        <h2>Które dni tygodnia</h2>
+        ${kolejnoscTyg.map(d => `
+          <div class="paskowy">
+            <span class="nazwa" style="width:92px">${DNI_TYGODNIA[d]}</span>
+            <span class="tor"><i style="width:${zaokr(wgTyg[d] / maksTyg * 100)}%;background:${d === 0 || d === 6 ? 'var(--akcent)' : 'var(--alarm)'}"></i></span>
+            <span class="wart">${wgTyg[d] || ''}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="karta">
+      <h2>Ostatnie 14 dni</h2>
+      <p class="wskazowka">Czy flag ostatnio przybywa, czy ubywa.</p>
+      ${histogramDni(dni, maksDzien)}
+    </div>
+  `;
+}
+
+function histogramFlag(wgGodz) {
+  const W = 720, H = 200, mL = 30, mR = 16, mT = 14, mB = 30;
+  const szerWykr = W - mL - mR, wysWykr = H - mT - mB;
+  const godziny = Object.keys(wgGodz).map(Number);
+  const odG = Math.min(...godziny), doG = Math.max(...godziny);
+  const rozpietosc = Math.max(doG - odG, 1) + 1;
+  const szerKol = szerWykr / rozpietosc;
+  const maks = Math.max(...Object.values(wgGodz));
+  const gornaOs = Math.max(2, maks);
+
+  let out = `<div class="wykres-otoczka"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Rozkład godzinowy czerwonych flag">`;
+  for (let i = 0; i <= gornaOs; i++) {
+    if (gornaOs > 6 && i % 2) continue;
+    const yy = mT + wysWykr - (i / gornaOs) * wysWykr;
+    out += `<line x1="${mL}" y1="${yy}" x2="${W - mR}" y2="${yy}" stroke="var(--linia)" stroke-width="1"/>`;
+    out += `<text x="${mL - 6}" y="${yy + 4}" text-anchor="end" font-family="var(--mono)" font-size="10.5" fill="var(--slaby)">${i}</text>`;
+  }
+  for (let g = odG; g <= doG; g++) {
+    const n = wgGodz[g] || 0;
+    const x = mL + (g - odG) * szerKol + szerKol / 2;
+    const szer = Math.min(28, szerKol * 0.6);
+    if (n) {
+      const wys = (n / gornaOs) * wysWykr;
+      out += `<rect x="${zaokr(x - szer / 2, 1)}" y="${zaokr(mT + wysWykr - wys, 1)}" width="${zaokr(szer, 1)}" height="${zaokr(wys, 1)}" rx="2" fill="var(--alarm)"><title>${g}:00 — ${n}</title></rect>`;
+    }
+    if (rozpietosc <= 16 || (g - odG) % 2 === 0) {
+      out += `<text x="${zaokr(x, 1)}" y="${H - mB + 18}" text-anchor="middle" font-family="var(--mono)" font-size="10.5" fill="var(--slaby)">${g}</text>`;
+    }
+  }
+  out += `<line x1="${mL}" y1="${mT + wysWykr}" x2="${W - mR}" y2="${mT + wysWykr}" stroke="var(--linia-mocna)" stroke-width="1"/>`;
+  out += `</svg></div>`;
+  return out;
+}
+
+function histogramDni(dni, maks) {
+  const W = 720, H = 190, mL = 30, mR = 16, mT = 14, mB = 34;
+  const szerWykr = W - mL - mR, wysWykr = H - mT - mB;
+  const szerKol = szerWykr / dni.length;
+  const gornaOs = Math.max(2, maks);
+  let out = `<div class="wykres-otoczka"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Czerwone flagi w ostatnich 14 dniach">`;
+  for (let i = 0; i <= gornaOs; i++) {
+    if (gornaOs > 6 && i % 2) continue;
+    const yy = mT + wysWykr - (i / gornaOs) * wysWykr;
+    out += `<line x1="${mL}" y1="${yy}" x2="${W - mR}" y2="${yy}" stroke="var(--linia)" stroke-width="1"/>`;
+    out += `<text x="${mL - 6}" y="${yy + 4}" text-anchor="end" font-family="var(--mono)" font-size="10.5" fill="var(--slaby)">${i}</text>`;
+  }
+  dni.forEach((d, idx) => {
+    const x = mL + idx * szerKol + szerKol / 2;
+    const szer = Math.min(26, szerKol * 0.62);
+    if (d.n) {
+      const wys = (d.n / gornaOs) * wysWykr;
+      out += `<rect x="${zaokr(x - szer / 2, 1)}" y="${zaokr(mT + wysWykr - wys, 1)}" width="${zaokr(szer, 1)}" height="${zaokr(wys, 1)}" rx="2" fill="var(--alarm)"><title>${d.etykieta} — ${d.n}</title></rect>`;
+    }
+    out += `<text x="${zaokr(x, 1)}" y="${H - mB + 16}" text-anchor="middle" font-family="var(--mono)" font-size="9.5" fill="var(--slaby)">${d.etykieta}</text>`;
+    out += `<text x="${zaokr(x, 1)}" y="${H - mB + 27}" text-anchor="middle" font-family="var(--mono)" font-size="9" fill="var(--slaby)">${d.dzien}</text>`;
+  });
+  out += `<line x1="${mL}" y1="${mT + wysWykr}" x2="${W - mR}" y2="${mT + wysWykr}" stroke="var(--linia-mocna)" stroke-width="1"/>`;
+  out += `</svg></div>`;
+  return out;
+}
+
 /* ===== widok: historia ===== */
 
 function rysujHistoria() {
@@ -1182,6 +1368,7 @@ function przelacz(nowy) {
     b.setAttribute('aria-selected', String(b.dataset.widok === nowy)));
   if (nowy === 'wpis') rysujWpis();
   else if (nowy === 'dashboard') rysujDashboard();
+  else if (nowy === 'flagi') rysujFlagi();
   else if (nowy === 'historia') rysujHistoria();
   else rysujUstawienia();
   window.scrollTo({ top: 0 });
