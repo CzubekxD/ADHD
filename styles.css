@@ -309,6 +309,24 @@ table.historia tr:hover td { background: var(--powierzchnia-2); }
 }
 .blad-pola { color: var(--alarm); font-size: 12.5px; margin-top: 5px; }
 
+.wskazowka-nowy {
+  font-size: 13.5px; color: var(--przygaszony);
+  background: var(--akcent-tlo); border-radius: var(--promien);
+  padding: 10px 14px; margin: 0 0 20px; line-height: 1.5;
+}
+.link-tekst {
+  appearance: none; background: none; border: 0; padding: 0;
+  font: inherit; color: var(--akcent); cursor: pointer;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.link-tekst:hover { opacity: 0.8; }
+.link-tekst:focus-visible { outline: 2px solid var(--akcent); outline-offset: 2px; border-radius: 3px; }
+.adres-kopiuj {
+  font-family: var(--mono); font-size: 13.5px; color: var(--tusz);
+  background: var(--powierzchnia-2); border: 1px solid var(--linia-mocna);
+  border-radius: var(--promien); padding: 8px 12px; user-select: all;
+}
+
 .ukryty { display: none !important; }
 .tylko-czytnik {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;

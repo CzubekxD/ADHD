@@ -98,6 +98,15 @@ const DOMYSLNA_KONFIGURACJA = {
     domyslnyZakres: [7, 22]
   },
 
+  /* Zakładka „O stronie” i wskazówka dla nowych.
+     Puste pola (np. buyMeACoffee: '') ukrywają dany element. */
+  oStronie: {
+    buyMeACoffee: 'https://buycoffee.to/czubekxd',
+    mailUwagi: 'mateusz.czubienko@gmail.com',
+    /* Wskazówka nad formularzem znika, gdy jest już tyle wpisów. */
+    pokazWskazowkeDoWpisow: 1
+  },
+
   /* Dni wolne poza weekendem i świętami — dopisujesz je
      klikając w historii. Format: 'RRRR-MM-DD'. */
   dniWolne: []

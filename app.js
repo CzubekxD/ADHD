@@ -300,8 +300,16 @@ function rysujWpis() {
   SZYBKIE = znaneDzialania(KONF.analiza.szybkieDzialania);
   const trafione = s => normalizujDzialanie(roboczy.dzialanie) === normalizujDzialanie(s.nazwa);
 
+  const liczbaWpisow = Magazyn.wpisy().length;
+  const prog = (KONF.oStronie && KONF.oStronie.pokazWskazowkeDoWpisow) || 0;
+  const wskazowkaHtml = (prog && liczbaWpisow < prog) ? `
+    <p class="wskazowka-nowy">Pierwszy raz? Zajrzyj do
+      <button type="button" class="link-tekst" data-idz-ostronie>„O stronie”</button>
+      — jak działają Twoje dane i dlaczego są bezpieczne. Ta wskazówka zniknie po pierwszym wpisie.</p>` : '';
+
   $('#widok').innerHTML = `
     <div class="karta jasna">
+      ${wskazowkaHtml}
       <label class="etykieta" for="pole-ts">Kiedy</label>
       <div class="rzad" style="margin-bottom:22px">
         <input type="datetime-local" id="pole-ts" value="${roboczy.ts}" style="width:auto">
@@ -368,6 +376,8 @@ function rysujWpis() {
 }
 
 function podepnijWpis() {
+  const wsk = $('[data-idz-ostronie]');
+  if (wsk) wsk.addEventListener('click', () => przelacz('ostronie'));
   $('#pole-ts').addEventListener('change', e => { roboczy.ts = e.target.value; });
   $('#teraz').addEventListener('click', () => {
     const t = new Date();
@@ -1355,6 +1365,81 @@ function podepnijUstawienia() {
   });
 }
 
+/* ===== widok: o stronie ===== */
+
+function rysujOStronie() {
+  const o = KONF.oStronie || {};
+  const kawa = (o.buyMeACoffee || '').trim();
+  const mail = (o.mailUwagi || '').trim();
+
+  $('#widok').innerHTML = `
+    <div class="karta jasna" style="max-width:640px">
+      <h2>O stronie</h2>
+      <p style="margin-bottom:16px">To narzędzie do obserwowania własnego stanu — poziomu energii,
+      czynników SZOP i czerwonych flag przeciążenia. Powstało po to, żeby pomagać, i
+      <strong>jest oraz pozostanie darmowe</strong>.</p>
+
+      <h3 style="margin-top:22px">Twoje dane są tylko Twoje</h3>
+      <p class="wskazowka" style="font-size:13.5px;line-height:1.6">
+        Wpisy są zapisywane wyłącznie w tej przeglądarce, na tym urządzeniu.
+        Nie trafiają na żaden serwer — nikt poza Tobą ich nie widzi.
+        Oznacza to też dwie rzeczy, o których warto pamiętać: nie zobaczysz ich
+        na innym urządzeniu, a wyczyszczenie danych przeglądarki je usunie.
+        Dlatego w <button type="button" class="link-tekst" data-idz-ustawienia>Ustawieniach</button>
+        jest „Pobierz JSON” — to Twoja kopia zapasowa i sposób przeniesienia wpisów
+        na inny sprzęt.</p>
+
+      <h3 style="margin-top:22px">Wspólny komputer?</h3>
+      <p class="wskazowka" style="font-size:13.5px;line-height:1.6">
+        Jeśli chcesz, żeby strona nie otwierała się od razu każdemu, kto sięgnie po Twoją
+        przeglądarkę, rozważ wtyczkę
+        <a href="https://addons.mozilla.org/firefox/addon/leechblock-ng/" target="_blank" rel="noopener noreferrer" class="link-tekst">LeechBlock NG</a>
+        — pozwala ukryć stronę za hasłem albo limitem. To wygodna zasłona, nie prawdziwe
+        szyfrowanie: chroni przed przypadkowym zajrzeniem, nie przed kimś zdeterminowanym.</p>
+
+      ${kawa ? `<h3 style="margin-top:22px">Wsparcie</h3>
+      <p style="margin-bottom:12px">Jeśli strona Ci się przydała, możesz postawić kawę.
+      To miłe, ale całkowicie dobrowolne — nic za tym nie jest zamknięte.</p>
+      <a class="przycisk glowny" href="${esc(kawa)}" target="_blank" rel="noopener noreferrer"
+        style="text-decoration:none;display:inline-block">☕ Postaw kawę</a>` : ''}
+
+      ${mail ? `<h3 style="margin-top:26px">Masz uwagi?</h3>
+      <p style="margin-bottom:8px">Napisz, co poprawić albo co nie działa. Adres do skopiowania:</p>
+      <div class="rzad">
+        <code class="adres-kopiuj" id="adres-uwagi">${esc(mail)}</code>
+        <button type="button" class="przycisk cichy" id="kopiuj-adres">kopiuj</button>
+      </div>` : ''}
+
+      <p class="wskazowka" style="margin-top:26px;font-size:12.5px">
+        To narzędzie do obserwowania siebie, nie do diagnozowania. Jeśli coś Cię niepokoi,
+        to materiał do rozmowy z człowiekiem, nie wyrok.</p>
+    </div>
+  `;
+
+  const doUst = $('[data-idz-ustawienia]');
+  if (doUst) doUst.addEventListener('click', () => przelacz('ustawienia'));
+
+  const kopiuj = $('#kopiuj-adres');
+  if (kopiuj) kopiuj.addEventListener('click', () => {
+    const tekst = mail;
+    const zrobione = () => komunikat('Skopiowano adres');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(tekst).then(zrobione).catch(() => reczneZaznaczenie());
+    } else {
+      reczneZaznaczenie();
+    }
+    function reczneZaznaczenie() {
+      const el = $('#adres-uwagi');
+      const zakres = document.createRange();
+      zakres.selectNodeContents(el);
+      const sel = window.getSelection();
+      sel.removeAllRanges(); sel.addRange(zakres);
+      try { document.execCommand('copy'); komunikat('Skopiowano adres'); }
+      catch (e) { komunikat('Zaznacz i skopiuj ręcznie'); }
+    }
+  });
+}
+
 /* ===== router ===== */
 
 function odswiezLicznik() {
@@ -1370,6 +1455,7 @@ function przelacz(nowy) {
   else if (nowy === 'dashboard') rysujDashboard();
   else if (nowy === 'flagi') rysujFlagi();
   else if (nowy === 'historia') rysujHistoria();
+  else if (nowy === 'ostronie') rysujOStronie();
   else rysujUstawienia();
   window.scrollTo({ top: 0 });
 }
