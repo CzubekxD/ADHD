@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WOOP</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible+Next:wght@400;600;700&family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Chakra+Petch:wght@600;700&family=Share+Tech+Mono&display=swap">
+<style>
+/* Układ: jedna kolumna (max 680px), zakładki na dole pod kciukiem; kreator pokazuje jeden krok W-O-O-P na ekran.
+   Cztery kolory kroków: życzenie (niebo), efekt (złoto), przeszkoda (rdza), plan (morska zieleń) — efekt i przeszkoda stoją obok siebie jako kontrast. */
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --sunk:#E4E8ED; --ink:#141B24; --muted:#5A6573; --line:#D2D8E0;
+  --accent:#1F6FB8; --accent-ink:#FFFFFF;
+  --w:#1F6FB8; --w-bg:#E1EEFA;
+  --o1:#9A6A00; --o1-bg:#FBF0D4;
+  --o2:#B4471F; --o2-bg:#FBE5DA;
+  --p:#0B7A68; --p-bg:#D9F1EC;
+  --ok:#0B7A68; --miss:#B4471F; --skip:#8A94A2;
+  --ex:#6D4BC4; --ex-bg:#F1ECFC;
+  --f-display:"Bricolage Grotesque","Atkinson Hyperlegible Next",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible Next","Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"Atkinson Hyperlegible Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --r:14px;
+  --spring:cubic-bezier(.3,1.5,.5,1);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F141A; --surface:#171E27; --sunk:#1F2731; --ink:#E6EBF1; --muted:#99A4B2; --line:#2C3643;
+  --accent:#6CB0F0; --accent-ink:#0F141A;
+  --w:#6CB0F0; --w-bg:#14283C;
+  --o1:#E2B547; --o1-bg:#33280E;
+  --o2:#F08A60; --o2-bg:#3A2017;
+  --p:#41C7AF; --p-bg:#0F2F2A;
+  --ok:#41C7AF; --miss:#F08A60; --skip:#7C8796;
+  --ex:#B7A2FF; --ex-bg:#211A38;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F141A; --surface:#171E27; --sunk:#1F2731; --ink:#E6EBF1; --muted:#99A4B2; --line:#2C3643;
+  --accent:#6CB0F0; --accent-ink:#0F141A;
+  --w:#6CB0F0; --w-bg:#14283C;
+  --o1:#E2B547; --o1-bg:#33280E;
+  --o2:#F08A60; --o2-bg:#3A2017;
+  --p:#41C7AF; --p-bg:#0F2F2A;
+  --ok:#41C7AF; --miss:#F08A60; --skip:#7C8796;
+  --ex:#B7A2FF; --ex-bg:#211A38;
+  color-scheme:dark}
+
+/* Motyw cyberpunk: zawsze ciemny, neonowe kolory kroków (cyjan, żółć, magenta, zieleń), ścięte rogi, skanlinie. */
+html[data-skin="cyber"]:root{
+  --bg:#07060D; --surface:#0E0C1A; --sunk:#181433; --ink:#E9F7FF; --muted:#9490BD; --line:#2C2656;
+  --accent:#00F0FF; --accent-ink:#07060D;
+  --w:#00F0FF; --w-bg:#04252B;
+  --o1:#FCEE0A; --o1-bg:#262404;
+  --o2:#FF2A6D; --o2-bg:#2E0A18;
+  --p:#05FFA1; --p-bg:#03281D;
+  --ok:#05FFA1; --miss:#FF2A6D; --skip:#6B6790;
+  --ex:#B967FF; --ex-bg:#1B0C30;
+  --f-display:"Chakra Petch","Bricolage Grotesque",system-ui,sans-serif;
+  --f-mono:"Share Tech Mono","Atkinson Hyperlegible Mono",ui-monospace,monospace;
+  --glow:0 0 14px rgb(0 240 255 / .45);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 120px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+button,summary{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.app{max-width:680px;margin:0 auto}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;gap:12px;padding-block:14px 10px;border-bottom:1px solid var(--line);view-transition-name:top}
+.brand{display:flex;align-items:baseline;gap:2px;font-family:var(--f-display);font-weight:800;font-size:24px;letter-spacing:-.02em;line-height:1}
+.brand b{font-weight:800;display:inline-block;animation:drop .55s var(--spring) both}
+.brand b:nth-child(2){animation-delay:.08s} .brand b:nth-child(3){animation-delay:.16s} .brand b:nth-child(4){animation-delay:.24s}
+.brand .c1{color:var(--w)} .brand .c2{color:var(--o1)} .brand .c3{color:var(--o2)} .brand .c4{color:var(--p)}
+.brand small{margin-left:10px;font-family:var(--f-mono);font-weight:400;font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.top .today{margin-left:auto;font-family:var(--f-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* przełącznik motywu */
+.skin{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px 4px 4px;min-height:32px;
+  font-family:var(--f-mono);font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--muted);transition:color .25s,border-color .25s,box-shadow .25s}
+.skin .knob{width:30px;height:18px;border-radius:999px;background:var(--sunk);position:relative;transition:background-color .25s}
+.skin .knob::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .32s var(--spring),background-color .25s,box-shadow .25s}
+.skin[aria-checked="true"]{color:var(--accent);border-color:var(--accent);box-shadow:var(--glow)}
+.skin[aria-checked="true"] .knob{background:var(--o2)}
+.skin[aria-checked="true"] .knob::after{transform:translateX(12px);background:#fff;box-shadow:0 0 8px #fff}
+@media (max-width:420px){.brand small{display:none}}
+
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);view-transition-name:tabs;
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));display:flex;justify-content:center}
+nav.tabs .in{position:relative;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;width:100%;max-width:680px}
+nav.tabs .pill{position:absolute;top:0;bottom:0;left:0;width:calc((100% - 8px) / 5);border-radius:10px;background:var(--sunk);
+  transform:translateX(calc(var(--i,0) * (100% + 2px)));transition:transform .34s var(--spring)}
+nav.tabs button{position:relative;z-index:1;background:none;border:0;border-radius:10px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12.5px;color:var(--muted);min-height:52px;transition:color .2s}
+nav.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s var(--spring)}
+nav.tabs button[aria-current="page"]{color:var(--accent);font-weight:600}
+nav.tabs button[aria-current="page"] svg{transform:translateY(-2px) scale(1.08)}
+
+main{display:flex;flex-direction:column;gap:16px;padding-top:18px}
+h1{font-family:var(--f-display);font-size:28px;line-height:1.15;font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:19px;margin:0;font-weight:800;letter-spacing:-.01em;text-wrap:balance}
+p{margin:0}
+.lede{color:var(--muted)}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.grow{flex:1;min-width:0}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600;text-align:center;
+  transition:transform .12s ease,background-color .2s,border-color .2s,color .2s}
+.btn:active:not(:disabled){transform:scale(.96)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent}
+.btn.small{min-height:38px;padding:6px 12px;font-size:14.5px}
+.btn.danger{color:var(--miss);border-color:var(--miss)}
+.btn:disabled{opacity:.45;cursor:default}
+.stack{display:flex;flex-direction:column;gap:8px}
+.stack .btn{width:100%}
+
+/* litery kroków */
+.lt{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;font-family:var(--f-display);font-weight:800;font-size:17px;flex:none}
+.k-wish{--c:var(--w);--cb:var(--w-bg)} .k-outcome{--c:var(--o1);--cb:var(--o1-bg)} .k-obstacle{--c:var(--o2);--cb:var(--o2-bg)} .k-plan{--c:var(--p);--cb:var(--p-bg)}
+.lt{background:var(--cb);color:var(--c)}
+
+/* karta WOOP */
+.woop{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:14px}
+.woop.ex{border:1.5px dashed var(--ex);background:linear-gradient(135deg,var(--ex-bg),var(--surface) 55%)}
+.ex-note{display:flex;gap:10px;align-items:center;border-radius:12px;padding:10px 14px;background:var(--ex-bg);color:var(--ex);font-size:14.5px;font-weight:600}
+.ex-note::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--ex);flex:none}
+/* wyjaśnienie „Czym jest WOOP?” nad listą: rozwijane, z blokadą */
+.intro{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.intro-head{display:flex;align-items:center;gap:6px;padding:6px 10px 6px 6px;flex-wrap:wrap}
+.intro-toggle{flex:1 1 240px;min-width:0;display:flex;align-items:center;gap:12px;background:none;border:0;padding:10px 12px;border-radius:10px;text-align:left;
+  font-family:var(--f-display);font-weight:800;font-size:18px;letter-spacing:-.01em;transition:background-color .2s}
+.intro-toggle:hover:not(:disabled){background:var(--sunk)}
+.intro-toggle:disabled{cursor:default}
+.intro-toggle .ltrs{display:inline-flex;gap:3px}
+.intro-toggle .ltrs .lt{width:24px;height:24px;font-size:14px;border-radius:7px}
+.intro-toggle .chev{margin-left:auto;width:20px;height:20px;fill:none;stroke:var(--muted);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .32s var(--spring),opacity .2s;flex:none}
+.intro.open .chev{transform:rotate(180deg)}
+.intro-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .38s cubic-bezier(.3,.9,.3,1)}
+.intro.open .intro-body{grid-template-rows:1fr}
+.intro-body>.in{overflow:hidden;min-height:0}
+.intro-body .pad{padding:2px 18px 18px;display:flex;flex-direction:column;gap:12px;opacity:0;transform:translateY(-6px);transition:opacity .25s,transform .3s}
+.intro.open .intro-body .pad{opacity:1;transform:none;transition-delay:.08s}
+.intro .pad p{font-size:15.5px;max-width:80ch}
+.intro .pad p.muted{color:var(--muted);font-size:14.5px}
+.intro-steps{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+@media (min-width:700px){.intro-steps{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.intro-steps li{display:flex;gap:10px;align-items:flex-start;background:var(--cb);border-radius:12px;padding:10px 12px;min-width:0}
+.intro-steps li b{display:block;color:var(--c);font-size:14.5px}
+.intro-steps li span.d{font-size:14px;color:var(--ink)}
+.w-main,.w-side{display:flex;flex-direction:column;gap:14px;min-width:0}
+.cards{gap:12px}
+.woop.leaving{overflow:hidden;opacity:0;transform:scale(.97);padding-block:0;border-width:0;margin-bottom:-16px;
+  transition:max-height .3s ease,opacity .2s,transform .3s,padding .3s,margin .3s}
+.woop .head{display:flex;gap:12px;align-items:flex-start}
+.woop .wish{font-family:var(--f-display);font-size:21px;font-weight:800;line-height:1.25;letter-spacing:-.01em;text-wrap:balance}
+.tag{font-family:var(--f-mono);font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag.ex{background:var(--ex);color:var(--surface);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.contrast{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:stretch}
+.vs{align-self:center;font-family:var(--f-mono);font-size:11.5px;font-weight:600;color:var(--muted);background:var(--sunk);border-radius:999px;padding:3px 8px}
+.half{border-radius:12px;padding:10px 12px;background:var(--cb);display:flex;flex-direction:column;gap:2px;min-width:0}
+.half .lab{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--c);font-weight:600}
+.half .tx{font-size:15px;overflow-wrap:anywhere}
+.plan{border-left:4px solid var(--p);background:var(--p-bg);border-radius:4px 12px 12px 4px;padding:12px 14px;font-size:17px;line-height:1.45}
+.plan b{color:var(--p);font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;font-weight:600}
+.plan .then{font-weight:700}
+.check{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:12px}
+.check .q{font-weight:600;font-size:15px}
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg3 button{min-height:42px;border-radius:10px;border:1px solid var(--line);background:transparent;font-weight:600;font-size:14px;padding:4px 6px;
+  transition:transform .12s ease,background-color .25s,border-color .25s,color .25s}
+.seg3 button:active{transform:scale(.95)}
+.seg3 button.pop{animation:pop .4s var(--spring)}
+.seg3 button[aria-pressed="true"][data-s="ok"]{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.seg3 button[aria-pressed="true"][data-s="miss"]{background:var(--miss);border-color:var(--miss);color:var(--surface)}
+.seg3 button[aria-pressed="true"][data-s="skip"]{background:var(--skip);border-color:var(--skip);color:var(--surface)}
+.dots{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.dot{width:14px;height:14px;border-radius:4px;background:var(--sunk);border:1px solid var(--line)}
+.dot.ok{background:var(--ok);border-color:var(--ok)} .dot.miss{background:var(--miss);border-color:var(--miss)} .dot.skip{background:var(--skip);border-color:var(--skip)}
+.dot.today{outline:2px solid var(--ink);outline-offset:1px}
+.dot.pop{animation:popBig .45s var(--spring)}
+.meta{font-family:var(--f-mono);font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.meta .streak{color:var(--ok);font-weight:600}
+.confirm{background:var(--o2-bg);border:1px solid var(--o2);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px;animation:unfold .22s ease-out}
+.confirm p{font-weight:600}
+.note{background:var(--sunk);border-radius:12px;padding:12px 14px;font-size:14.5px;color:var(--muted)}
+
+/* menu „więcej” */
+.more{position:relative}
+.more summary{list-style:none;min-width:42px;font-size:20px;line-height:1;letter-spacing:.05em}
+.more summary::-webkit-details-marker{display:none}
+.more[open] summary{background:var(--sunk)}
+.more .menu{position:absolute;right:0;bottom:calc(100% + 6px);z-index:6;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px;
+  display:flex;flex-direction:column;min-width:200px;box-shadow:0 12px 32px rgb(0 0 0 / .22);transform-origin:bottom right;animation:menuIn .18s ease-out}
+.more .menu button{background:none;border:0;text-align:left;padding:10px 12px;border-radius:8px;font-weight:600;font-size:15px;min-height:42px}
+.more .menu button:hover{background:var(--sunk)}
+.more .menu button.danger{color:var(--miss)}
+
+/* kreator */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.steps li{display:flex}
+.steps button{width:100%;border:0;background:var(--sunk);border-radius:10px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);min-height:58px;
+  transition:transform .12s ease,box-shadow .25s,background-color .25s}
+.steps button:active{transform:scale(.95)}
+.steps button .lt{width:26px;height:26px;font-size:15px;background:transparent;color:var(--muted);border:1.5px solid var(--line);transition:background-color .3s,color .3s,border-color .3s}
+.steps button.done .lt{background:var(--cb);color:var(--c);border-color:transparent}
+.steps button.lit .lt{animation:popBig .5s var(--spring)}
+.steps button[aria-current="step"]{background:var(--surface);color:var(--ink);box-shadow:0 0 0 2px var(--c) inset;font-weight:600}
+.steps button[aria-current="step"] .lt{background:var(--c);color:var(--surface);border-color:transparent}
+.prog{height:6px;border-radius:99px;background:var(--sunk);overflow:hidden;margin-top:-8px}
+.prog i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--w) 0 25%,var(--o1) 25% 50%,var(--o2) 50% 75%,var(--p) 75%);
+  clip-path:inset(0 100% 0 0 round 99px);transition:clip-path .5s var(--spring)}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px 18px;display:flex;flex-direction:column;gap:14px;border-top:5px solid var(--c);view-transition-name:stage}
+.stage .q{font-family:var(--f-display);font-size:25px;font-weight:800;line-height:1.2;letter-spacing:-.015em;text-wrap:balance}
+.stage .help{color:var(--muted);font-size:15px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:13px;font-weight:600;color:var(--muted)}
+.field label.big{font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;color:var(--p)}
+.field textarea,.field input,.field select{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:12px 13px;min-height:46px;font-size:16px;transition:border-color .2s,box-shadow .2s}
+.field textarea{resize:vertical;min-height:92px;line-height:1.45}
+.field textarea:focus,.field input:focus,.field select:focus{outline:2px solid var(--c,var(--accent));outline-offset:0;border-color:transparent;box-shadow:0 0 0 5px var(--cb,var(--sunk))}
+.preview{border-radius:12px;background:var(--p-bg);padding:12px 14px;font-size:16px;line-height:1.45}
+.preview .empty{color:var(--muted);font-style:italic}
+.sample{font-size:14px;color:var(--muted);border-left:3px solid var(--line);padding-left:10px}
+.sample b{color:var(--ink);font-weight:600}
+.counter{font-family:var(--f-mono);font-size:12px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+
+/* chwila na wyobrażenie */
+.imagine{display:flex;align-items:center;gap:14px;background:var(--cb);border-radius:14px;padding:12px 14px;transition:box-shadow .3s}
+.imagine.on{box-shadow:0 0 0 2px var(--c) inset}
+.ring{width:58px;height:58px;flex:none;position:relative}
+.ring::before{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--c);opacity:0;transform:scale(.5)}
+.imagine.on .ring::before{animation:breath 8s ease-in-out infinite}
+.ring svg{width:58px;height:58px;transform:rotate(-90deg);position:relative}
+.ring circle{fill:none;stroke-width:5}
+.ring .bgc{stroke:var(--line)} .ring .fg{stroke:var(--c);stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+.ring span{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-mono);font-weight:600;font-size:15px;font-variant-numeric:tabular-nums}
+.imagine .tx{font-size:14.5px;flex:1;min-width:0}
+.imagine .tx b{display:block;font-size:15px}
+.imagine .breath-lbl{display:block;font-family:var(--f-mono);font-size:12px;color:var(--c);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+
+/* przećwiczenie */
+.rehearse .big{font-family:var(--f-display);font-size:26px;font-weight:800;line-height:1.25;letter-spacing:-.015em;text-wrap:balance;overflow-wrap:anywhere}
+.giant{font-family:var(--f-display);font-weight:800;font-size:64px;line-height:.9;color:var(--c)}
+.reveal .p1,.reveal .p2{animation:rise .6s ease-out both}
+.reveal .p1{animation-delay:.25s} .reveal .p2{animation-delay:1.1s}
+.done-mark{width:56px;height:56px;fill:none;stroke:var(--p);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.done-mark circle{stroke-dasharray:145;stroke-dashoffset:145;animation:draw .6s ease-out forwards}
+.done-mark path{stroke-dasharray:40;stroke-dashoffset:40;animation:draw .35s .5s ease-out forwards}
+
+/* metoda */
+.prose{display:flex;flex-direction:column;gap:12px}
+.prose p,.prose li{color:var(--ink);font-size:15.5px;max-width:75ch}
+.prose ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.prose .muted{color:var(--muted)}
+.prose a{color:var(--accent)}
+.method{display:flex;flex-direction:column;gap:10px}
+.mrow{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.mrow .tx{min-width:0} .mrow .tx b{display:block}
+.mrow .tx span{color:var(--muted);font-size:14.5px}
+.src li{font-size:14px}
+/* ten sam przycisk kawy co w Tablicy */
+.prose a.coffee{display:inline-flex;align-items:center;gap:8px;background:#ffdd57;color:#111;border:1px solid #d9b400;border-radius:10px;padding:10px 16px;font-weight:600;font-size:14px;text-decoration:none;transition:transform .12s ease,filter .2s}
+.prose a.coffee:hover{filter:brightness(1.05)}
+.prose a.coffee:active{transform:scale(.96)}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;font:inherit}
+code.mail{font-family:var(--f-mono);font-size:14px;background:var(--sunk);border-radius:8px;padding:8px 10px;overflow-wrap:anywhere}
+
+.sect{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.sect p{color:var(--muted);font-size:14.5px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14.5px;z-index:40;max-width:calc(100vw - 32px);text-align:center;opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .3s var(--spring);view-transition-name:toast}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+footer.foot{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:13px;color:var(--muted);padding-top:18px;border-top:1px solid var(--line);margin-top:8px}
+footer.foot a{color:var(--muted)}
+
+/* keyframes */
+@keyframes drop{from{transform:translateY(-12px);opacity:0}}
+@keyframes pop{50%{transform:scale(1.06)}}
+@keyframes popBig{0%{transform:scale(.6)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
+@keyframes unfold{from{opacity:0;transform:translateY(-6px)}}
+@keyframes menuIn{from{opacity:0;transform:scale(.94) translateY(4px)}}
+@keyframes breath{0%,100%{transform:scale(.5);opacity:.12}50%{transform:scale(1);opacity:.3}}
+@keyframes rise{from{opacity:0;filter:blur(4px)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* przejścia między widokami (View Transitions) */
+::view-transition-old(root),::view-transition-new(root){animation-duration:.22s}
+::view-transition-group(stage){animation-duration:.28s}
+@keyframes vt-out-l{to{transform:translateX(-32px);opacity:0}}
+@keyframes vt-in-r{from{transform:translateX(32px);opacity:0}}
+@keyframes vt-out-r{to{transform:translateX(32px);opacity:0}}
+@keyframes vt-in-l{from{transform:translateX(-32px);opacity:0}}
+html[data-dir="next"]::view-transition-old(stage){animation:.18s ease-in both vt-out-l}
+html[data-dir="next"]::view-transition-new(stage){animation:.28s cubic-bezier(.2,.9,.3,1) both vt-in-r}
+html[data-dir="prev"]::view-transition-old(stage){animation:.18s ease-in both vt-out-r}
+html[data-dir="prev"]::view-transition-new(stage){animation:.28s cubic-bezier(.2,.9,.3,1) both vt-in-l}
+
+/* zmiana motywu: nowy wygląd rozlewa się kołem od przełącznika (bez osobnych grup przejścia) */
+html.vt-skin *{view-transition-name:none!important}
+html.vt-skin::view-transition-old(root),html.vt-skin::view-transition-new(root){animation:none;mix-blend-mode:normal}
+
+/* ---------- cyberpunk: szczegóły ---------- */
+[data-skin="cyber"] body{background-color:var(--bg);
+  background-image:linear-gradient(rgb(0 240 255 / .045) 1px,transparent 1px),linear-gradient(90deg,rgb(0 240 255 / .045) 1px,transparent 1px);
+  background-size:36px 36px;background-attachment:fixed}
+[data-skin="cyber"] body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:60;
+  background:repeating-linear-gradient(0deg,rgb(0 0 0 / .22) 0 1px,transparent 1px 3px)}
+[data-skin="cyber"] header.top{background:rgb(7 6 13 / .92);border-bottom-color:rgb(0 240 255 / .35);box-shadow:0 1px 18px -6px rgb(0 240 255 / .5)}
+[data-skin="cyber"] .brand b{text-shadow:0 0 10px currentColor;animation:drop .55s var(--spring) both,glitch 6s 1.2s infinite}
+[data-skin="cyber"] .brand.burst b{animation:glitchBurst .5s steps(2) both}
+[data-skin="cyber"] h1,[data-skin="cyber"] h2{text-transform:uppercase;letter-spacing:.03em;text-shadow:0 0 14px rgb(0 240 255 / .35)}
+[data-skin="cyber"] h1::before{content:"// ";color:var(--o2);text-shadow:0 0 10px var(--o2)}
+[data-skin="cyber"] .eyebrow{color:var(--accent)}
+[data-skin="cyber"] .woop,[data-skin="cyber"] .stage,[data-skin="cyber"] .sect,[data-skin="cyber"] .mrow{
+  border-radius:0;border-color:rgb(0 240 255 / .28);box-shadow:inset 0 0 28px rgb(0 240 255 / .05);
+  clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px))}
+[data-skin="cyber"] .intro{border-radius:0;border-color:rgb(0 240 255 / .28);box-shadow:inset 0 0 28px rgb(0 240 255 / .05)}
+[data-skin="cyber"] .intro-toggle{text-transform:uppercase;letter-spacing:.03em;border-radius:2px}
+[data-skin="cyber"] .intro-steps li{border-radius:2px}
+[data-skin="cyber"] .intro-steps li{border-left:2px solid var(--c)}
+[data-skin="cyber"] .woop.ex{border-color:var(--ex);box-shadow:inset 0 0 30px rgb(185 103 255 / .12)}
+[data-skin="cyber"] .ex-note{border-radius:0;border-left:2px solid var(--ex);text-shadow:0 0 8px rgb(185 103 255 / .5)}
+[data-skin="cyber"] .stage{border-top-color:var(--c);box-shadow:inset 0 6px 24px -14px var(--c)}
+[data-skin="cyber"] .woop .wish,[data-skin="cyber"] .stage .q,[data-skin="cyber"] .rehearse .big{text-transform:uppercase;letter-spacing:.02em}
+[data-skin="cyber"] .btn,[data-skin="cyber"] .seg3 button,[data-skin="cyber"] .steps button,[data-skin="cyber"] .tag,
+[data-skin="cyber"] .field textarea,[data-skin="cyber"] .field input,[data-skin="cyber"] .field select,[data-skin="cyber"] .confirm,
+[data-skin="cyber"] .imagine,[data-skin="cyber"] .preview,[data-skin="cyber"] .more .menu,[data-skin="cyber"] .toast,[data-skin="cyber"] .note{border-radius:2px}
+[data-skin="cyber"] .btn{font-family:var(--f-mono);text-transform:uppercase;letter-spacing:.08em;font-size:14px}
+[data-skin="cyber"] .btn.primary{box-shadow:var(--glow)}
+[data-skin="cyber"] .btn.primary:hover{box-shadow:0 0 22px rgb(0 240 255 / .7)}
+[data-skin="cyber"] .lt{border-radius:2px;text-shadow:0 0 8px currentColor;box-shadow:inset 0 0 0 1px var(--c)}
+[data-skin="cyber"] .half{border-radius:0;border-left:2px solid var(--c)}
+[data-skin="cyber"] .plan{border-radius:0;box-shadow:-6px 0 16px -8px var(--p)}
+[data-skin="cyber"] .plan b{text-shadow:0 0 8px var(--p)}
+[data-skin="cyber"] .vs{border-radius:0;color:var(--o2);background:transparent;border:1px solid var(--o2);text-transform:uppercase}
+[data-skin="cyber"] .seg3 button[aria-pressed="true"]{box-shadow:0 0 14px currentColor}
+[data-skin="cyber"] .seg3 button[aria-pressed="true"][data-s="ok"]{box-shadow:0 0 14px var(--ok)}
+[data-skin="cyber"] .seg3 button[aria-pressed="true"][data-s="miss"]{box-shadow:0 0 14px var(--miss)}
+[data-skin="cyber"] .dot{border-radius:1px}
+[data-skin="cyber"] .dot.ok{box-shadow:0 0 6px var(--ok)} [data-skin="cyber"] .dot.miss{box-shadow:0 0 6px var(--miss)}
+[data-skin="cyber"] .dot.today{outline-color:var(--accent)}
+[data-skin="cyber"] .steps button[aria-current="step"]{box-shadow:0 0 0 1px var(--c) inset,0 0 16px -4px var(--c)}
+[data-skin="cyber"] .prog{border-radius:0} [data-skin="cyber"] .prog i{filter:drop-shadow(0 0 6px var(--accent))}
+[data-skin="cyber"] .field textarea,[data-skin="cyber"] .field input,[data-skin="cyber"] .field select{background:#05040A}
+[data-skin="cyber"] .ring .fg{filter:drop-shadow(0 0 4px var(--c))}
+[data-skin="cyber"] nav.tabs{background:rgb(14 12 26 / .95);border-top-color:rgb(0 240 255 / .35);box-shadow:0 -1px 18px -6px rgb(0 240 255 / .5)}
+[data-skin="cyber"] nav.tabs .pill{border-radius:2px;background:rgb(0 240 255 / .08);box-shadow:inset 0 0 0 1px rgb(0 240 255 / .5),0 0 14px -2px rgb(0 240 255 / .5)}
+[data-skin="cyber"] nav.tabs button{font-family:var(--f-mono);letter-spacing:.04em}
+[data-skin="cyber"] nav.tabs button[aria-current="page"] svg{filter:drop-shadow(0 0 5px var(--accent))}
+[data-skin="cyber"] .toast{background:var(--accent);color:var(--accent-ink);font-family:var(--f-mono);box-shadow:var(--glow)}
+[data-skin="cyber"] .done-mark{filter:drop-shadow(0 0 6px var(--p))}
+[data-skin="cyber"] .giant{text-shadow:0 0 18px var(--c)}
+@keyframes glitch{0%,91%,100%{transform:none;text-shadow:0 0 10px currentColor}
+  92%{transform:translate(2px,-1px);text-shadow:-3px 0 #FF2A6D,3px 0 #00F0FF}
+  94%{transform:translate(-2px,1px);text-shadow:3px 0 #FF2A6D,-3px 0 #00F0FF}
+  96%{transform:none;text-shadow:0 0 10px currentColor}}
+@keyframes glitchBurst{0%{transform:translate(3px,0);text-shadow:-4px 0 #FF2A6D,4px 0 #00F0FF;opacity:.6}
+  50%{transform:translate(-3px,1px);text-shadow:4px 0 #FF2A6D,-4px 0 #00F0FF}
+  100%{transform:none;text-shadow:0 0 10px currentColor;opacity:1}}
+
+/* szeroki ekran: szersza kolumna, listy w dwóch kolumnach, kreator i przećwiczenie w czytelnej środkowej kolumnie */
+.cards,.grid2{display:grid;gap:16px;align-items:start}
+@media (min-width:900px){
+  .app,nav.tabs .in{max-width:1100px}
+  .grid2,.method{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+  /* karta jako wiersz listy: życzenie | efekt-przeszkoda-plan | dziś + działania */
+  .woop{display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,2.1fr) minmax(290px,1fr);gap:24px;align-items:start;padding:20px 22px}
+  .woop .confirm{grid-column:1/-1}
+  .w-side{border-left:1px dashed var(--line);padding-left:24px;align-self:stretch}
+  .woop.ex .w-side{border-left-color:var(--ex);justify-content:center}
+  .w-side .check{border-top:0;padding-top:0}
+  .method{align-items:stretch}
+  main[data-view="nowy"]>*,main[data-view="run"]>*{width:100%;max-width:760px;margin-inline:auto}
+  nav.tabs button{flex-direction:row;justify-content:center;gap:8px;font-size:14px;min-height:46px}
+}
+
+@media (max-width:380px){.contrast{grid-template-columns:1fr}.vs{justify-self:center}.seg3 button{font-size:13px}}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .done-mark circle,.done-mark path{stroke-dashoffset:0}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div class="brand" aria-label="WOOP"><b class="c1">W</b><b class="c2">O</b><b class="c3">O</b><b class="c4">P</b><small>życzenie · plan</small></div>
+    <span class="today" id="todayLbl"></span>
+    <button class="skin" id="skinBtn" role="switch" aria-checked="false" data-act="skin" title="Motyw cyberpunk"><span class="knob" aria-hidden="true"></span>CYBER</button>
+  </header>
+  <main id="main"></main>
+</div>
+<nav class="tabs" aria-label="Zakładki"><div class="in" id="tabs"></div></nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+const KEY='woop-v1', PLANY_KEY='plany-jezeli-v1';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let uidN=0;const uid=()=>Date.now().toString(36)+(uidN++).toString(36)+Math.random().toString(36).slice(2,6);
+const pad=n=>String(n).padStart(2,'0');
+const dkey=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today=()=>dkey(new Date());
+const daysBack=n=>{const out=[];const d=new Date();d.setHours(12,0,0,0);for(let i=n-1;i>=0;i--){const x=new Date(d);x.setDate(d.getDate()-i);out.push(dkey(x));}return out;};
+const DOW=['nd','pn','wt','śr','cz','pt','so'];
+const fmtDay=k=>{const [y,m,d]=k.split('-').map(Number);const x=new Date(y,m-1,d);return DOW[x.getDay()]+' '+d+'.'+pad(m);};
+const calm=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- kroki metody ---------- */
+const STEPS=[
+  {k:'wish',L:'W',name:'Życzenie',q:'Czego chcesz?',
+   help:'Jedno ważne życzenie na najbliższe tygodnie: ambitne, ale w Twoim zasięgu. Zapisz je w kilku słowach.',
+   ph:'Chcę regularnie biegać 3 razy w tygodniu rano.'},
+  {k:'outcome',L:'O',name:'Efekt',q:'Co będzie najlepsze, gdy to się uda?',
+   help:'Wybierz jeden efekt, który najbardziej Cię cieszy. Zapisz go, a potem wyobraź sobie jak najżywiej: co widzisz, co czujesz.',
+   ph:'Więcej energii w ciągu dnia, lepsza kondycja i poczucie dumy.',
+   img:'Zamknij oczy i zobacz ten efekt. Gdzie jesteś? Jak się czujesz?'},
+  {k:'obstacle',L:'O',name:'Przeszkoda',q:'Co w Tobie najbardziej Cię zatrzymuje?',
+   help:'Szukaj w sobie: nawyk, emocja, myśl, zmęczenie. Nie okoliczności, na które nie masz wpływu. Wybierz jedną, główną, i zobacz moment, w którym się pojawia.',
+   ph:'Rano jestem zmęczony i mam ogromną ochotę wcisnąć drzemkę.',
+   img:'Zobacz konkretną chwilę, w której przeszkoda się pojawia. Co się dzieje tuż przed nią?'},
+  {k:'plan',L:'P',name:'Plan',q:'Co zrobisz, gdy przeszkoda się pojawi?',
+   help:'Jedno konkretne działanie albo myśl. Przy „Jeżeli” opisz moment przeszkody tak, żeby dało się go rozpoznać, przy „to” to, co wtedy robisz.',
+   ifPh:'rano włączy się budzik i będę chciał wcisnąć drzemkę',
+   thenPh:'od razu wstanę i założę buty do biegania, które przygotowałem wieczorem przy łóżku'}
+];
+const EXAMPLE={id:'example',wish:'Chcę regularnie biegać 3 razy w tygodniu rano.',
+  outcome:'Będę mieć więcej energii w ciągu dnia, lepszą kondycję i poczucie dumy.',
+  obstacle:'Rano jestem zmęczony i mam ogromną ochotę wcisnąć drzemkę w telefonie.',
+  ifText:'rano włączy się budzik i będę chciał wcisnąć drzemkę',
+  thenText:'natychmiast wstanę i założę buty do biegania, które przygotowałem wieczorem przy łóżku',
+  checks:{},rehearsals:0};
+const EXAMPLE2={id:'example2',wish:'Chcę czytać 20 minut dziennie przed snem.',
+  outcome:'Spokojniejsza głowa wieczorem i łatwiejsze zasypianie.',
+  obstacle:'Wieczorem odruchowo sięgam po telefon i przewijam bez końca.',
+  ifText:'wieczorem złapię się na tym, że sięgam po telefon',
+  thenText:'odłożę go do szuflady w kuchni i otworzę książkę leżącą na poduszce',
+  checks:{},rehearsals:0};
+/* przykłady nie są zapisywane — pokazujemy je tylko, dopóki nie ma żadnego własnego WOOP */
+const EXAMPLES=[EXAMPLE,EXAMPLE2];
+const isEx=x=>EXAMPLES.some(e=>e.id===x.id);
+
+/* ---------- dane ---------- */
+function fresh(){return{version:1,items:[],config:{}};}
+function normItem(x){return{id:x.id||uid(),wish:x.wish||'',outcome:x.outcome||'',obstacle:x.obstacle||'',ifText:x.ifText||'',thenText:x.thenText||'',
+  szop:x.szop||'',created:x.created||Date.now(),updated:x.updated||Date.now(),archived:!!x.archived,
+  checks:(x.checks&&typeof x.checks==='object')?x.checks:{},rehearsals:+x.rehearsals||0,lastRehearsal:x.lastRehearsal||null};}
+function normalize(d){const f=fresh();d=d&&typeof d==='object'?d:f;
+  d.version=1;d.items=Array.isArray(d.items)?d.items.filter(x=>x&&typeof x==='object').map(normItem):[];
+  d.config=Object.assign(f.config,d.config&&typeof d.config==='object'?d.config:{});return d;}
+let STORE_OK=true;
+function load(){try{const r=localStorage.getItem(KEY);return r?normalize(JSON.parse(r)):null;}catch(e){STORE_OK=false;return null;}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));STORE_OK=true;}catch(e){STORE_OK=false;}}
+let S=load()||fresh();
+const byId=id=>EXAMPLES.find(x=>x.id===id)||S.items.find(x=>x.id===id);
+
+/* ---------- stan widoku ---------- */
+let TAB='moje', WIZ=null, RUN=null, CONF=null, SHOW_ARCH=false, IMG=null;
+let JUST=null;      /* świeżo kliknięty wpis dnia — tylko on dostaje animację „pop” */
+let PREV_PROG=0;    /* poprzedni stan paska postępu, żeby przejść od niego do nowego */
+function newDraft(src){return{editId:src?src.id:null,step:0,d:{wish:'',outcome:'',obstacle:'',ifText:'',thenText:'',szop:'',...(src?{wish:src.wish,outcome:src.outcome,obstacle:src.obstacle,ifText:src.ifText,thenText:src.thenText,szop:src.szop}:{})}};}
+/* szkic kreatora przeżywa odświeżenie strony */
+function saveDraft(){try{if(WIZ)sessionStorage.setItem(KEY+'-draft',JSON.stringify(WIZ));else sessionStorage.removeItem(KEY+'-draft');}catch(e){}}
+try{const r=sessionStorage.getItem(KEY+'-draft');if(r){WIZ=JSON.parse(r);TAB='nowy';}}catch(e){}
+
+/* motyw: zapisany w config, więc wraca razem z kopią JSON */
+function applySkin(){const on=S.config.skin==='cyber';const de=document.documentElement;
+  if(on)de.dataset.skin='cyber';else delete de.dataset.skin;
+  $('#skinBtn').setAttribute('aria-checked',on);}
+function toggleSkin(btn){
+  const on=S.config.skin!=='cyber';
+  const apply=()=>{S.config.skin=on?'cyber':'';save();applySkin();};
+  const burst=()=>{if(!on)return;const b=$('.brand');b.classList.remove('burst');b.getBoundingClientRect();b.classList.add('burst');setTimeout(()=>b.classList.remove('burst'),900);};
+  if(!document.startViewTransition||calm()||document.hidden){apply();burst();return;}
+  const r=btn.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+  const R=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));
+  const de=document.documentElement;de.classList.add('vt-skin');
+  const t=document.startViewTransition(apply);
+  t.ready.then(()=>{de.animate({clipPath:[`circle(0px at ${x}px ${y}px)`,`circle(${R}px at ${x}px ${y}px)`]},{duration:600,easing:'cubic-bezier(.6,0,.2,1)',pseudoElement:'::view-transition-new(root)'});}).catch(()=>{});
+  t.finished.finally(()=>{de.classList.remove('vt-skin');burst();});
+}
+
+const filledStep=(s,d)=>s.k==='plan'?!!(d.ifText.trim()&&d.thenText.trim()):!!d[s.k].trim();
+
+/* ---------- zakładki (budowane raz, żeby pigułka mogła się przesuwać) ---------- */
+const TI={
+  moje:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/>',
+  nowy:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+  metoda:'<path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4z"/><path d="M9 8h6M9 12h6"/>',
+  dane:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
+  o:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5h.01"/>'
+};
+const TABS=[['moje','Moje WOOP'],['nowy','Nowy'],['metoda','Metoda'],['dane','Dane'],['o','O stronie']];
+$('#tabs').innerHTML='<span class="pill" aria-hidden="true"></span>'+TABS.map(([k,l])=>`<button data-act="tab" data-k="${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${TI[k]}</svg><span>${l}</span></button>`).join('');
+
+/* ---------- render ---------- */
+function render(){
+  $('#todayLbl').textContent=fmtDay(today());
+  const tabs=$('#tabs');
+  tabs.style.setProperty('--i',TABS.findIndex(t=>t[0]===TAB));
+  tabs.querySelectorAll('button').forEach((b,i)=>{
+    if(TABS[i][0]===TAB)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
+    if(TABS[i][0]==='nowy')b.lastChild.textContent=WIZ&&WIZ.editId?'Edycja':'Nowy';
+  });
+  const m=$('#main');
+  /* zapamiętaj fokus, bo innerHTML podmienia przyciski */
+  const ae=document.activeElement;let fsel=null;
+  if(ae&&m.contains(ae)&&ae.dataset&&ae.dataset.act)fsel='[data-act="'+ae.dataset.act+'"]'+['id','s','i','k'].map(a=>ae.dataset[a]!=null?`[data-${a}="${CSS.escape(ae.dataset[a])}"]`:'').join('');
+  m.dataset.view=RUN?'run':TAB;
+  if(RUN)m.innerHTML=vRun();
+  else if(TAB==='moje')m.innerHTML=vList();
+  else if(TAB==='nowy')m.innerHTML=vWizard();
+  else if(TAB==='metoda')m.innerHTML=vMethod();
+  else if(TAB==='o')m.innerHTML=vAbout();
+  else m.innerHTML=vData();
+  m.insertAdjacentHTML('beforeend',`<footer class="foot"><a href="https://czubekxd.github.io/ADHD/" target="_blank" rel="noopener">wszystkie narzędzia ↗</a><a href="https://czubekxd.github.io/ADHD/plany/" target="_blank" rel="noopener">Plany Jeżeli… to… ↗</a><a href="https://buycoffee.to/czubekxd" target="_blank" rel="noopener">postaw kawę ☕</a><span>czubekxd · MIT</span></footer>`);
+  if(fsel){const n=m.querySelector(fsel);if(n)try{n.focus({preventScroll:true});}catch(e){}}
+  /* pasek postępu: start od poprzedniej wartości, żeby było widać przejście */
+  const pr=m.querySelector('.prog i');
+  if(pr){const v=+pr.dataset.v;pr.style.clipPath=`inset(0 ${100-PREV_PROG}% 0 0 round 99px)`;pr.getBoundingClientRect();pr.style.clipPath=`inset(0 ${100-v}% 0 0 round 99px)`;PREV_PROG=v;}
+  else PREV_PROG=0;
+}
+
+/* przejście widoku: kierunek „next”/„prev” przesuwa kartę kroku, reszta się przenika */
+let VT=0;
+function go(dir,scroll){
+  const run=()=>{if(scroll)window.scrollTo(0,0);render();};
+  if(!document.startViewTransition||calm()||document.hidden){run();return;}
+  const tok=++VT;document.documentElement.dataset.dir=dir||'';
+  const t=document.startViewTransition(run);
+  t.finished.finally(()=>{if(tok===VT)delete document.documentElement.dataset.dir;});
+}
+
+const planSentence=x=>`<span class="p1"><b>JEŻELI</b> ${x.ifText?esc(x.ifText):'<span class="lede">…</span>'},</span> <span class="p2"><b>TO</b> <span class="then">${x.thenText?esc(x.thenText):'…'}</span>.</span>`;
+
+/* seria: kolejne dni z „zadziałał”; „nie było okazji” jej nie przerywa */
+function streak(x){let n=0;const d=new Date();d.setHours(12,0,0,0);if(!x.checks[dkey(d)])d.setDate(d.getDate()-1);
+  for(let g=0;g<400;g++){const s=x.checks[dkey(d)];if(s==='ok')n++;else if(s!=='skip')break;d.setDate(d.getDate()-1);}return n;}
+
+function card(x,isEx){
+  const t=today();const st=x.checks[t]||'';
+  const days=daysBack(14);
+  const cnt={ok:0,miss:0,skip:0};days.forEach(k=>{const s=x.checks[k];if(s)cnt[s]++;});
+  const fresh=JUST===x.id&&st;
+  const dots=days.map(k=>`<span class="dot ${x.checks[k]||''} ${k===t?'today':''} ${k===t&&fresh?'pop':''}" title="${fmtDay(k)}: ${({ok:'zadziałało',miss:'nie zadziałało',skip:'nie było okazji'})[x.checks[k]]||'brak wpisu'}"></span>`).join('');
+  const sk=isEx?0:streak(x);
+  const conf=CONF==='del:'+x.id?`<div class="confirm"><p>Usunąć ten WOOP razem z historią?</p><div class="row"><button class="btn small danger" data-act="del" data-id="${x.id}">Usuń</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`:'';
+  const seg=(s,l)=>`<button data-act="check" data-id="${x.id}" data-s="${s}" aria-pressed="${st===s}" class="${fresh&&st===s?'pop':''}">${l}</button>`;
+  return`<article class="woop ${isEx?'ex':''}" data-id="${x.id}">
+    <div class="head"><span class="lt k-wish">W</span><div class="grow"><div class="wish">${esc(x.wish)||'<span class="lede">(bez życzenia)</span>'}</div>
+      <div class="row" style="margin-top:6px">${isEx?'<span class="tag ex">przykład</span>':''}${x.archived?'<span class="tag">w archiwum</span>':''}</div></div></div>
+    <div class="w-main">
+    <div class="contrast">
+      <div class="half k-outcome"><span class="lab">O · efekt</span><span class="tx">${esc(x.outcome)||'…'}</span></div>
+      <span class="vs" aria-hidden="true">ale</span>
+      <div class="half k-obstacle"><span class="lab">O · przeszkoda</span><span class="tx">${esc(x.obstacle)||'…'}</span></div>
+    </div>
+    <div class="plan">${planSentence(x)}</div>
+    </div>
+    <div class="w-side">
+    ${isEx?`<div class="stack"><button class="btn primary" data-act="rehearse" data-id="${x.id}">Przejdź przykład krok po kroku</button><button class="btn" data-act="newWoop">Ułóż własny WOOP</button></div></div>`:`
+    <div class="check">
+      <span class="q">Dziś, gdy pojawiła się przeszkoda, plan…</span>
+      <div class="seg3" role="group" aria-label="Wynik planu dzisiaj">${seg('ok','zadziałał')}${seg('miss','nie zadziałał')}${seg('skip','nie było okazji')}</div>
+      <div class="dots" aria-label="Ostatnie 14 dni">${dots}</div><span class="meta">Ostatnie 14 dni: ${cnt.ok}✓ ${cnt.miss}✕${sk>=2?` · <span class="streak">seria ${sk} ✓</span>`:''}${x.rehearsals?` · przećwiczony ${x.rehearsals}×`:''}</span>
+    </div>
+    <div class="row">
+      <button class="btn small primary" data-act="rehearse" data-id="${x.id}">Przećwicz</button>
+      <button class="btn small" data-act="edit" data-id="${x.id}">Edytuj</button>
+      <span class="grow"></span>
+      <details class="more"><summary class="btn small ghost" aria-label="Więcej działań">⋯</summary><div class="menu">
+        <button data-act="toPlany" data-id="${x.id}">Przenieś do Planów</button>
+        <button data-act="arch" data-id="${x.id}">${x.archived?'Przywróć z archiwum':'Archiwizuj'}</button>
+        ${conf?'':`<button class="danger" data-act="ask" data-k="del:${x.id}">Usuń…</button>`}
+      </div></details>
+    </div>
+    </div>${conf}`}
+  </article>`;
+}
+
+/* „Czym jest WOOP?” — domyślnie rozwinięte, stan zwinięcia zapamiętany */
+function introBox(){
+  const open=S.config.introOpen!==false;
+  const steps=[['wish','W','Życzenie','czego chcesz w najbliższych tygodniach'],['outcome','O','Efekt','co najlepszego się stanie, gdy się uda'],
+    ['obstacle','O','Przeszkoda','co w Tobie zwykle staje na drodze'],['plan','P','Plan','„Jeżeli pojawi się przeszkoda, to zrobię…”']];
+  return`<section class="intro ${open?'open':''}" id="intro">
+    <div class="intro-head">
+      <button class="intro-toggle" data-act="intro" aria-expanded="${open}" aria-controls="introBody">
+        <span class="ltrs" aria-hidden="true">${steps.map(s=>`<span class="lt k-${s[0]}">${s[1]}</span>`).join('')}</span>
+        <span>Czym jest WOOP?</span>
+        <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>
+    <div class="intro-body" id="introBody" ${open?'':'inert'}><div class="in"><div class="pad">
+      <p>WOOP to prosta metoda z psychologii motywacji (Gabriele Oettingen), która zamienia życzenie w gotowy plan na chwilę, w której zwykle odpuszczasz. Składa się z czterech kroków, zawsze w tej kolejności:</p>
+      <ol class="intro-steps">${steps.map(s=>`<li class="k-${s[0]}"><span class="lt">${s[1]}</span><span><b>${s[2]}</b><span class="d">${s[3]}</span></span></li>`).join('')}</ol>
+      <p class="muted">Najważniejsze jest zestawienie: najpierw wyobrażasz sobie efekt, zaraz potem przeszkodę. Dzięki temu nie kończy się na przyjemnym marzeniu, tylko na konkretnym „jeżeli…, to…”. Ułożenie WOOP zajmuje kilka minut, a im częściej go przećwiczysz, tym łatwiej plan sam się włącza. Więcej w zakładce <button type="button" class="linkbtn" data-act="tab" data-k="metoda">Metoda</button>.</p>
+    </div></div></div>
+  </section>`;
+}
+function setIntro(open){const s=$('#intro');if(!s)return;s.classList.toggle('open',open);
+  s.querySelector('.intro-toggle').setAttribute('aria-expanded',open);
+  const b=$('#introBody');if(open)b.removeAttribute('inert');else b.setAttribute('inert','');}
+
+function vList(){
+  const act=S.items.filter(x=>!x.archived), arch=S.items.filter(x=>x.archived);
+  const warn=STORE_OK?'':`<div class="note">Ta przeglądarka nie pozwala zapisywać danych (np. tryb prywatny). WOOP-y znikną po zamknięciu strony — skopiuj je w zakładce Dane.</div>`;
+  if(!S.items.length)return`${warn}<div class="row"><div class="grow"><h1>Twoje WOOP-y</h1><p class="lede">Nie masz jeszcze żadnego. Tak wygląda gotowy — od życzenia do planu na moment, w którym zwykle odpuszczasz.</p></div><button class="btn small primary" data-act="newWoop">+ Nowy</button></div>
+    ${introBox()}
+    <p class="ex-note">To przykłady. Znikną, gdy zapiszesz swój pierwszy WOOP.</p>
+    <div class="cards">${EXAMPLES.map(x=>card(x,true)).join('')}</div>`;
+  const doneToday=act.filter(x=>x.checks[today()]).length;
+  return`${warn}<div class="row"><div class="grow"><h1>Twoje WOOP-y</h1><p class="lede">${act.length?`Dziś zaznaczone: ${doneToday} z ${act.length}.`:'Wszystkie są w archiwum.'}</p></div><button class="btn small primary" data-act="newWoop">+ Nowy</button></div>
+    ${introBox()}
+    ${act.length?`<div class="cards">${act.map(x=>card(x)).join('')}</div>`:''}
+    ${arch.length?`<button class="btn ghost" data-act="toggleArch">${SHOW_ARCH?'Ukryj':'Pokaż'} archiwum (${arch.length})</button>${SHOW_ARCH?`<div class="cards">${arch.map(x=>card(x)).join('')}</div>`:''}`:''}`;
+}
+
+function imagineBox(st){
+  const on=IMG&&IMG.k===st.k;const total=30;const left=on?Math.max(0,Math.ceil((IMG.end-Date.now())/1000)):total;
+  const C=2*Math.PI*24;const off=on?C*(left/total):C;
+  const run=on&&left>0;
+  return`<div class="imagine k-${st.k} ${run?'on':''}"><div class="ring" aria-hidden="true"><svg viewBox="0 0 58 58"><circle class="bgc" cx="29" cy="29" r="24"/><circle class="fg" id="ringfg" cx="29" cy="29" r="24" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/></svg><span id="ringtx">${left}</span></div>
+    <div class="tx"><b>Chwila na wyobrażenie</b>${esc(st.img)}${run?'<span class="breath-lbl">oddychaj razem z kołem</span>':''}</div>
+    <button class="btn small" data-act="imagine" data-k="${st.k}">${run?'Stop':'30 s'}</button></div>`;
+}
+
+const stepsNav=(cur,doneFn,act)=>`<ol class="steps">${STEPS.map((s,i)=>`<li><button class="k-${s.k} ${doneFn(s,i)?'done':''}" data-act="${act}" data-i="${i}" ${i===cur?'aria-current="step"':''}><span class="lt">${s.L}</span>${s.name}</button></li>`).join('')}</ol>`;
+
+function vWizard(){
+  if(!WIZ)WIZ=newDraft();
+  const st=STEPS[WIZ.step],d=WIZ.d;
+  const nDone=STEPS.filter(s=>filledStep(s,d)).length;
+  const nav=stepsNav(WIZ.step,s=>filledStep(s,d),'goStep')+`<div class="prog" aria-hidden="true"><i data-v="${nDone*25}"></i></div>`;
+  let body='';
+  if(st.k==='plan'){
+    body=`<div class="field"><label class="big" for="f-if">JEŻELI…</label><textarea id="f-if" data-f="ifText" rows="2" placeholder="${esc(st.ifPh)}">${esc(d.ifText)}</textarea></div>
+      ${!d.ifText.trim()&&d.obstacle.trim()?`<button class="btn small ghost" data-act="ifFromObstacle">Wstaw moją przeszkodę jako „Jeżeli”</button>`:''}
+      <div class="field"><label class="big" for="f-then">…TO</label><textarea id="f-then" data-f="thenText" rows="2" placeholder="${esc(st.thenPh)}">${esc(d.thenText)}</textarea></div>
+      <div class="preview" id="pv">${d.ifText.trim()||d.thenText.trim()?planSentence(d):'<span class="empty">Tu złoży się Twoje zdanie „Jeżeli…, to…”.</span>'}</div>`;
+  }else{
+    body=`<div class="field"><label for="f-${st.k}">${st.name}</label><textarea id="f-${st.k}" data-f="${st.k}" rows="3" placeholder="${esc(st.ph)}">${esc(d[st.k])}</textarea></div>
+      ${st.img?imagineBox(st):''}`;
+  }
+  const ctx=WIZ.step>0?`<div class="sample">${STEPS.slice(0,WIZ.step).filter(s=>s.k!=='plan').map(s=>`<div><b>${s.L} · ${s.name}:</b> ${esc(d[s.k])||'—'}</div>`).join('')}</div>`:'';
+  const last=WIZ.step===3;
+  const can=nDone===4;
+  return`<div class="row"><h1 class="grow">${WIZ.editId?'Edycja WOOP':'Nowy WOOP'}</h1>${WIZ.editId||Object.values(d).some(v=>String(v).trim())?`<button class="btn small ghost" data-act="cancelWiz">Porzuć</button>`:''}</div>
+    ${nav}
+    <section class="stage k-${st.k}">
+      <span class="eyebrow">krok ${WIZ.step+1} z 4 · ${st.name}</span>
+      <p class="q">${st.q}</p>
+      <p class="help">${st.help}</p>
+      ${ctx}
+      ${body}
+    </section>
+    <div class="row">
+      ${WIZ.step>0?`<button class="btn" data-act="prev">← Wstecz</button>`:''}
+      <span class="grow"></span>
+      ${last?`<button class="btn primary" data-act="saveWiz" ${can?'':'disabled'}>${WIZ.editId?'Zapisz zmiany':'Zapisz WOOP'}</button>`:`<button class="btn primary" data-act="next">Dalej →</button>`}
+    </div>
+    ${last&&!can?`<p class="lede" style="font-size:14px">Żeby zapisać, uzupełnij wszystkie cztery kroki — puste są oznaczone szarą literą u góry.</p>`:''}`;
+}
+
+function vRun(){
+  const x=byId(RUN.id);if(!x){RUN=null;return vList();}
+  if(RUN.step>=4){return`<section class="stage k-plan rehearse"><svg class="done-mark" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="23"/><path d="M15 27l7 7 15-16"/></svg>
+      <span class="eyebrow">przećwiczone</span><p class="big">Plan jest gotowy na chwilę, w której przyjdzie przeszkoda.</p>
+      <div class="plan reveal">${planSentence(x)}</div><p class="help">Najlepiej działa, gdy przechodzisz WOOP regularnie — choćby raz dziennie, rano albo wieczorem.</p></section>
+      <div class="stack"><button class="btn primary" data-act="endRun">Gotowe</button><button class="btn" data-act="rehearse" data-id="${x.id}">Jeszcze raz</button></div>`;}
+  const st=STEPS[RUN.step];
+  const txt=st.k==='plan'?`<div class="plan">${planSentence(x)}</div><p class="help">Powiedz to zdanie w myślach albo na głos, dwa razy.</p>`:`<p class="big">${esc(x[st.k])}</p>${st.img?imagineBox(st):''}`;
+  return`${stepsNav(RUN.step,(s,i)=>i<RUN.step,'runStep')}<div class="prog" aria-hidden="true"><i data-v="${RUN.step*25}"></i></div>
+    <section class="stage k-${st.k} rehearse"><div class="row"><span class="giant">${st.L}</span><span class="eyebrow grow">${st.name}${isEx(x)?' · przykład':''}</span></div>${txt}</section>
+    <div class="row"><button class="btn ghost" data-act="${RUN.step?'runPrev':'endRun'}">${RUN.step?'← Wstecz':'Przerwij'}</button><span class="grow"></span><button class="btn primary" data-act="runNext">${RUN.step===3?'Zakończ':'Dalej →'}</button></div>`;
+}
+
+function vMethod(){
+  return`<div class="stack" style="gap:6px"><h1>Jak działa WOOP</h1><p class="lede">Cztery kroki, zawsze w tej kolejności. Całość zajmuje kilka minut.</p></div>
+  <div class="method">${STEPS.map(s=>`<div class="mrow k-${s.k}"><span class="lt">${s.L}</span><div class="tx"><b>${({wish:'Wish — życzenie',outcome:'Outcome — najlepszy efekt',obstacle:'Obstacle — wewnętrzna przeszkoda',plan:'Plan — „Jeżeli…, to…”'})[s.k]}</b><span>${s.help}</span></div></div>`).join('')}</div>
+  <section class="sect prose">
+    <h2>Dlaczego właśnie tak</h2>
+    <p>Samo wyobrażanie sobie sukcesu potrafi rozleniwić, bo mózg dostaje nagrodę z góry. WOOP zaraz po efekcie stawia przeszkodę — ten zestaw autorka metody, Gabriele Oettingen, nazywa <b>kontrastem myślowym</b>. Dlatego kolejność jest ważna: najpierw efekt, potem przeszkoda.</p>
+    <p>Ostatni krok to <b>plan wdrożeniowy</b> (Peter Gollwitzer): zdanie „jeżeli pojawi się X, to zrobię Y”. Decyzja zapada wcześniej, więc w trudnej chwili nie trzeba jej podejmować od nowa. W badaniach połączenie obu technik nazywa się MCII.</p>
+    <p>Przeszkoda ma być w Tobie: nawyk, emocja, zmęczenie. Na pogodę czy szefa plan nie zadziała, na Twoją reakcję na nie — już tak.</p>
+    <h2>Jak tego używać tutaj</h2>
+    <ul>
+      <li><b>Przećwicz</b> przechodzi z Tobą zapisany WOOP od nowa, krok po kroku. Warto robić to regularnie, bo plan ma być pod ręką, zanim przyjdzie przeszkoda.</li>
+      <li><b>Dziś plan…</b> to szybki wpis, czy plan zadziałał. Po dwóch tygodniach kropek widać, czy plan trzeba poprawić.</li>
+      <li><b>Do Planów</b> (w menu ⋯ na karcie) przenosi Twoje „Jeżeli…, to…” do narzędzia Plany Jeżeli… to…, gdzie możesz rozpisać je na więcej kroków, z licznikiem czy oddechem.</li>
+    </ul>
+    <h2>Źródła</h2>
+    <ul class="src">
+      <li>Oficjalna strona metody: <a href="https://woopmylife.org" target="_blank" rel="noopener">woopmylife.org</a> (G. Oettingen).</li>
+      <li>Oettingen G. (2014). <i>Rethinking Positive Thinking: Inside the New Science of Motivation</i>. Current.</li>
+      <li>Wang G., Wang Y., Gai X. (2021). A meta-analysis of the effects of mental contrasting with implementation intentions on goal attainment. <i>Frontiers in Psychology</i>, 12, 565202. <a href="https://doi.org/10.3389/fpsyg.2021.565202" target="_blank" rel="noopener">doi:10.3389/fpsyg.2021.565202</a></li>
+      <li>Gawrilow C., Gollwitzer P. M., Oettingen G. (2011). If-then plans benefit executive functions in children with ADHD. <i>Journal of Social and Clinical Psychology</i>, 30(6). <a href="https://www.socmot.uni-konstanz.de/sites/default/files/Gawrilow_Gollwitzer_Oettingen_Executive_Function_JSCP_2011.pdf" target="_blank" rel="noopener">PDF</a> <span class="muted">— badanie dotyczyło dzieci; dla dorosłych z ADHD to wskazówka, nie dowód.</span></li>
+    </ul>
+  </section>`;
+}
+
+const MAIL='mateusz.czubienko@gmail.com';
+function vAbout(){
+  return`<div class="stack" style="gap:6px"><h1>O stronie</h1><p class="lede">WOOP to narzędzie do układania życzeń i planów na trudne momenty. Powstało po to, żeby pomagać, i <b>jest oraz pozostanie darmowe</b>.</p></div>
+  <div class="grid2">
+  <section class="sect prose">
+    <h2>Twoje dane są tylko Twoje</h2>
+    <p class="muted">WOOP-y są zapisywane wyłącznie w tej przeglądarce, na tym urządzeniu. Nie trafiają na żaden serwer — nikt poza Tobą ich nie widzi. Dlatego nie zobaczysz ich na innym urządzeniu, a wyczyszczenie danych przeglądarki je usunie. Kopię zrobisz w zakładce <button type="button" class="linkbtn" data-act="tab" data-k="dane">Dane</button>.</p>
+  </section>
+  <section class="sect prose">
+    <h2>Wsparcie</h2>
+    <p>Jeśli WOOP Ci się przydał, możesz postawić kawę. To miłe, ale całkowicie dobrowolne — nic za tym nie jest zamknięte.</p>
+    <p><a class="coffee" href="https://buycoffee.to/czubekxd" target="_blank" rel="noopener">☕ Postaw kawę</a></p>
+  </section>
+  <section class="sect prose">
+    <h2>Masz uwagi?</h2>
+    <p>Napisz, co poprawić albo co nie działa. Adres do skopiowania:</p>
+    <div class="row"><code class="mail" id="mailAddr">${MAIL}</code><button class="btn small" data-act="copyMail">kopiuj</button></div>
+  </section>
+  <section class="sect prose">
+    <h2>Kod</h2>
+    <p>Kod leży otwarty na <a href="https://github.com/czubekxd/ADHD" target="_blank" rel="noopener">GitHubie</a> na licencji MIT — możesz go pobrać, zmienić i używać u siebie. Pozostałe narzędzia: <a href="https://czubekxd.github.io/ADHD/" target="_blank" rel="noopener">czubekxd.github.io/ADHD</a>.</p>
+    <p class="muted" style="font-size:13.5px">To narzędzie do pracy nad sobą, nie do diagnozowania ani leczenia. Jeśli coś Cię niepokoi, porozmawiaj o tym z człowiekiem.</p>
+  </section>
+  </div>`;
+}
+
+function vData(){
+  const conf=(k,msg,act,label,attrs)=>CONF===k?`<div class="confirm"><p>${msg}</p><div class="row"><button class="btn small danger" data-act="${act}" ${attrs||''}>${label}</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`:'';
+  return`<h1>Dane</h1>
+  <div class="grid2">
+  <section class="sect"><h2>Kopia</h2><p>WOOP-y są zapisane tylko w tej przeglądarce. Skopiuj kopię, żeby zrobić backup albo przenieść je na telefon.</p>
+    <div class="field"><label for="d-exp">Kopia (JSON)</label><textarea id="d-exp" rows="4" readonly>${esc(JSON.stringify(S))}</textarea></div>
+    <div class="row"><button class="btn small" data-act="copy">Kopiuj kopię</button><span class="meta">${S.items.length} WOOP · ${S.items.reduce((a,x)=>a+Object.keys(x.checks).length,0)} wpisów dziennych</span></div></section>
+  <section class="sect"><h2>Wczytaj kopię</h2><p>Dołączenie dodaje tylko WOOP-y, których jeszcze tu nie ma, i uzupełnia ich dzienne wpisy. Zastąpienie kasuje to, co jest teraz.</p>
+    <div class="field"><label for="d-imp">Wklej kopię</label><textarea id="d-imp" rows="3" placeholder='{"version":1,"items":[…]}'></textarea></div>
+    <div class="row"><button class="btn small" data-act="doImport" data-m="merge">Dołącz</button>${CONF==='imp'?'':`<button class="btn small ghost danger" data-act="ask" data-k="imp">Zastąp wszystko</button>`}</div>
+    ${conf('imp','Zastąpić wszystkie WOOP-y wklejoną kopią?','doImport','Zastąp','data-m="replace"')}<p id="impmsg" hidden></p></section>
+  <section class="sect"><h2>Wyczyść</h2>${CONF==='reset'?conf('reset','Usunąć wszystkie WOOP-y i ich historię? Bez kopii nie da się tego cofnąć.','doReset','Usuń wszystko'):`<div class="row"><button class="btn small ghost danger" data-act="ask" data-k="reset">Usuń wszystkie dane</button></div>`}</section>
+  </div>`;
+}
+
+/* ---------- wyobrażenie: licznik ---------- */
+setInterval(()=>{
+  if(!IMG)return;const left=Math.max(0,Math.ceil((IMG.end-Date.now())/1000));
+  const C=2*Math.PI*24;const fg=$('#ringfg'),tx=$('#ringtx');
+  if(fg)fg.setAttribute('stroke-dashoffset',(C*left/30).toFixed(1));if(tx)tx.textContent=left;
+  if(left<=0){IMG=null;try{navigator.vibrate&&navigator.vibrate(120);}catch(e){}render();}
+},250);
+
+/* ---------- Plany Jeżeli… to… ---------- */
+const sameSite=()=>/github\.io$/.test(location.hostname)||location.protocol==='file:'||/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+function toPlany(x){
+  if(!sameSite()){toast('Zadziała po wrzuceniu WOOP do repo obok Planów (czubekxd.github.io). Tutaj Plany mają osobną pamięć.');return;}
+  try{
+    const raw=localStorage.getItem(PLANY_KEY);const d=raw?JSON.parse(raw):{version:2,plans:[]};
+    if(!Array.isArray(d.plans))d.plans=[];
+    const node=(type,text)=>({id:uid(),type,text,note:'',status:'none',tool:{kind:'none',min:0},contact:'',children:[]});
+    const root=node('trigger',x.ifText);const act=node('action',x.thenText);act.note='Z WOOP: '+x.wish;
+    root.children=[{label:'',node:act}];
+    d.plans.unshift({id:uid(),szop:'',runs:[],drill:{ok:0,miss:0},root});
+    localStorage.setItem(PLANY_KEY,JSON.stringify(d));
+    toast('Dodano do Planów Jeżeli… to…');
+  }catch(e){toast('Nie udało się zapisać do Planów.');}
+}
+
+/* ---------- akcje ---------- */
+let TT;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(TT);TT=setTimeout(()=>t.classList.remove('on'),3200);}
+function focusField(){setTimeout(()=>{const el=document.querySelector('.stage textarea');if(el&&matchMedia('(pointer:fine)').matches){try{el.focus({preventScroll:true});}catch(e){}}},60);}
+/* karta zwija się, zanim zniknie z listy */
+function leave(id,fn){
+  const a=document.querySelector(`article[data-id="${CSS.escape(id)}"]`);
+  if(!a||calm()){fn();return;}
+  a.style.maxHeight=a.offsetHeight+'px';a.getBoundingClientRect();a.classList.add('leaving');a.style.maxHeight='0px';
+  setTimeout(fn,300);
+}
+const closeMenus=except=>document.querySelectorAll('details.more[open]').forEach(d=>{if(d!==except)d.open=false;});
+
+document.addEventListener('click',e=>{
+  closeMenus(e.target.closest('details.more'));
+  const el=e.target.closest('[data-act]');if(!el)return;
+  const dd=el.closest('details.more');if(dd)dd.open=false;
+  const a=el.dataset.act,id=el.dataset.id;
+  switch(a){
+    case'skin':toggleSkin(el);break;
+    case'intro':{const open=!$('#intro').classList.contains('open');S.config.introOpen=open;save();setIntro(open);break;}
+    case'tab':{const k=el.dataset.k;if(k===TAB&&!RUN)break;TAB=k;RUN=null;CONF=null;IMG=null;go('',true);if(TAB==='nowy')focusField();break;}
+    case'newWoop':WIZ=newDraft();saveDraft();TAB='nowy';RUN=null;go('',true);focusField();break;
+    case'edit':WIZ=newDraft(byId(id));saveDraft();TAB='nowy';go('',true);break;
+    case'cancelWiz':WIZ=null;saveDraft();TAB='moje';IMG=null;go('',true);break;
+    case'goStep':{const i=+el.dataset.i;const dir=i>WIZ.step?'next':i<WIZ.step?'prev':'';WIZ.step=i;IMG=null;saveDraft();go(dir);focusField();break;}
+    case'next':WIZ.step=Math.min(3,WIZ.step+1);IMG=null;saveDraft();go('next',true);focusField();break;
+    case'prev':WIZ.step=Math.max(0,WIZ.step-1);IMG=null;saveDraft();go('prev',true);break;
+    case'ifFromObstacle':{const o=WIZ.d.obstacle.trim().replace(/[.!]+$/,'');WIZ.d.ifText=o.charAt(0).toLocaleLowerCase('pl')+o.slice(1);}saveDraft();render();break;
+    case'saveWiz':{const d=WIZ.d;
+      if(WIZ.editId){const x=byId(WIZ.editId);if(x){Object.assign(x,{wish:d.wish.trim(),outcome:d.outcome.trim(),obstacle:d.obstacle.trim(),ifText:d.ifText.trim(),thenText:d.thenText.trim(),szop:d.szop,updated:Date.now()});}}
+      else S.items.unshift(normItem({wish:d.wish.trim(),outcome:d.outcome.trim(),obstacle:d.obstacle.trim(),ifText:d.ifText.trim(),thenText:d.thenText.trim(),szop:d.szop}));
+      save();toast(WIZ.editId?'Zapisano zmiany':'Zapisano WOOP');WIZ=null;saveDraft();TAB='moje';go('',true);break;}
+    case'imagine':{const k=el.dataset.k;if(IMG&&IMG.k===k){IMG=null;}else IMG={k,end:Date.now()+30000};render();break;}
+    case'check':{const x=byId(id);if(!x)break;const t=today();x.checks[t]=x.checks[t]===el.dataset.s?undefined:el.dataset.s;if(!x.checks[t])delete x.checks[t];save();JUST=id;render();JUST=null;break;}
+    case'rehearse':RUN={id,step:0};IMG=null;go('',true);break;
+    case'runStep':{const i=+el.dataset.i;const dir=i>RUN.step?'next':i<RUN.step?'prev':'';RUN.step=i;IMG=null;go(dir);break;}
+    case'runNext':RUN.step++;IMG=null;if(RUN.step>=4){const x=byId(RUN.id);if(x&&!isEx(x)){x.rehearsals=(x.rehearsals||0)+1;x.lastRehearsal=Date.now();save();}}go('next',true);break;
+    case'runPrev':RUN.step=Math.max(0,RUN.step-1);IMG=null;go('prev');break;
+    case'endRun':RUN=null;IMG=null;TAB='moje';go('',true);break;
+    case'toPlany':{const x=byId(id);if(x)toPlany(x);break;}
+    case'arch':{const x=byId(id);if(x)leave(id,()=>{x.archived=!x.archived;save();toast(x.archived?'Przeniesiono do archiwum':'Przywrócono');render();});break;}
+    case'toggleArch':SHOW_ARCH=!SHOW_ARCH;render();break;
+    case'ask':CONF=el.dataset.k;render();break;
+    case'noConf':CONF=null;render();break;
+    case'del':leave(id,()=>{S.items=S.items.filter(x=>x.id!==id);CONF=null;save();toast('Usunięto');render();});break;
+    case'copy':{const t=$('#d-exp');const ok=()=>toast('Skopiowano kopię');const fb=()=>{t.focus();t.select();toast('Zaznaczono — skopiuj ręcznie');};
+      try{navigator.clipboard.writeText(t.value).then(ok,fb);}catch(err){fb();}break;}
+    case'copyMail':{const fb=()=>{const r=document.createRange();r.selectNodeContents($('#mailAddr'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Zaznaczono — skopiuj ręcznie');};
+      try{navigator.clipboard.writeText(MAIL).then(()=>toast('Skopiowano adres'),fb);}catch(err){fb();}break;}
+    case'doImport':{const mode=el.dataset.m;let msg='';
+      try{const inc=normalize(JSON.parse($('#d-imp').value));
+        if(mode==='replace'){S=inc;msg='Wczytano '+S.items.length+' WOOP.';}
+        else{let add=0,upd=0;inc.items.forEach(n=>{const o=S.items.find(x=>x.id===n.id);if(!o){S.items.push(n);add++;}else{Object.keys(n.checks).forEach(k=>{if(!o.checks[k]){o.checks[k]=n.checks[k];upd++;}});}});msg=`Dodano ${add} WOOP, uzupełniono ${upd} wpisów dziennych.`;}
+        save();CONF=null;render();}
+      catch(err){msg='To nie wygląda na kopię WOOP. Wklej cały tekst z pola „Kopia (JSON)”.';CONF=null;render();}
+      const m=$('#impmsg');if(m){m.hidden=false;m.textContent=msg;}break;}
+    case'doReset':S=fresh();save();CONF=null;WIZ=null;saveDraft();render();toast('Wyczyszczono');break;
+  }
+});
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(el.dataset.f&&WIZ){WIZ.d[el.dataset.f]=el.value;saveDraft();
+    if(el.dataset.f==='ifText'||el.dataset.f==='thenText'){const pv=$('#pv');if(pv)pv.innerHTML=WIZ.d.ifText.trim()||WIZ.d.thenText.trim()?planSentence(WIZ.d):'<span class="empty">Tu złoży się Twoje zdanie „Jeżeli…, to…”.</span>';}
+    return;}
+});
+/* litera kroku u góry zapala się (z „pop”), gdy krok dostaje treść — bez przerysowania strony, żeby nie zgubić kliknięcia */
+document.addEventListener('input',()=>{if(!WIZ||TAB!=='nowy'||RUN)return;const d=WIZ.d;let n=0;
+  document.querySelectorAll('.steps button').forEach((b,i)=>{const f=filledStep(STEPS[i],d);if(f){n++;if(!b.classList.contains('done'))b.classList.add('lit');}else b.classList.remove('lit');b.classList.toggle('done',f);});
+  const pr=$('.prog i');if(pr){pr.style.clipPath=`inset(0 ${100-n*25}% 0 0 round 99px)`;PREV_PROG=n*25;}
+  const sv=document.querySelector('[data-act="saveWiz"]');if(sv)sv.disabled=n<4;});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(document.querySelector('details.more[open]')){closeMenus();return;}if(CONF){CONF=null;render();}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')render();});
+applySkin();
+render();
+})();
+</script>
+</body>
+</html>
