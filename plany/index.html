@@ -187,7 +187,19 @@ h2{font-size:18px;margin:0;font-weight:800}
 .canvas .gnode{touch-action:none;cursor:grab}
 .canvas .gnode.dragging{cursor:grabbing}
 .canvas .gnode.dragging .gn{stroke:var(--accent);stroke-width:2.5;filter:drop-shadow(0 6px 10px rgb(0 0 0 / .25))}
-.gplus{cursor:pointer}
+.gplus{cursor:pointer;touch-action:none}
+/* połączenia między węzłami (jak w n8n) */
+.gedge.link{stroke:var(--t-question);stroke-dasharray:7 5;stroke-width:2}
+.garrow{fill:var(--t-question)}
+.glb.link{fill:var(--t-question);paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round}
+.gtemp{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-dasharray:6 4;pointer-events:none}
+.gunlink{cursor:pointer}
+.gunlink circle{fill:var(--surface);stroke:var(--t-question);stroke-width:1.5}
+.gunlink text{fill:var(--t-question);font-size:13px;font-weight:800;text-anchor:middle;dominant-baseline:central;pointer-events:none;font-family:var(--f-body)}
+.gunlink:hover circle,.gunlink:focus-visible circle{fill:var(--bad);stroke:var(--bad)}
+.gunlink:hover text,.gunlink:focus-visible text{fill:var(--surface)}
+.gnode.droptarget .gn{stroke:var(--accent);stroke-width:3;filter:drop-shadow(0 0 8px color-mix(in srgb,var(--accent) 55%,transparent))}
+.canvas.linking{cursor:crosshair}
 .gplus circle{fill:var(--surface);stroke:var(--accent);stroke-width:1.8}
 .gplus text{fill:var(--accent);font-size:18px;font-weight:800;text-anchor:middle;dominant-baseline:central;font-family:var(--f-body);pointer-events:none}
 .gplus.sm circle{stroke-dasharray:3 2}
@@ -340,7 +352,7 @@ function find(n,id,parent,link){if(n.id===id)return{node:n,parent:parent||null,l
 function countN(n){return 1+n.children.reduce((a,c)=>a+(c.node?countN(c.node):0),0);}
 const LET=i=>String.fromCharCode(65+i);
 const short=(t,m)=>{t=String(t||'').trim()||'(bez opisu)';return t.length>m?t.slice(0,m-1)+'…':t;};
-function gotoText(p,g){if(!g||g==='end')return'Koniec planu';const r=p?find(p.root,g):findAny(g);return r?'Wróć do: '+short(r.node.text,40):'Koniec planu';}
+function gotoText(p,g){if(!g||g==='end')return'Koniec planu';const r=p?find(p.root,g):findAny(g);return r?'Przejdź do: '+short(r.node.text,40):'Koniec planu';}
 function tally(n){const a={ok:0,bad:0,none:0};walk(n,x=>{if(x.type!=='trigger')a[x.status]++;});return a;}
 const plan=id=>id===EXAMPLE.id?EXAMPLE:S.plans.find(p=>p.id===id);
 const isBranch=n=>n.type==='question'||n.type==='choice';
@@ -517,7 +529,7 @@ function vEditor(){
     <div class="seg" role="group" aria-label="Widok"><button data-act="view" data-k="canvas" aria-pressed="${ED.view!=='list'}">Węzły</button><button data-act="view" data-k="list" aria-pressed="${ED.view==='list'}">Lista</button></div></div>`;
   const legend=`<div class="legend">${['trigger','question','action','escalate'].map(t=>`<span>${ic(t)}${lab(t)}</span>`).join('')}</div>`;
   const body=ED.view==='list'?`<div class="tree">${tree(p.root,0,null,null)}</div>`
-    :`<p class="hint">Przeciągnij węzeł, żeby go przesunąć. Dotknij, żeby go opisać. Plus po prawej dodaje kolejny węzeł, plus na linii wstawia węzeł pomiędzy.</p>
+    :`<p class="hint">Przeciągnij węzeł, żeby go przesunąć. Dotknij, żeby go opisać. Plus po prawej dodaje kolejny węzeł, plus na linii wstawia węzeł pomiędzy. <b>Przeciągnij plus na inny węzeł, żeby je połączyć.</b></p>
       <div class="canvaswrap"><div class="canvas" id="canvas">${graph(p,true,ED.z||1)}</div>
       <div class="zoom" role="group" aria-label="Widok płótna">${hasManual(p)?`<button class="wide" data-act="ask" data-k="tidy">Uporządkuj</button>`:''}<button class="wide" data-act="fit" aria-label="Dopasuj plan do okna">Cały plan</button><button data-act="zoom" data-k="-1" aria-label="Pomniejsz">−</button><button data-act="zoom" data-k="1" aria-label="Powiększ">+</button></div></div>
       ${CONF==='tidy'?`<div class="confirm"><p>Ułożyć węzły automatycznie? Ręczne położenie zostanie zapomniane.</p><div class="btnrow"><button class="btn small danger" data-act="tidy">Uporządkuj</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`:''}`;
@@ -597,8 +609,12 @@ function layoutOf(p,edit){
   const GX=edit?88:48;let leaf=0;const auto={};const order=[];const kids={};
   (function lay(n,d){let y;
     /* odpowiedź bez własnego kroku rysujemy jako małą pigułkę „koniec” albo „wróć do…” */
-    kids[n.id]=n.children.map((c,i)=>({c,i,node:c.node||{id:n.id+'~'+i,type:'goto',virt:true,owner:n.id,idx:i,goto:c.goto||'end',text:gotoText(p,c.goto),children:[]}}));
-    const ks=kids[n.id];
+    kids[n.id]=n.children.map((c,i)=>{
+      if(c.node)return{c,i,node:c.node};
+      const t=c.goto&&c.goto!=='end'?find(p.root,c.goto):null;
+      if(t)return{c,i,node:t.node,link:true};   // połączenie: linia do istniejącego węzła
+      return{c,i,node:{id:n.id+'~'+i,type:'goto',virt:true,owner:n.id,idx:i,goto:'end',text:'Koniec planu',children:[]}};});
+    const ks=kids[n.id].filter(k=>!k.link);
     if(!ks.length){y=leaf*(GH+GGY);leaf++;}else{const ys=ks.map(k=>lay(k.node,d+1));y=(ys[0]+ys[ys.length-1])/2;}
     auto[n.id]={x:d*(GW+GX),y};order.push(n);return y;})(p.root,0);
   const pos={};
@@ -606,7 +622,7 @@ function layoutOf(p,edit){
     if(n.pos)pos[n.id]={x:n.pos.x,y:n.pos.y};
     else if(!parent)pos[n.id]={x:auto[n.id].x,y:auto[n.id].y};
     else{const pp=pos[parent.id],pa=auto[parent.id],a=auto[n.id];pos[n.id]={x:pp.x+(a.x-pa.x),y:pp.y+(a.y-pa.y)};}
-    (kids[n.id]||[]).forEach(k=>fin(k.node,n));})(p.root,null);
+    (kids[n.id]||[]).filter(k=>!k.link).forEach(k=>fin(k.node,n));})(p.root,null);
   const box={minX:Infinity,minY:Infinity,maxX:-Infinity,maxY:-Infinity};
   order.forEach(n=>{const q=pos[n.id];box.minX=Math.min(box.minX,q.x);box.minY=Math.min(box.minY,q.y);box.maxX=Math.max(box.maxX,q.x+GW);box.maxY=Math.max(box.maxY,q.y+GH);});
   return{pos,order,GX,box,kids};
@@ -619,7 +635,15 @@ function graphLayers(p,edit,L){
         <rect class="gvr ${end?'end':''}" width="${VW}" height="${VH}" rx="${VH/2}"/><text class="gtx gvt" x="${VW/2}" y="${VH/2+4}" text-anchor="middle">${esc(wrap((end?'■ ':'↪ ')+n.text,24,1)[0])}</text></g>`;
       if(edit)plus+=`<g class="gplus sm" data-act="ownStep" data-id="${n.owner}" data-i="${n.idx}" transform="translate(${a.x+VW+18},${a.y+GH/2})" role="button" tabindex="0" aria-label="Dodaj tu własny krok"><circle r="11"/><text>+</text></g>`;
       return;}
-    (L.kids[n.id]||[]).forEach(({c,i,node:kn})=>{const b=pos[kn.id];const x1=a.x+GW,y1=a.y+GH/2,x2=b.x,y2=b.y+GH/2;
+    (L.kids[n.id]||[]).forEach(({c,i,node:kn,link})=>{const b=pos[kn.id];const x1=a.x+GW,y1=a.y+GH/2,x2=b.x,y2=b.y+GH/2;
+      if(link){const back=x2<x1+40;const k=back?Math.max(90,Math.abs(y2-y1)/2):Math.max(40,(x2-x1)/2);const c1x=x1+k,c2x=x2-k;
+        edges+=`<path class="gedge link" d="M${x1} ${y1} C${c1x} ${y1}, ${c2x} ${y2}, ${x2-2} ${y2}" marker-end="url(#garr)"/>`;
+        const lbl=(n.type==='question'?LET(i)+' · ':'')+(c.label||(c.other?'Inne…':''));
+        const bz=(T,p0,p1,p2,p3)=>{const u=1-T;return u*u*u*p0+3*u*u*T*p1+3*u*T*T*p2+T*T*T*p3;};
+        if(lbl.trim())edges+=`<text class="glb link" x="${bz(.55,x1,c1x,c2x,x2)}" y="${bz(.55,y1,y1,y2,y2)-8}" text-anchor="middle">${esc(wrap(lbl,22,1)[0])}</text>`;
+        if(edit){const mx=bz(.3,x1,c1x,c2x,x2),my=bz(.3,y1,y1,y2,y2);
+          plus+=`<g class="gunlink" data-act="unlink" data-id="${n.id}" data-i="${i}" transform="translate(${mx},${my})" role="button" tabindex="0" aria-label="Rozłącz: ${esc(lbl||'połączenie')}"><circle r="10"/><text>×</text></g>`;}
+        return;}
       const k=Math.max(40,Math.abs(x2-x1)/2);const c1x=x1+k,c2x=x2-k;
       edges+=`<path class="gedge" d="M${x1} ${y1} C${c1x} ${y1}, ${c2x} ${y2}, ${x2} ${y2}"/>`;
       if(n.type==='question'||(c.label&&n.children.length>1))edges+=`<text class="glb" x="${x2+2}" y="${b.y+(kn.virt?(GH-VH)/2:0)-7}">${esc(wrap((n.type==='question'?LET(i)+' · ':'')+(c.label||(c.other?'Inne…':'')),26,1)[0])}</text>`;
@@ -645,7 +669,7 @@ function graph(p,edit,z){
   z=z||1;const PAD=24,TOP=20,RIGHT=edit?56:0;
   const L=layoutOf(p,edit);const P2=graphLayers(p,edit,L);const b=L.box;
   const vx=b.minX-PAD,vy=b.minY-PAD-TOP,w=b.maxX-b.minX+PAD*2+RIGHT,h=b.maxY-b.minY+PAD*2+TOP;
-  return`<svg id="${edit?'gsvg':'gsvg-ro'}" width="${Math.round(w*z)}" height="${Math.round(h*z)}" viewBox="${vx} ${vy} ${w} ${h}" role="group" aria-label="Węzły planu"><g id="ge">${P2.edges}</g><g id="gn">${P2.nodes}</g><g id="gp">${P2.plus}</g></svg>`;
+  return`<svg id="${edit?'gsvg':'gsvg-ro'}" width="${Math.round(w*z)}" height="${Math.round(h*z)}" viewBox="${vx} ${vy} ${w} ${h}" role="group" aria-label="Węzły planu"><defs><marker id="garr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="garrow" d="M0 0L10 5L0 10z"/></marker></defs><g id="ge">${P2.edges}</g><g id="gn">${P2.nodes}</g><g id="gp">${P2.plus}</g></svg>`;
 }
 /* dobiera powiększenie tak, żeby cały plan zmieścił się w oknie płótna */
 function fitZoom(max){const p=plan(ED.planId);const cv=$('#canvas');if(!p||!cv)return;
@@ -695,6 +719,60 @@ function endDrag(){
 }
 window.addEventListener('pointerup',endDrag);
 window.addEventListener('pointercancel',endDrag);
+
+/* łączenie węzłów: przeciągnij z plusa (wyjścia) na dowolny węzeł — jak w n8n.
+   Klik bez przeciągania działa po staremu (dodaje / wstawia węzeł). */
+let LINK=null;
+document.addEventListener('pointerdown',e=>{
+  const g=e.target.closest&&e.target.closest('#canvas .gplus');if(!g)return;
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  const svg=$('#gsvg');if(!svg)return;
+  const m=g.transform.baseVal.consolidate();if(!m)return;
+  LINK={g,svg,act:g.dataset.act,id:g.dataset.id,i:g.dataset.i,sx:e.clientX,sy:e.clientY,x:m.matrix.e,y:m.matrix.f,moved:false,pid:e.pointerId,over:null};
+});
+function linkTarget(e){const el=document.elementFromPoint(e.clientX,e.clientY);const g=el&&el.closest&&el.closest('#canvas .gnode[data-node]');return g||null;}
+window.addEventListener('pointermove',e=>{
+  if(!LINK||e.pointerId!==LINK.pid)return;
+  if(!LINK.moved){if(Math.hypot(e.clientX-LINK.sx,e.clientY-LINK.sy)<6)return;LINK.moved=true;
+    const t=document.createElementNS('http://www.w3.org/2000/svg','path');t.setAttribute('class','gtemp');t.setAttribute('id','gtemp');
+    LINK.svg.querySelector('#ge').appendChild(t);const cv=$('#canvas');if(cv)cv.classList.add('linking');}
+  e.preventDefault();
+  const s=svgPt(LINK.svg,e.clientX,e.clientY);const k=Math.max(40,Math.abs(s.x-LINK.x)/2);
+  const t=LINK.svg.querySelector('#gtemp');if(t)t.setAttribute('d',`M${LINK.x} ${LINK.y} C${LINK.x+k} ${LINK.y}, ${s.x-k} ${s.y}, ${s.x} ${s.y}`);
+  const g=linkTarget(e);if(LINK.over&&LINK.over!==g)LINK.over.classList.remove('droptarget');
+  if(g){g.classList.add('droptarget');LINK.over=g;}else LINK.over=null;
+  const cv=$('#canvas');if(cv){const c=cv.getBoundingClientRect();const E=36,V=12;
+    if(e.clientX<c.left+E)cv.scrollLeft-=V;else if(e.clientX>c.right-E)cv.scrollLeft+=V;
+    if(e.clientY<c.top+E)cv.scrollTop-=V;else if(e.clientY>c.bottom-E)cv.scrollTop+=V;}
+},{passive:false});
+function endLink(e){
+  if(!LINK)return;const L=LINK;LINK=null;if(!L.moved)return;
+  NOCLICK=Date.now()+300;const cv=$('#canvas');if(cv)cv.classList.remove('linking');
+  const g=e&&e.type==='pointerup'?linkTarget(e):null;
+  if(!g){render();return;}
+  connect(L,g.dataset.node);
+}
+window.addEventListener('pointerup',endLink);
+window.addEventListener('pointercancel',endLink);
+function connect(L,tid){
+  const p=plan(ED.planId);if(!p){render();return;}
+  const t=find(p.root,tid);const r=find(p.root,L.id);
+  if(!t||!r){render();return;}
+  if(t.node.type==='trigger'){toastSk('Do „Jeżeli…” nie da się podłączyć — to start planu');render();return;}
+  const n=r.node;if(n.id===tid){render();return;}
+  let lost=0;
+  const relink=c=>{if(c.node){if(find(c.node,tid)){toastSk('Ten węzeł leży w odpinanej gałęzi — wybierz inny');return false;}
+      walk(c.node,m=>{if(String(m.text||'').trim())lost++;});}
+    c.node=null;c.goto=tid;return true;};
+  if(L.act==='ownStep'||L.act==='pickIns'){const c=n.children[+L.i];if(!c||!relink(c)){render();return;}}
+  else if(L.act==='pickOut'){
+    if(n.type==='question'){if(n.qtype==='yesno'&&n.children.length>=2)n.qtype='single';n.children.push({label:'',node:null,goto:tid});}
+    else if(!n.children.length)n.children.push({label:'',node:null,goto:tid});
+    else{render();return;}}
+  else{render();return;}
+  fixGotos(p.root);ED.pick=null;save();render();
+  toastSk(lost?`Połączono · odpięto ${lost} ${lost===1?'krok':'kroki'} · Ctrl+Z cofa`:'Połączono · Ctrl+Z cofa');
+}
 
 /* Ćwiczenia */
 function buildDeck(){const ids=S.plans.slice().sort((a,b)=>((b.drill.miss-b.drill.ok)-(a.drill.miss-a.drill.ok))||(Math.random()-.5)).map(p=>p.id);DR={order:ids,i:0,revealed:false};}
@@ -900,6 +978,9 @@ document.addEventListener('click',e=>{
     case'noConf':CONF=null;render();break;
     case'delNode':delNode(id);break;
     case'delPlanId':killPlan(id);break;
+    case'unlink':{const r=findAny(id);if(!r)break;const n=r.node;const i=+el.dataset.i;const c=n.children[i];if(!c)break;
+      if(n.type==='question'){c.goto='end';}else n.children.splice(i,1);
+      save();render();toastSk('Rozłączono · Ctrl+Z cofa');break;}
     case'delPlan':killPlan(ED.planId);break;
     case'reveal':DR.revealed=true;render();break;
     case'drillRate':{const p=plan(DR.order[DR.i]);if(p){p.drill[el.dataset.s]=(p.drill[el.dataset.s]||0)+1;save();}DR.i++;DR.revealed=false;render();break;}
