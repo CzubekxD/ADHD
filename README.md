@@ -3,13 +3,15 @@
 Trzy małe narzędzia do samomonitorowania i ogarniania dnia. Każde to osobna strona statyczna:
 żadnego backendu, żadnego konta, dane zostają w przeglądarce.
 
-Strona startowa: **https://czubekxd.github.io/ADHD/**
+Strona startowa ze wszystkimi narzędziami: **https://czubekxd.github.io/ADHD/**
 
-| Folder | Narzędzie | Dane w `localStorage` |
+| Narzędzie | Otwórz w przeglądarce | Kod |
 |---|---|---|
-| [`pasek/`](pasek/) | **Pasek zdrowia × SZOP** — energia, czynniki SZOP, czerwone flagi, regeneracja (opis niżej) | `mcz.dane.v1` |
-| [`tablica/`](tablica/) | **Tablica scoringowa** — dzienna tablica zadań z punktacją 1/3/8/21, plan tygodnia, historia; specyfikacja w [`tablica/SPEC.md`](tablica/SPEC.md) | `tablica-scoringowa-v1` |
-| [`plany/`](plany/) | **Plany Jeżeli… to…** — drzewa kroków na trudne momenty, tryb „Teraz”, ćwiczenia z kart | `plany-jezeli-v1` |
+| **Pasek zdrowia × SZOP** — energia, czynniki SZOP, czerwone flagi, regeneracja (opis niżej) | **https://czubekxd.github.io/ADHD/pasek/** | [`pasek/`](pasek/) |
+| **Tablica scoringowa** — dzienna tablica zadań z punktacją 1/3/8/21, plan tygodnia, historia; specyfikacja w [`tablica/SPEC.md`](tablica/SPEC.md) | **https://czubekxd.github.io/ADHD/tablica/** | [`tablica/`](tablica/) |
+| **Plany Jeżeli… to…** — drzewa kroków na trudne momenty, tryb „Teraz”, ćwiczenia z kart | **https://czubekxd.github.io/ADHD/plany/** | [`plany/`](plany/) |
+
+Klucze danych w `localStorage`: `mcz.dane.v1` (Pasek), `tablica-scoringowa-v1` (Tablica), `plany-jezeli-v1` (Plany).
 
 W korzeniu leży `index.html` — strona startowa z kafelkami wszystkich narzędzi.
 Nowe narzędzie dopisujesz w tablicy `TOOLS` na jej dole.
