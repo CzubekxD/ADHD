@@ -1,0 +1,800 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Plany Jeżeli… to…</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: jedna kolumna mobile-first (max 640px), zakładki na dole pod kciukiem, jeden węzeł na ekran w trybie Teraz */
+:root{
+  --bg:#EDF0F4; --surface:#FFFFFF; --sunk:#E3E8EE; --ink:#17202B; --muted:#586374; --line:#CFD6DF;
+  --accent:#3A4ED6; --accent-ink:#FFFFFF;
+  --ok:#0B8573; --ok-bg:#DCF2EE; --bad:#C8501C; --bad-bg:#FBE4D8; --none:#7C8797; --none-bg:#E7EBF0;
+  --t-trigger:#3A4ED6; --t-question:#A86F0C; --t-choice:#7650B0; --t-action:#3D5875; --t-escalate:#A23F86;
+  --f-body:"Atkinson Hyperlegible Next","Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"Atkinson Hyperlegible Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --r:12px; --dur:220ms;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F141B; --surface:#17202A; --sunk:#1E2833; --ink:#E5EAF1; --muted:#97A2B2; --line:#2B3644;
+  --accent:#8C9BFF; --accent-ink:#0F141B;
+  --ok:#3CC4AE; --ok-bg:#12302B; --bad:#FF8A5B; --bad-bg:#3A2117; --none:#8C97A7; --none-bg:#222C38;
+  --t-trigger:#8C9BFF; --t-question:#E0A940; --t-choice:#B595EC; --t-action:#9BB3CF; --t-escalate:#E07CC4;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F141B; --surface:#17202A; --sunk:#1E2833; --ink:#E5EAF1; --muted:#97A2B2; --line:#2B3644;
+  --accent:#8C9BFF; --accent-ink:#0F141B;
+  --ok:#3CC4AE; --ok-bg:#12302B; --bad:#FF8A5B; --bad-bg:#3A2117; --none:#8C97A7; --none-bg:#222C38;
+  --t-trigger:#8C9BFF; --t-question:#E0A940; --t-choice:#B595EC; --t-action:#9BB3CF; --t-escalate:#E07CC4;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+.rm *, .rm *::before, .rm *::after{transition:none!important;animation:none!important}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.app{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:0 112px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;gap:12px;padding-block:14px 10px;border-bottom:1px solid var(--line)}
+.brand{font-weight:800;font-size:20px;letter-spacing:-.01em;display:flex;align-items:baseline;gap:6px;min-width:0}
+.brand .arr{color:var(--accent)}
+.brand small{font-family:var(--f-mono);font-weight:400;font-size:11px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.pill{margin-left:auto;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums}
+
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center}
+nav.tabs .in{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;width:100%;max-width:640px}
+nav.tabs button{background:none;border:0;border-radius:10px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);min-height:52px;min-width:0}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-current="page"]{color:var(--accent);background:var(--sunk);font-weight:600}
+
+main{display:flex;flex-direction:column;gap:16px;padding-top:18px}
+h1{font-size:26px;line-height:1.2;font-weight:800;margin:0;text-wrap:balance;letter-spacing:-.015em}
+h2{font-size:18px;margin:0;font-weight:800}
+.lede{color:var(--muted);margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+
+.ic{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.t-trigger{color:var(--t-trigger)} .t-question{color:var(--t-question)} .t-choice{color:var(--t-choice)} .t-action{color:var(--t-action)} .t-escalate{color:var(--t-escalate)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 16px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);font-weight:600;text-align:center}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent}
+.btn.small{min-height:40px;padding:6px 12px;font-size:14.5px}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn:disabled{opacity:.45;cursor:default}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+.btnrow.stack{flex-direction:column}
+.btnrow.stack .btn{width:100%}
+
+/* lista wyzwalaczy */
+.triggers{display:flex;flex-direction:column;gap:10px}
+.trig{display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;min-height:64px}
+.trig .tx{font-size:17.5px;font-weight:600;line-height:1.35}
+.trig .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{font-family:var(--f-mono);font-size:12px;padding:2px 8px;border-radius:999px;background:var(--sunk);color:var(--muted)}
+
+/* przebieg */
+.crumbs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.crumbs::-webkit-scrollbar{display:none}
+.crumb{flex:none;display:inline-flex;align-items:center;gap:4px;max-width:180px;font-size:13px;padding:4px 10px;border-radius:999px;background:var(--sunk);color:var(--muted);border:0}
+.crumb span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumb.cur{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.crumb .ic{width:14px;height:14px}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 18px;display:flex;flex-direction:column;gap:14px}
+.stage.st-ok{background:var(--ok-bg);border-color:var(--ok)}
+.stage.st-bad{background:var(--bad-bg);border-color:var(--bad)}
+.stage .big{font-size:23px;line-height:1.3;font-weight:800;margin:0;text-wrap:balance}
+.stage .note{margin:0;color:var(--muted)}
+.todo{color:var(--muted);font-style:italic}
+.rate{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rate button{min-height:44px;border-radius:10px;border:1px solid var(--line);background:transparent;font-weight:600;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:6px}
+.rate button[aria-pressed="true"].ok{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.rate button[aria-pressed="true"].bad{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.contact{font-family:var(--f-mono);font-size:15px;padding:10px 12px;border-radius:10px;background:var(--sunk);user-select:all}
+
+/* narzędzia */
+.tool{border-top:1px dashed var(--line);padding-top:14px;display:flex;flex-direction:column;gap:12px;align-items:stretch}
+.clock{font-family:var(--f-mono);font-size:44px;font-weight:600;font-variant-numeric:tabular-nums;text-align:center;letter-spacing:.02em;line-height:1}
+.bar{height:6px;border-radius:99px;background:var(--sunk);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent)}
+.toolnote{text-align:center;color:var(--muted);font-size:14.5px;margin:0}
+.breath{display:grid;place-items:center;height:200px}
+.orb{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle at 40% 35%,color-mix(in srgb,var(--accent) 35%,var(--surface)),color-mix(in srgb,var(--accent) 12%,var(--surface)));border:2px solid var(--accent);display:grid;place-items:center;transform:scale(.55);transition-property:transform;transition-timing-function:ease-in-out}
+.orb[data-phase="in"]{transform:scale(1);transition-duration:var(--in,4s)}
+.orb[data-phase="out"]{transform:scale(.55);transition-duration:var(--out,6s)}
+.orb b{font-size:18px;color:var(--ink)}
+.rm .orb{transform:none!important;width:160px;height:160px}
+
+/* podsumowanie */
+.sum{display:flex;flex-direction:column;gap:10px}
+.sumrow{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.sumrow .tx{display:flex;gap:8px;align-items:flex-start;font-weight:600}
+.sumrow .tx .ic{margin-top:3px}
+
+/* plany */
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.plan .tx{font-size:17px;font-weight:600;line-height:1.35}
+.tally{display:flex;gap:6px;flex-wrap:wrap}
+.st{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;padding:2px 8px;border-radius:999px;font-family:var(--f-mono)}
+.st-none .stx,.st.st-none{background:var(--none-bg);color:var(--muted)}
+.st.st-ok{background:var(--ok-bg);color:var(--ok)}
+.st.st-bad{background:var(--bad-bg);color:var(--bad)}
+
+.seg{display:inline-grid;grid-auto-flow:column;background:var(--sunk);border-radius:10px;padding:3px;gap:3px}
+.seg button{border:0;background:transparent;border-radius:8px;padding:6px 14px;font-size:14.5px;font-weight:600;color:var(--muted);min-height:36px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgb(0 0 0 / .12)}
+.edhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.edhead .grow{flex:1}
+
+.tree{display:flex;flex-direction:column;gap:6px}
+.blabel{margin-left:calc(min(var(--d),6) * 16px);font-family:var(--f-mono);font-size:12.5px;color:var(--muted);padding-left:4px}
+.row{margin-left:calc(min(var(--d),6) * 16px);display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 8px 8px 12px;min-height:52px;text-align:left;width:auto}
+.row.sel{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+.row.st-ok{background:var(--ok-bg);border-color:var(--ok)}
+.row.st-bad{background:var(--bad-bg);border-color:var(--bad)}
+.row .rt{flex:1;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:15px}
+.row .tool-ic{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);flex:none}
+.cyc{flex:none;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--none);background:var(--surface);display:grid;place-items:center;font-weight:800;font-size:17px;color:var(--none)}
+.cyc.st-ok{border-color:var(--ok);background:var(--ok);color:var(--surface)}
+.cyc.st-bad{border-color:var(--bad);background:var(--bad);color:var(--surface)}
+.panel{margin-left:calc(min(var(--d),6) * 16px);background:var(--sunk);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:13px;font-weight:600;color:var(--muted)}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;min-height:44px}
+.field textarea{resize:vertical;min-height:64px}
+.two{display:grid;grid-template-columns:1fr 110px;gap:8px}
+.confirm{background:var(--bad-bg);border:1px solid var(--bad);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.confirm p{margin:0;font-weight:600}
+
+.graphwrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.graphwrap svg{display:block}
+.gn{fill:var(--surface);stroke:var(--line);stroke-width:1.5}
+.gn.st-ok{fill:var(--ok-bg);stroke:var(--ok)} .gn.st-bad{fill:var(--bad-bg);stroke:var(--bad)}
+.gtx{fill:var(--ink);font-size:12px;font-family:var(--f-body)}
+.glb{fill:var(--muted);font-size:11px;font-family:var(--f-mono)}
+.gedge{fill:none;stroke:var(--line);stroke-width:2}
+.gnode{cursor:pointer}
+.gst{font-size:13px;font-weight:800;font-family:var(--f-body)}
+.gst.st-ok{fill:var(--ok)} .gst.st-bad{fill:var(--bad)} .gst.st-none{fill:var(--none)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+
+/* ćwiczenia */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 18px;display:flex;flex-direction:column;gap:14px;min-height:220px}
+.card .big{font-size:22px;font-weight:800;line-height:1.3;margin:0;text-wrap:balance}
+.outline{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.outline li{display:flex;flex-direction:column;gap:6px}
+.outline .ln{display:flex;gap:8px;align-items:flex-start}
+.outline .ln .ic{margin-top:3px}
+.outline ul{list-style:none;margin:0;padding-left:14px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.outline .lab{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.counter{font-family:var(--f-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* ustawienia */
+.sect{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.sect p{margin:0;color:var(--muted);font-size:14.5px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.empty{color:var(--muted);text-align:center;padding:24px 8px}
+/* płótno węzłów */
+.hint{margin:0;color:var(--muted);font-size:14px}
+.canvaswrap{position:relative}
+.canvas{height:58vh;min-height:300px;overflow:auto;border:1px solid var(--line);border-radius:var(--r);background-color:var(--bg);background-image:radial-gradient(var(--line) 1.2px,transparent 1.2px);background-size:20px 20px;padding:12px;-webkit-overflow-scrolling:touch}
+.canvas svg{display:block}
+.zoom{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}
+.zoom button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:20px;font-weight:700}
+.zoom button.wide{width:auto;padding:0 12px;font-size:14px;font-weight:600}
+.canvas{user-select:none;-webkit-user-select:none}
+.canvas .gnode{touch-action:none;cursor:grab}
+.canvas .gnode.dragging{cursor:grabbing}
+.canvas .gnode.dragging .gn{stroke:var(--accent);stroke-width:2.5;filter:drop-shadow(0 6px 10px rgb(0 0 0 / .25))}
+.gplus{cursor:pointer}
+.gplus circle{fill:var(--surface);stroke:var(--accent);stroke-width:1.8}
+.gplus text{fill:var(--accent);font-size:18px;font-weight:800;text-anchor:middle;dominant-baseline:central;font-family:var(--f-body);pointer-events:none}
+.gplus.sm circle{stroke-dasharray:3 2}
+.gplus.sm text{font-size:15px}
+.gplus:hover circle,.gplus:focus-visible circle{fill:var(--accent)}
+.gplus:hover text,.gplus:focus-visible text{fill:var(--accent-ink)}
+.gstub{fill:none;stroke:var(--accent);stroke-width:2;stroke-dasharray:4 3}
+.gnode.sel .gn{stroke:var(--accent);stroke-width:2.5}
+.gtx.ph{fill:var(--muted);font-style:italic}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:center}
+.sheet .in{width:100%;max-width:640px;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0;box-shadow:0 -10px 30px rgb(0 0 0 / .22);padding:10px 16px calc(16px + env(safe-area-inset-bottom,0px));max-height:62vh;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.grip{width:40px;height:4px;border-radius:4px;background:var(--line);align-self:center}
+.sheet .panel{margin-left:0;background:transparent;padding:0}
+.sheetspace{height:56vh}
+.picks{display:grid;gap:8px}
+.pick{display:flex;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg);min-height:60px}
+.pick .ic{width:24px;height:24px}
+.pick b{display:block;font-size:16px}
+.pick small{display:block;color:var(--muted);font-size:13.5px}
+@media (max-width:360px){.grid2{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">Jeżeli <span class="arr">→</span> to <small>plany</small></div>
+    <button class="pill" id="pill" hidden data-act="goTimer"></button>
+  </header>
+  <main id="main"></main>
+</div>
+<nav class="tabs" aria-label="Zakładki"><div class="in" id="tabs"></div></nav>
+
+<script>
+(function(){
+'use strict';
+const KEY='plany-jezeli-v1';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let uidN=0;const uid=()=>Date.now().toString(36)+(uidN++).toString(36)+Math.random().toString(36).slice(2,6);
+
+/* ---------- konfiguracja i dane ---------- */
+function defCfg(){return{
+  labels:{trigger:'Jeżeli',question:'Pytanie',choice:'Wybór',action:'Działanie',escalate:'Eskalacja'},
+  tags:['Stres','Zmęczenie','Oczekiwania','Przebodźcowanie'],
+  breath:{in:4,out:6},
+  defaults:{timer:5,brk:10,breath:3},
+  motion:'system', sound:true
+};}
+function N(type,text,o,kids){o=o||{};kids=kids||[];return{id:uid(),type,text,note:o.note||'',status:'none',
+  tool:o.tool||{kind:'none',min:0},contact:o.contact||'',
+  children:kids.map(k=>Array.isArray(k)?{label:k[0],node:k[1]}:{label:'',node:k})};}
+function P(trigger,first){return{id:uid(),szop:'',runs:[],drill:{ok:0,miss:0},root:N('trigger',trigger,{},first?[first]:[])};}
+/* jeden przykład, trzymany poza Twoimi planami */
+function examplePlan(){const p=P('uciekam w telefon lub Internet, żeby odsunąć trudne zadanie',
+    N('action','Wyznaczam koniec przerwy',{tool:{kind:'break',min:10}},[
+      N('choice','Co wybieram po przerwie?',{},[
+        ['Najmniejszy krok',N('action','Robię najmniejszy krok',{tool:{kind:'timer',min:5}})],
+        ['Wyjaśnienie wymagań',N('action','Wyjaśniam wymagania')],
+        ['Świadome przesunięcie',N('action','Świadomie przesuwam zadanie')]
+      ])]));p.id='example';return p;}
+const EXAMPLE=examplePlan();
+/* treści wyzwalaczy z pierwszego prototypu, usuwane przy migracji do wersji 2 */
+const OLD_SEED=['pojawiają się nowe cele lub wytyczne i czuję, że wymagania mnie przerastają','zadanie wydaje mi się za duże i zaczynam je odkładać','po niepowodzeniu mam ochotę porzucić wszystkie rutyny','kolejny raz wracam myślami do tej samej porażki','uciekam w telefon lub Internet, żeby odsunąć trudne zadanie','mam ochotę rzucić wszystko'];
+function fresh(){return{version:2,config:defCfg(),plans:[]};}
+function clonePlan(src){const c=JSON.parse(JSON.stringify(src));c.id=uid();c.runs=[];c.drill={ok:0,miss:0};walk(c.root,n=>{n.id=uid();n.status='none';});return c;}
+function normalize(d){
+  if((d.version||1)<2){d.plans=(d.plans||[]).filter(p=>!(p&&p.root&&OLD_SEED.includes(p.root.text)));d.version=2;}
+  const c=defCfg();d.config=Object.assign(c,d.config||{});
+  d.config.labels=Object.assign(defCfg().labels,(d.config.labels)||{});
+  d.config.breath=Object.assign(defCfg().breath,d.config.breath||{});
+  d.config.defaults=Object.assign(defCfg().defaults,d.config.defaults||{});
+  if(!Array.isArray(d.config.tags))d.config.tags=defCfg().tags;
+  d.plans=(d.plans||[]).filter(p=>p&&p.root);
+  d.plans.forEach(p=>{p.runs=p.runs||[];p.drill=p.drill||{ok:0,miss:0};walk(p.root,n=>{n.children=n.children||[];n.tool=n.tool||{kind:'none',min:0};n.status=n.status||'none';});});
+  return d;
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const d=JSON.parse(r);if(d&&Array.isArray(d.plans))return normalize(d);}}catch(e){}return null;}
+let S=load()||fresh();
+if(S.version!==2){S.version=2;}
+try{save0();}catch(e){}
+function save0(){localStorage.setItem(KEY,JSON.stringify(S));}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const cfg=()=>S.config;
+
+function walk(n,fn,parent,link){fn(n,parent,link);n.children.forEach(c=>walk(c.node,fn,n,c));}
+function find(n,id,parent,link){if(n.id===id)return{node:n,parent:parent||null,link:link||null};for(const c of n.children){const r=find(c.node,id,n,c);if(r)return r;}return null;}
+function countN(n){return 1+n.children.reduce((a,c)=>a+countN(c.node),0);}
+function tally(n){const a={ok:0,bad:0,none:0};walk(n,x=>{if(x.type!=='trigger')a[x.status]++;});return a;}
+const plan=id=>id===EXAMPLE.id?EXAMPLE:S.plans.find(p=>p.id===id);
+const isBranch=n=>n.type==='question'||n.type==='choice';
+
+/* ---------- ikony ---------- */
+const ICON={
+  trigger:'<path d="M13 3 5 13h6l-1 8 8-10h-6z"/>',
+  question:'<path d="M12 2.5 21.5 12 12 21.5 2.5 12z"/><path d="M10.3 10a1.8 1.8 0 1 1 2.5 1.6c-.5.2-.8.6-.8 1.1v.4"/><path d="M12 15.6v.01"/>',
+  choice:'<path d="M6 3v18"/><path d="M6 12h4a5 5 0 0 0 5-5V4"/><path d="M6 12h4a5 5 0 0 1 5 5v3"/><path d="m13 6 2-2 2 2"/><path d="m13 18 2 2 2-2"/>',
+  action:'<path d="M7 5v14l11-7z"/>',
+  escalate:'<circle cx="8" cy="8" r="3"/><path d="M3 20a5 5 0 0 1 10 0"/><path d="M15 6h6v5h-3l-2 2v-2h-1z"/>'
+};
+const ic=(t,cls)=>`<svg class="ic t-${t} ${cls||''}" viewBox="0 0 24 24" aria-hidden="true">${ICON[t]}</svg>`;
+const TABICON={
+  now:'<path d="M13 3 5 13h6l-1 8 8-10h-6z"/>',
+  plans:'<circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 6h10"/><path d="M12 6v8a4 4 0 0 0 4 4h1"/>',
+  drill:'<rect x="4" y="6" width="14" height="14" rx="2"/><path d="M8 3h10a2 2 0 0 1 2 2v11"/>',
+  ex:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5v.01"/>',
+  set:'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>'
+};
+const ST={none:{sym:'○',word:'bez oceny'},ok:{sym:'✓',word:'działa'},bad:{sym:'✕',word:'nie działa'}};
+const badge=s=>`<span class="st st-${s}">${ST[s].sym} ${ST[s].word}</span>`;
+const lab=t=>esc(cfg().labels[t]||t);
+const isTodo=t=>/^uzupełnij/i.test(t||'');
+const txt=t=>!String(t||'').trim()?`<span class="todo">(bez opisu)</span>`:isTodo(t)?`<span class="todo">${esc(t)}</span>`:esc(t);
+
+/* ---------- ruch ---------- */
+function applyMotion(){
+  const m=cfg().motion;let reduce=m==='reduce';
+  if(m==='system'){try{reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}}
+  document.documentElement.classList.toggle('rm',reduce);
+  return reduce;
+}
+const reduced=()=>document.documentElement.classList.contains('rm');
+
+/* ---------- stan widoku ---------- */
+let TAB='now';
+let RUN=null;      // {planId, path:[ids], done}
+let ED={planId:null,sel:null,view:'canvas',pick:null,z:1};
+let DR=null;       // {order, i, revealed, done}
+let CONF=null;     // klucz potwierdzenia w stronie
+let TM=null;       // timer
+
+/* ---------- render ---------- */
+function render(){
+  renderTabs();
+  const m=$('#main');
+  const cv0=$('#canvas');const sc=cv0?[cv0.scrollLeft,cv0.scrollTop]:null;
+  draw(m);
+  const cv1=$('#canvas');if(sc&&cv1){cv1.scrollLeft=sc[0];cv1.scrollTop=sc[1];}
+  tick();
+}
+function draw(m){
+  if(TAB==='now')m.innerHTML=RUN?(RUN.done?vSummary():vRun()):vHome();
+  else if(TAB==='plans')m.innerHTML=ED.planId&&plan(ED.planId)?vEditor():vPlans();
+  else if(TAB==='drill')m.innerHTML=vDrill();
+  else if(TAB==='ex')m.innerHTML=vExample();
+  else m.innerHTML=vSettings();
+}
+function renderTabs(){
+  const t=[['now','Teraz'],['plans','Plany'],['drill','Ćwiczenia'],['ex','Przykład'],['set','Ustawienia']];
+  $('#tabs').innerHTML=t.map(([k,l])=>`<button data-act="tab" data-k="${k}" ${TAB===k?'aria-current="page"':''}><svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${TABICON[k]}</svg>${l}</button>`).join('');
+}
+
+/* Teraz: lista wyzwalaczy */
+function vHome(){
+  if(!S.plans.length)return`<h1>Co się teraz dzieje?</h1><p class="lede">Nie masz jeszcze planów. Zbuduj pierwszy albo zobacz, jak działa przykład.</p>
+    <div class="btnrow stack"><button class="btn primary" data-act="newPlan">+ Nowy plan</button><button class="btn" data-act="tab" data-k="ex">Zobacz przykład</button></div>`;
+  return`<div><h1>Co się teraz dzieje?</h1><p class="lede">Wybierz sytuację. Przejdziesz przez plan po jednym kroku.</p></div>
+  <div class="triggers">${S.plans.map(p=>`<button class="trig" data-act="start" data-id="${p.id}">
+    <span class="eyebrow">${ic('trigger')}${lab('trigger')}…</span>
+    <span class="tx">${esc(p.root.text||'(bez opisu)')}</span>
+    ${p.szop?`<span class="meta"><span class="chip">${esc(p.szop)}</span></span>`:''}
+  </button>`).join('')}</div>`;
+}
+
+/* Teraz: przebieg */
+function vRun(){
+  const p=plan(RUN.planId);if(!p){RUN=null;return vHome();}
+  const nodes=RUN.path.map(id=>find(p.root,id)).filter(Boolean);
+  const cur=nodes[nodes.length-1];const n=cur.node;
+  const crumbs=nodes.map((r,i)=>`<button class="crumb ${i===nodes.length-1?'cur':''}" data-act="jump" data-i="${i}">${ic(r.node.type)}<span>${esc(r.node.text)}</span></button>`).join('');
+  let next='';
+  if(n.type==='trigger'){
+    next=n.children.length?`<button class="btn primary" data-act="next">To robię →</button>`:`<p class="note">Ten plan nie ma jeszcze kroków.</p>`;
+  }else if(isBranch(n)&&n.children.length){
+    next=`<div class="btnrow stack">${n.children.map((c,i)=>`<button class="btn ${i===0?'':''}" data-act="branch" data-i="${i}">${esc(c.label||('Opcja '+(i+1)))}</button>`).join('')}</div>`;
+  }else if(n.children.length===1){
+    next=`<button class="btn primary" data-act="next">Zrobione, dalej →</button>`;
+  }else if(n.children.length>1){
+    next=`<div class="btnrow stack">${n.children.map((c,i)=>`<button class="btn" data-act="branch" data-i="${i}">${esc(c.label||c.node.text)}</button>`).join('')}</div>`;
+  }else{
+    next=`<button class="btn primary" data-act="finish">Koniec ścieżki</button>`;
+  }
+  const eyebrow=n.type==='trigger'?`${ic('trigger')}${lab('trigger')}…`:`${ic(n.type)}${lab(n.type)} · krok ${nodes.length-1}`;
+  const contact=n.type==='escalate'?(n.contact?`<div class="contact">${esc(n.contact)}</div>`:`<p class="note todo">Dopisz w edytorze, do kogo się zwracasz.</p>`):'';
+  const rate=n.type==='trigger'?'':`<div class="rate" role="group" aria-label="Ocena kroku">
+      <button class="ok" data-act="rate" data-s="ok" aria-pressed="${n.status==='ok'}">✓ Działa</button>
+      <button class="bad" data-act="rate" data-s="bad" aria-pressed="${n.status==='bad'}">✕ Nie działa</button></div>`;
+  return`<div class="crumbs" aria-label="Przebyta ścieżka">${crumbs}</div>
+  <section class="stage st-${n.type==='trigger'?'none':n.status}">
+    <span class="eyebrow">${eyebrow}</span>
+    <p class="big">${txt(n.text)}</p>
+    ${n.note?`<p class="note">${esc(n.note)}</p>`:''}
+    ${contact}
+    ${toolHtml(n)}
+    ${rate}
+  </section>
+  ${next}
+  <div class="btnrow"><button class="btn ghost small" data-act="back">← Wstecz</button><button class="btn ghost small" data-act="stop">Przerwij plan</button></div>`;
+}
+function toolHtml(n){
+  const k=n.tool&&n.tool.kind;if(!k||k==='none')return'';
+  const mine=TM&&TM.nodeId===n.id;
+  const running=mine&&TM.running;
+  const min=n.tool.min||defMin(k);
+  const ctl=`<div class="btnrow">${running?`<button class="btn small" data-act="tmPause">Pauza</button>`:`<button class="btn small primary" data-act="tmStart" data-id="${n.id}">${mine&&TM.remaining>0&&!TM.done?'Wznów':'Start'} · ${min} min</button>`}${mine?`<button class="btn small ghost" data-act="tmReset">Wyzeruj</button>`:''}</div>`;
+  if(k==='breath'){
+    const b=cfg().breath;
+    return`<div class="tool"><div class="breath"><div class="orb" id="orb" style="--in:${b.in}s;--out:${b.out}s" data-phase="${mine?'':'idle'}"><b id="phase">${mine?'':'Gotowy?'}</b></div></div>
+      <div class="bar"><i id="pbar"></i></div><div class="clock" id="clock">${fmt(min*60000)}</div>
+      <p class="toolnote">Wdech ${b.in} s, wydech ${b.out} s</p>${ctl}</div>`;
+  }
+  const note=k==='break'?`<p class="toolnote" id="tmnote">Po starcie pokażę godzinę końca przerwy.</p>`:`<p class="toolnote">Licznik ${min} minut na ten krok.</p>`;
+  return`<div class="tool"><div class="clock" id="clock">${fmt(min*60000)}</div><div class="bar"><i id="pbar"></i></div>${note}${ctl}</div>`;
+}
+function defMin(k){const d=cfg().defaults;return k==='break'?d.brk:k==='breath'?d.breath:d.timer;}
+
+function vSummary(){
+  const p=plan(RUN.planId);
+  const nodes=RUN.path.map(id=>find(p.root,id)).filter(r=>r&&r.node.type!=='trigger');
+  return`<div><h1>Ścieżka zakończona</h1><p class="lede">Oceń kroki, które przeszedłeś. Ocena zostaje w planie i widać ją w edytorze.</p></div>
+  <div class="sum">${nodes.map(r=>{const n=r.node;return`<div class="sumrow"><div class="tx">${ic(n.type)}<span>${txt(n.text)}</span></div>
+    <div class="rate"><button class="ok" data-act="rateId" data-id="${n.id}" data-s="ok" aria-pressed="${n.status==='ok'}">✓ Działa</button>
+    <button class="bad" data-act="rateId" data-id="${n.id}" data-s="bad" aria-pressed="${n.status==='bad'}">✕ Nie działa</button></div></div>`;}).join('')}</div>
+  <div class="btnrow stack"><button class="btn primary" data-act="stop">Gotowe</button><button class="btn" data-act="start" data-id="${p.id}">Przejdź plan jeszcze raz</button></div>`;
+}
+
+/* Plany: lista */
+function vPlans(){
+  return`<div class="edhead"><h1 class="grow">Plany</h1><button class="btn small primary" data-act="newPlan">+ Nowy plan</button></div>
+  ${S.plans.length?'':'<p class="empty">Brak planów. Dodaj pierwszy albo skopiuj przykład z zakładki Przykład.</p>'}
+  ${S.plans.map(p=>{const t=tally(p.root);return`<article class="plan">
+    <span class="eyebrow">${ic('trigger')}${lab('trigger')}…${p.szop?` <span class="chip">${esc(p.szop)}</span>`:''}</span>
+    <div class="tx">${esc(p.root.text||'(bez opisu)')}</div>
+    <div class="tally">${t.ok?badge('ok').replace(ST.ok.word,t.ok+' '+ST.ok.word):''}${t.bad?badge('bad').replace(ST.bad.word,t.bad+' '+ST.bad.word):''}<span class="st st-none">${countN(p.root)-1} kroków</span><span class="st st-none">uruchomiony ${p.runs.length}×</span></div>
+    <div class="btnrow"><button class="btn small" data-act="edit" data-id="${p.id}">Edytuj</button><button class="btn small ghost" data-act="start" data-id="${p.id}">Uruchom</button></div>
+  </article>`;}).join('')}`;
+}
+
+/* Plany: edytor */
+function vEditor(){
+  const p=plan(ED.planId);
+  const head=`<div class="edhead"><button class="btn small ghost" data-act="closeEd">← Plany</button><span class="grow"></span>
+    <div class="seg" role="group" aria-label="Widok"><button data-act="view" data-k="canvas" aria-pressed="${ED.view!=='list'}">Węzły</button><button data-act="view" data-k="list" aria-pressed="${ED.view==='list'}">Lista</button></div></div>`;
+  const legend=`<div class="legend">${['trigger','question','choice','action','escalate'].map(t=>`<span>${ic(t)}${lab(t)}</span>`).join('')}</div>`;
+  const body=ED.view==='list'?`<div class="tree">${tree(p.root,0,null,null)}</div>`
+    :`<p class="hint">Przeciągnij węzeł, żeby go przesunąć. Dotknij, żeby go opisać. Plus po prawej dodaje kolejny węzeł, plus na linii wstawia węzeł pomiędzy.</p>
+      <div class="canvaswrap"><div class="canvas" id="canvas">${graph(p,true,ED.z||1)}</div>
+      <div class="zoom" role="group" aria-label="Widok płótna">${hasManual(p)?`<button class="wide" data-act="ask" data-k="tidy">Uporządkuj</button>`:''}<button data-act="zoom" data-k="-1" aria-label="Pomniejsz">−</button><button data-act="zoom" data-k="1" aria-label="Powiększ">+</button></div></div>
+      ${CONF==='tidy'?`<div class="confirm"><p>Ułożyć węzły automatycznie? Ręczne położenie zostanie zapomniane.</p><div class="btnrow"><button class="btn small danger" data-act="tidy">Uporządkuj</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`:''}`;
+  const del=CONF==='delPlan'?`<div class="confirm"><p>Usunąć cały plan razem z ${countN(p.root)-1} krokami?</p><div class="btnrow"><button class="btn small danger" data-act="delPlan">Usuń plan</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`
+    :`<button class="btn small ghost danger" data-act="ask" data-k="delPlan">Usuń plan</button>`;
+  const sheet=ED.pick?pickSheet():(ED.sel&&find(p.root,ED.sel)?nodeSheet(p):'');
+  return head+legend+body+`<div class="btnrow"><button class="btn small" data-act="start" data-id="${p.id}">Uruchom ten plan</button></div>`+del+(sheet?`<div class="sheetspace"></div>${sheet}`:'');
+}
+function nodeSheet(p){const r=find(p.root,ED.sel);
+  return`<div class="sheet" role="dialog" aria-label="Edycja węzła"><div class="in"><div class="grip"></div><span class="eyebrow">${ic(r.node.type)}${lab(r.node.type)}</span>${panel(r.node,r.parent,r.link,0)}</div></div>`;}
+function pickSheet(){const pk=ED.pick;
+  const D={action:'Konkretny krok, może mieć licznik',question:'Rozgałęzienie z odpowiedziami, np. tak / nie',choice:'Kilka dróg do wybrania',escalate:'Zwracam się do kogoś o pomoc'};
+  return`<div class="sheet" role="dialog" aria-label="Dodaj węzeł"><div class="in"><div class="grip"></div><h2>${pk.mode==='ins'?'Wstaw węzeł pomiędzy':'Dodaj węzeł'}</h2>
+    <div class="picks">${['action','question','choice','escalate'].map(t=>`<button class="pick" data-act="pickType" data-k="${t}">${ic(t)}<span><b>${lab(t)}</b><small>${D[t]}</small></span></button>`).join('')}</div>
+    <button class="btn ghost" data-act="pickCancel">Anuluj</button></div></div>`;}
+function tree(n,d,parent,link){
+  let h='';
+  if(parent&&(isBranch(parent)||parent.children.length>1))h+=`<div class="blabel" style="--d:${d}">↳ ${esc(link.label||'(bez etykiety)')}</div>`;
+  const sel=ED.sel===n.id;
+  const toolTag=n.tool&&n.tool.kind!=='none'?`<span class="tool-ic">${toolName(n.tool.kind)} ${n.tool.min||defMin(n.tool.kind)}′</span>`:'';
+  const cyc=n.type==='trigger'?'':`<span class="cyc st-${n.status}" role="button" tabindex="0" data-act="cycle" data-id="${n.id}" aria-label="Ocena: ${ST[n.status].word}. Zmień">${n.status==='none'?'':ST[n.status].sym}</span>`;
+  h+=`<div class="row ${sel?'sel':''} st-${n.type==='trigger'?'none':n.status}" style="--d:${d}" role="button" tabindex="0" data-act="sel" data-id="${n.id}" aria-expanded="${sel}">
+    ${ic(n.type)}<span class="rt" id="rt-${n.id}">${n.type==='trigger'?'<b>'+lab('trigger')+'</b> ':''}${txt(n.text)}</span>${toolTag}${cyc}</div>`;
+  n.children.forEach(c=>{h+=tree(c.node,d+1,n,c);});
+  return h;
+}
+function toolName(k){return{timer:'timer',break:'przerwa',breath:'oddech'}[k]||'';}
+function panel(n,parent,link,d){
+  const C=cfg();const id=n.id;
+  const typeSel=n.type==='trigger'?'':`<div class="field"><label for="f-type-${id}">Typ węzła</label><select id="f-type-${id}" data-f="type" data-id="${id}">${['question','choice','action','escalate'].map(t=>`<option value="${t}" ${n.type===t?'selected':''}>${esc(C.labels[t])}</option>`).join('')}</select></div>`;
+  const labelF=parent&&(isBranch(parent)||parent.children.length>1)?`<div class="field"><label for="f-label-${id}">Etykieta gałęzi (odpowiedź)</label><input id="f-label-${id}" data-f="label" data-id="${id}" value="${esc(link.label)}"></div>`:'';
+  const szop=n.type==='trigger'?`<div class="field"><label for="f-szop-${id}">Czynnik SZOP (opcjonalnie)</label><select id="f-szop-${id}" data-f="szop" data-id="${id}"><option value="">brak</option>${C.tags.map(t=>`<option ${plan(ED.planId).szop===t?'selected':''}>${esc(t)}</option>`).join('')}</select></div>`:'';
+  const tool=n.type==='action'?`<div class="two"><div class="field"><label for="f-tk-${id}">Narzędzie</label><select id="f-tk-${id}" data-f="toolkind" data-id="${id}">
+      ${[['none','brak'],['timer','timer kroku'],['break','koniec przerwy'],['breath','oddech']].map(([v,l])=>`<option value="${v}" ${n.tool.kind===v?'selected':''}>${l}</option>`).join('')}</select></div>
+      <div class="field"><label for="f-tm-${id}">Minuty</label><input id="f-tm-${id}" type="number" min="1" max="120" inputmode="numeric" data-f="toolmin" data-id="${id}" value="${n.tool.kind==='none'?'':(n.tool.min||defMin(n.tool.kind))}" ${n.tool.kind==='none'?'disabled':''}></div></div>`:'';
+  const contact=n.type==='escalate'?`<div class="field"><label for="f-ct-${id}">Do kogo się zwracam (imię, numer)</label><input id="f-ct-${id}" data-f="contact" data-id="${id}" value="${esc(n.contact)}"></div>`:'';
+  const addNext=!isBranch(n)?`<button class="btn small" data-act="pickOut" data-id="${id}">+ Następny węzeł</button>`:'';
+  const addBr=isBranch(n)?`<button class="btn small" data-act="pickOut" data-id="${id}">+ Gałąź</button>`:'';
+  let del='';
+  if(n.type!=='trigger'){
+    const below=countN(n)-1;const lift=n.children.length===1;
+    del=CONF==='del:'+id?`<div class="confirm"><p>${lift?'Usunąć ten krok? Następne kroki zostaną podpięte wyżej.':below?`Usunąć ten krok i ${below} pod nim?`:'Usunąć ten krok?'}</p><div class="btnrow"><button class="btn small danger" data-act="delNode" data-id="${id}">Usuń</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`
+      :`<button class="btn small ghost danger" data-act="ask" data-k="del:${id}">Usuń krok</button>`;
+  }
+  return`<div class="panel" style="--d:${d}">
+    ${typeSel}${labelF}
+    <div class="field"><label for="f-text-${id}">${n.type==='trigger'?'Jeżeli…':'Treść'}</label><textarea id="f-text-${id}" data-f="text" data-id="${id}" rows="2">${esc(n.text)}</textarea></div>
+    ${n.type==='trigger'?'':`<div class="field"><label for="f-note-${id}">Dopisek (opcjonalnie)</label><textarea id="f-note-${id}" data-f="note" data-id="${id}" rows="2">${esc(n.note)}</textarea></div>`}
+    ${szop}${tool}${contact}
+    <div class="btnrow">${addNext}${addBr}<button class="btn small primary" data-act="closePanel">Gotowe</button></div>${del}</div>`;
+}
+
+/* graf w stylu węzłów */
+function wrap(t,max,lines){const w=String(t).split(/\s+/);const out=[];let cur='';
+  for(const x of w){if((cur+' '+x).trim().length>max&&cur){out.push(cur);cur=x;}else cur=(cur+' '+x).trim();}
+  if(cur)out.push(cur);
+  if(out.length>lines){const o=out.slice(0,lines);o[lines-1]=o[lines-1].replace(/.{0,2}$/,'')+'…';return o;}return out;}
+const GW=180,GH=72,GGY=34,GHR=14;
+/* układ: automatyczne drzewo, nadpisane ręcznym położeniem (n.pos);
+   węzły bez własnego położenia trzymają się rodzica, więc przesuwają się razem z nim */
+function layoutOf(p,edit){
+  const GX=edit?88:48;let leaf=0;const auto={};const order=[];
+  (function lay(n,d){let y;
+    if(!n.children.length){y=leaf*(GH+GGY);leaf++;}else{const ys=n.children.map(c=>lay(c.node,d+1));y=(ys[0]+ys[ys.length-1])/2;}
+    auto[n.id]={x:d*(GW+GX),y};order.push(n);return y;})(p.root,0);
+  const pos={};
+  (function fin(n,parent){
+    if(n.pos)pos[n.id]={x:n.pos.x,y:n.pos.y};
+    else if(!parent)pos[n.id]={x:auto[n.id].x,y:auto[n.id].y};
+    else{const pp=pos[parent.id],pa=auto[parent.id],a=auto[n.id];pos[n.id]={x:pp.x+(a.x-pa.x),y:pp.y+(a.y-pa.y)};}
+    n.children.forEach(c=>fin(c.node,n));})(p.root,null);
+  const box={minX:Infinity,minY:Infinity,maxX:-Infinity,maxY:-Infinity};
+  order.forEach(n=>{const q=pos[n.id];box.minX=Math.min(box.minX,q.x);box.minY=Math.min(box.minY,q.y);box.maxX=Math.max(box.maxX,q.x+GW);box.maxY=Math.max(box.maxY,q.y+GH);});
+  return{pos,order,GX,box};
+}
+function graphLayers(p,edit,L){
+  const pos=L.pos;let edges='',nodes='',plus='';
+  L.order.forEach(n=>{const a=pos[n.id];const br=isBranch(n);
+    n.children.forEach((c,i)=>{const b=pos[c.node.id];const x1=a.x+GW,y1=a.y+GH/2,x2=b.x,y2=b.y+GH/2;
+      const k=Math.max(40,Math.abs(x2-x1)/2);const c1x=x1+k,c2x=x2-k;
+      edges+=`<path class="gedge" d="M${x1} ${y1} C${c1x} ${y1}, ${c2x} ${y2}, ${x2} ${y2}"/>`;
+      if(c.label&&(br||n.children.length>1))edges+=`<text class="glb" x="${x2+2}" y="${b.y-7}">${esc(wrap(c.label,24,1)[0])}</text>`;
+      if(edit){const mx=(x1+3*c1x+3*c2x+x2)/8,my=(y1+y2)/2;
+        plus+=`<g class="gplus sm" data-act="pickIns" data-id="${n.id}" data-i="${i}" transform="translate(${mx},${my})" role="button" tabindex="0" aria-label="Wstaw węzeł pomiędzy"><circle r="11"/><text>+</text></g>`;}
+    });
+    if(edit&&(br||!n.children.length)){
+      const onEdge=br&&n.children.length;const hx=onEdge?a.x+GW:a.x+GW+26,hy=a.y+GH/2;
+      if(!onEdge)edges+=`<path class="gstub" d="M${a.x+GW} ${hy} H${hx-GHR}"/>`;
+      plus+=`<g class="gplus" data-act="pickOut" data-id="${n.id}" transform="translate(${hx},${hy})" role="button" tabindex="0" aria-label="${br?'Dodaj gałąź':'Dodaj następny węzeł'}"><circle r="${GHR}"/><text>+</text></g>`;}
+    const empty=!String(n.text||'').trim();
+    const T=empty?[n.type==='trigger'?'Co się dzieje?':'Dotknij, żeby opisać']:wrap(n.text,22,3);
+    const st=n.type==='trigger'?'none':n.status;const sel=edit&&ED.sel===n.id;
+    nodes+=`<g class="gnode ${sel?'sel':''}" data-node="${n.id}" ${edit?`data-act="gsel" data-id="${n.id}" role="button" tabindex="0"`:''} transform="translate(${a.x},${a.y})" aria-label="${esc(lab(n.type)+': '+(n.text||'bez opisu'))}">
+      <rect class="gn st-${st}" width="${GW}" height="${GH}" rx="10"/>
+      <svg x="8" y="8" width="16" height="16" viewBox="0 0 24 24" class="ic t-${n.type}">${ICON[n.type]}</svg>
+      ${st!=='none'?`<text class="gst st-${st}" x="${GW-18}" y="21">${ST[st].sym}</text>`:''}
+      ${T.map((l,i)=>`<text class="gtx ${empty?'ph':''}" x="30" y="${21+i*16}">${esc(l)}</text>`).join('')}
+    </g>`;});
+  return{edges,nodes,plus};
+}
+function graph(p,edit,z){
+  z=z||1;const PAD=24,TOP=20,RIGHT=edit?56:0;
+  const L=layoutOf(p,edit);const P2=graphLayers(p,edit,L);const b=L.box;
+  const vx=b.minX-PAD,vy=b.minY-PAD-TOP,w=b.maxX-b.minX+PAD*2+RIGHT,h=b.maxY-b.minY+PAD*2+TOP;
+  return`<svg id="${edit?'gsvg':'gsvg-ro'}" width="${Math.round(w*z)}" height="${Math.round(h*z)}" viewBox="${vx} ${vy} ${w} ${h}" role="group" aria-label="Węzły planu"><g id="ge">${P2.edges}</g><g id="gn">${P2.nodes}</g><g id="gp">${P2.plus}</g></svg>`;
+}
+const hasManual=p=>{let m=false;walk(p.root,n=>{if(n.pos)m=true;});return m;};
+
+/* przeciąganie węzłów */
+let DRAG=null,NOCLICK=0;
+function svgPt(svg,cx,cy){const pt=svg.createSVGPoint();pt.x=cx;pt.y=cy;return pt.matrixTransform(svg.getScreenCTM().inverse());}
+document.addEventListener('pointerdown',e=>{
+  const g=e.target.closest&&e.target.closest('#canvas .gnode[data-node]');if(!g)return;
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  const p=plan(ED.planId);const svg=$('#gsvg');if(!p||!svg)return;
+  const q=layoutOf(p,true).pos[g.dataset.node];if(!q)return;
+  const s=svgPt(svg,e.clientX,e.clientY);
+  DRAG={id:g.dataset.node,svg,off:{x:s.x-q.x,y:s.y-q.y},sx:e.clientX,sy:e.clientY,moved:false,pid:e.pointerId};
+});
+window.addEventListener('pointermove',e=>{
+  if(!DRAG||e.pointerId!==DRAG.pid)return;
+  if(!DRAG.moved){if(Math.hypot(e.clientX-DRAG.sx,e.clientY-DRAG.sy)<6)return;DRAG.moved=true;
+    const g=DRAG.svg.querySelector(`[data-node="${DRAG.id}"]`);if(g)g.classList.add('dragging');}
+  e.preventDefault();
+  const p=plan(ED.planId);const r=p&&find(p.root,DRAG.id);if(!r)return;
+  const s=svgPt(DRAG.svg,e.clientX,e.clientY);
+  r.node.pos={x:Math.round(s.x-DRAG.off.x),y:Math.round(s.y-DRAG.off.y)};
+  const L=layoutOf(p,true);const P2=graphLayers(p,true,L);
+  DRAG.svg.querySelector('#ge').innerHTML=P2.edges;DRAG.svg.querySelector('#gp').innerHTML=P2.plus;
+  DRAG.svg.querySelectorAll('#gn .gnode').forEach(g=>{const q=L.pos[g.dataset.node];if(q)g.setAttribute('transform',`translate(${q.x},${q.y})`);});
+  const cv=$('#canvas');if(cv){const c=cv.getBoundingClientRect();const E=36,V=12;
+    if(e.clientX<c.left+E)cv.scrollLeft-=V;else if(e.clientX>c.right-E)cv.scrollLeft+=V;
+    if(e.clientY<c.top+E)cv.scrollTop-=V;else if(e.clientY>c.bottom-E)cv.scrollTop+=V;}
+},{passive:false});
+function endDrag(){
+  if(!DRAG)return;const d=DRAG;DRAG=null;if(!d.moved)return;
+  NOCLICK=Date.now()+250;
+  const p=plan(ED.planId);const r=p&&find(p.root,d.id);
+  if(r&&r.node.pos){r.node.pos.x=Math.round(r.node.pos.x/10)*10;r.node.pos.y=Math.round(r.node.pos.y/10)*10;}
+  save();
+  const vb0=d.svg.viewBox.baseVal;const ox=vb0.x,oy=vb0.y;
+  render();
+  const cv=$('#canvas'),sv=$('#gsvg');
+  if(cv&&sv){const z=ED.z||1;const vb=sv.viewBox.baseVal;cv.scrollLeft+=(ox-vb.x)*z;cv.scrollTop+=(oy-vb.y)*z;}
+}
+window.addEventListener('pointerup',endDrag);
+window.addEventListener('pointercancel',endDrag);
+
+/* Ćwiczenia */
+function buildDeck(){const ids=S.plans.slice().sort((a,b)=>((b.drill.miss-b.drill.ok)-(a.drill.miss-a.drill.ok))||(Math.random()-.5)).map(p=>p.id);DR={order:ids,i:0,revealed:false};}
+function outline(n){if(!n.children.length)return'';
+  return`<ul class="outline">${n.children.map(c=>`<li>${c.label&&(isBranch(n)||n.children.length>1)?`<span class="lab">↳ ${esc(c.label)}</span>`:''}<span class="ln">${ic(c.node.type)}<span>${txt(c.node.text)}</span></span>${c.node.children.length?outline(c.node).replace('class="outline"',''):''}</li>`).join('')}</ul>`;}
+function vDrill(){
+  if(!S.plans.length)return`<h1>Ćwiczenia</h1><p class="empty">Dodaj plany, żeby ćwiczyć.</p>`;
+  if(!DR||DR.order.some(id=>!plan(id)))buildDeck();
+  if(DR.i>=DR.order.length)return`<h1>Ćwiczenia</h1><div class="card"><p class="big">Przejrzałeś wszystkie karty.</p><p class="lede">Karty, których jeszcze nie pamiętasz, wrócą na początek następnej rundy.</p><button class="btn primary" data-act="drillRestart">Nowa runda</button></div>`;
+  const p=plan(DR.order[DR.i]);
+  return`<div class="edhead"><h1 class="grow">Ćwiczenia</h1><span class="counter">karta ${DR.i+1} z ${DR.order.length}</span></div>
+  <div class="card"><span class="eyebrow">${ic('trigger')}${lab('trigger')}…</span><p class="big">${esc(p.root.text)}</p>
+    ${DR.revealed?`<span class="eyebrow">to…</span>${outline(p.root)||'<p class="lede">Plan nie ma jeszcze kroków.</p>'}`:`<p class="lede">Powiedz sobie, co robisz. Potem odkryj plan.</p>`}</div>
+  ${DR.revealed?`<div class="grid2"><button class="btn" data-act="drillRate" data-s="ok">✓ Pamiętałem</button><button class="btn" data-act="drillRate" data-s="miss">↺ Jeszcze nie</button></div>`
+    :`<button class="btn primary" data-act="reveal">Pokaż „to…”</button>`}
+  <button class="btn ghost" data-act="drillNext">Następna karta →</button>`;
+}
+
+/* Przykład */
+let EXV='list';
+function vExample(){const p=EXAMPLE;
+  return`<div><h1>Przykład</h1><p class="lede">Jeden plan pokazujący, jak działają węzły. Nie jest zapisany wśród Twoich planów. Możesz go przejść albo skopiować i przerobić po swojemu.</p></div>
+  <div class="legend">${['trigger','question','choice','action','escalate'].map(t=>`<span>${ic(t)}${lab(t)}</span>`).join('')}</div>
+  <div class="edhead"><span class="grow"></span><div class="seg" role="group" aria-label="Widok"><button data-act="exView" data-k="list" aria-pressed="${EXV==='list'}">Lista</button><button data-act="exView" data-k="graph" aria-pressed="${EXV==='graph'}">Graf</button></div></div>
+  ${EXV==='graph'?`<div class="graphwrap">${graph(p,false,1)}</div>`
+    :`<div class="card"><span class="eyebrow">${ic('trigger')}${lab('trigger')}…</span><p class="big">${esc(p.root.text)}</p><span class="eyebrow">to…</span>${outline(p.root)}</div>`}
+  <div class="btnrow stack"><button class="btn primary" data-act="start" data-id="${p.id}">Przejdź przykład krok po kroku</button><button class="btn" data-act="copyEx">Skopiuj do moich planów</button></div>`;
+}
+
+/* Ustawienia */
+function vSettings(){const C=cfg();
+  const conf=(k,msg,act,label)=>CONF===k?`<div class="confirm"><p>${msg}</p><div class="btnrow"><button class="btn small danger" data-act="${act}">${label}</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`:'';
+  return`<h1>Ustawienia</h1>
+  <section class="sect"><h2>Ruch i dźwięk</h2>
+    <div class="field"><label for="c-motion">Animacje</label><select id="c-motion" data-c="motion">
+      <option value="system" ${C.motion==='system'?'selected':''}>jak w systemie telefonu</option>
+      <option value="reduce" ${C.motion==='reduce'?'selected':''}>wyłączone</option>
+      <option value="full" ${C.motion==='full'?'selected':''}>włączone</option></select></div>
+    <div class="field"><label for="c-sound">Sygnał na koniec licznika</label><select id="c-sound" data-c="sound"><option value="1" ${C.sound?'selected':''}>dźwięk i wibracja</option><option value="0" ${C.sound?'':'selected'}>bez sygnału</option></select></div>
+  </section>
+  <section class="sect"><h2>Liczniki</h2>
+    <div class="grid2">
+      <div class="field"><label for="c-in">Wdech (s)</label><input id="c-in" type="number" min="2" max="12" inputmode="numeric" data-c="breath.in" value="${C.breath.in}"></div>
+      <div class="field"><label for="c-out">Wydech (s)</label><input id="c-out" type="number" min="2" max="14" inputmode="numeric" data-c="breath.out" value="${C.breath.out}"></div>
+      <div class="field"><label for="c-dt">Timer kroku (min)</label><input id="c-dt" type="number" min="1" max="120" inputmode="numeric" data-c="defaults.timer" value="${C.defaults.timer}"></div>
+      <div class="field"><label for="c-db">Przerwa (min)</label><input id="c-db" type="number" min="1" max="120" inputmode="numeric" data-c="defaults.brk" value="${C.defaults.brk}"></div>
+      <div class="field"><label for="c-dbr">Oddech (min)</label><input id="c-dbr" type="number" min="1" max="30" inputmode="numeric" data-c="defaults.breath" value="${C.defaults.breath}"></div>
+    </div></section>
+  <section class="sect"><h2>Nazwy typów węzłów</h2>
+    <div class="grid2">${['trigger','question','choice','action','escalate'].map(t=>`<div class="field"><label for="c-l-${t}">${ic(t)} ${t==='trigger'?'wyzwalacz':t==='question'?'pytanie':t==='choice'?'wybór':t==='action'?'działanie':'eskalacja'}</label><input id="c-l-${t}" data-c="labels.${t}" value="${esc(C.labels[t])}"></div>`).join('')}</div></section>
+  <section class="sect"><h2>Tagi wyzwalaczy</h2><p>Oddzielone przecinkami. Domyślnie czynniki SZOP.</p>
+    <div class="field"><label for="c-tags">Tagi</label><input id="c-tags" data-c="tags" value="${esc(C.tags.join(', '))}"></div></section>
+  <section class="sect"><h2>Dane</h2><p>Plany są zapisane tylko w tej przeglądarce. Skopiuj kopię, żeby przenieść je na inne urządzenie.</p>
+    <div class="field"><label for="c-exp">Kopia (JSON)</label><textarea id="c-exp" rows="4" readonly>${esc(JSON.stringify(S))}</textarea></div>
+    <div class="btnrow"><button class="btn small" data-act="copy">Kopiuj kopię</button></div>
+    <div class="field"><label for="c-imp">Wklej kopię, żeby ją wczytać</label><textarea id="c-imp" rows="3" placeholder='{"version":1,…}'></textarea></div>
+    <p id="impmsg" hidden></p>
+    ${CONF==='imp'?conf('imp','Wczytać kopię? Obecne plany zostaną zastąpione.','doImport','Wczytaj'):`<div class="btnrow"><button class="btn small" data-act="ask" data-k="imp">Wczytaj kopię</button></div>`}
+    ${CONF==='reset'?conf('reset','Usunąć wszystkie plany i ustawienia? Tego nie da się cofnąć bez kopii.','doReset','Usuń wszystko'):`<div class="btnrow"><button class="btn small ghost danger" data-act="ask" data-k="reset">Wyczyść wszystko</button></div>`}
+  </section>`;
+}
+
+/* ---------- timer ---------- */
+const fmt=ms=>{ms=Math.max(0,ms);const s=Math.ceil(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');};
+let WL=null;
+async function wake(){try{if(navigator.wakeLock)WL=await navigator.wakeLock.request('screen');}catch(e){WL=null;}}
+function sleep(){try{if(WL)WL.release();}catch(e){}WL=null;}
+let AC=null;
+function ding(){if(!cfg().sound)return;
+  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();[0,.35].forEach(t=>{const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=660;o.connect(g);g.connect(AC.destination);
+    const s=AC.currentTime+t;g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(0.25,s+.02);g.gain.exponentialRampToValueAtTime(0.0001,s+.28);o.start(s);o.stop(s+.3);});}catch(e){}
+  try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(e){}}
+function findAny(id){for(const p of S.plans.concat([EXAMPLE])){const r=find(p.root,id);if(r)return{p,...r};}return null;}
+function tmStart(id){const r=findAny(id);if(!r)return;const n=r.node;
+  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();}catch(e){}
+  if(TM&&TM.nodeId===id&&!TM.running&&TM.remaining>0&&!TM.done){TM.endAt=Date.now()+TM.remaining;TM.running=true;}
+  else{const ms=(n.tool.min||defMin(n.tool.kind))*60000;TM={nodeId:id,planId:r.p.id,kind:n.tool.kind,total:ms,endAt:Date.now()+ms,remaining:ms,running:true,done:false,started:Date.now(),label:n.text};}
+  wake();render();}
+function tmPause(){if(!TM)return;TM.remaining=TM.endAt-Date.now();TM.running=false;sleep();render();}
+function tmReset(){TM=null;sleep();render();}
+function tick(){
+  const pill=$('#pill');
+  if(!TM){pill.hidden=true;return;}
+  let rem=TM.running?TM.endAt-Date.now():TM.remaining;
+  if(TM.running&&rem<=0){TM.running=false;TM.remaining=0;TM.done=true;rem=0;sleep();ding();setTimeout(render,0);}
+  const elapsed=TM.total-rem;
+  const onNode=TAB==='now'&&RUN&&!RUN.done&&RUN.path[RUN.path.length-1]===TM.nodeId;
+  pill.hidden=onNode;
+  if(!onNode)pill.textContent=(TM.done?'✓ koniec · ':'⏱ ')+fmt(rem)+' · '+toolName(TM.kind);
+  if(!onNode)return;
+  const c=$('#clock');if(c)c.textContent=fmt(rem);
+  const b=$('#pbar');
+  if(TM.kind==='breath'){
+    const B=cfg().breath;const cyc=(B.in+B.out)*1000;const pos=elapsed%cyc;const inP=pos<B.in*1000;
+    const left=Math.ceil(((inP?B.in*1000:cyc)-pos)/1000);
+    const orb=$('#orb'),ph=$('#phase');
+    if(orb){const want=TM.done?'out':(inP?'in':'out');if(TM.running||TM.done){if(orb.dataset.phase!==want)orb.dataset.phase=want;}}
+    if(ph)ph.textContent=TM.done?'Koniec':(TM.running?(inP?'Wdech':'Wydech')+' '+left:'Pauza');
+    if(b)b.style.width=(TM.done?100:Math.min(100,(inP?pos/(B.in*1000):(pos-B.in*1000)/(B.out*1000))*100))+'%';
+  }else{
+    if(b)b.style.width=Math.min(100,elapsed/TM.total*100)+'%';
+    const tn=$('#tmnote');if(tn&&TM.kind==='break'){const end=new Date(TM.running?TM.endAt:Date.now()+rem);tn.textContent=TM.done?'Przerwa skończona. Wybierz, co dalej.':`Koniec przerwy o ${String(end.getHours()).padStart(2,'0')}:${String(end.getMinutes()).padStart(2,'0')}`;}
+  }
+}
+setInterval(tick,250);
+
+/* ---------- akcje ---------- */
+function startRun(id){const p=plan(id);if(!p)return;RUN={planId:id,path:[p.root.id],done:false};TAB='now';CONF=null;window.scrollTo(0,0);render();}
+function setStatus(id,s){const r=findAny(id);if(!r)return;r.node.status=r.node.status===s?'none':s;save();render();}
+function defLabel(n,k){return n.type==='question'?(['Tak','Nie'][k]||'Inna odpowiedź'):'Opcja '+(k+1);}
+/* tworzy węzeł z wybranego typu: na wyjściu węzła albo wstawiony na linii */
+function addFromPick(type){const pk=ED.pick;const p=plan(ED.planId);if(!pk||!p)return;
+  const r=find(p.root,pk.id);if(!r){ED.pick=null;render();return;}
+  const n=r.node;const nn=N(type,'');
+  if(pk.mode==='ins'){const link=n.children[pk.i];if(!link)return;const old=link.node;
+    nn.children=[{label:isBranch(nn)?defLabel(nn,0):'',node:old}];link.node=nn;}
+  else if(isBranch(n)){n.children.push({label:defLabel(n,n.children.length),node:nn});}
+  else{nn.children=n.children.map((c,i)=>({label:isBranch(nn)?defLabel(nn,i):c.label,node:c.node}));n.children=[{label:'',node:nn}];}
+  ED.pick=null;ED.sel=nn.id;CONF=null;save();render();focusNode(nn.id);focusText(nn.id);}
+function focusNode(id){setTimeout(()=>{const cv=$('#canvas');const el=cv&&cv.querySelector(`[data-node="${id}"]`);if(!cv||!el)return;
+  const r=el.getBoundingClientRect(),c=cv.getBoundingClientRect();
+  cv.scrollLeft+=r.left-c.left-(c.width-r.width)/2;cv.scrollTop+=r.top-c.top-Math.min(40,(c.height-r.height)/2);},40);}
+function delNode(id){const r=findAny(id);if(!r||!r.parent)return;const par=r.parent;const i=par.children.indexOf(r.link);
+  if(r.node.children.length===1){par.children[i]={label:r.link.label,node:r.node.children[0].node};}else par.children.splice(i,1);
+  ED.sel=null;CONF=null;save();render();}
+function focusText(id){setTimeout(()=>{const el=document.getElementById('f-text-'+id);if(el){try{el.focus({preventScroll:true});}catch(e){el.focus();}}},60);}
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');if(!el)return;
+  if(Date.now()<NOCLICK&&el.closest('#canvas')){NOCLICK=0;return;}
+  const a=el.dataset.act,id=el.dataset.id;
+  switch(a){
+    case'tab':TAB=el.dataset.k;CONF=null;window.scrollTo(0,0);render();break;
+    case'start':startRun(id);break;
+    case'next':{const p=plan(RUN.planId);const cur=find(p.root,RUN.path[RUN.path.length-1]).node;if(cur.children[0]){RUN.path.push(cur.children[0].node.id);window.scrollTo(0,0);render();}break;}
+    case'branch':{const p=plan(RUN.planId);const cur=find(p.root,RUN.path[RUN.path.length-1]).node;const c=cur.children[+el.dataset.i];if(c){RUN.path.push(c.node.id);window.scrollTo(0,0);render();}break;}
+    case'jump':RUN.path=RUN.path.slice(0,+el.dataset.i+1);render();break;
+    case'back':if(RUN.path.length>1){RUN.path.pop();render();}else{RUN=null;render();}break;
+    case'finish':{const p=plan(RUN.planId);p.runs.push({at:Date.now(),path:RUN.path.slice()});p.runs=p.runs.slice(-50);RUN.done=true;save();window.scrollTo(0,0);render();break;}
+    case'stop':{const wasEx=RUN&&RUN.planId===EXAMPLE.id;RUN=null;if(wasEx)TAB='ex';render();break;}
+    case'rate':setStatus(RUN.path[RUN.path.length-1],el.dataset.s);break;
+    case'rateId':setStatus(id,el.dataset.s);break;
+    case'tmStart':tmStart(id);break;
+    case'tmPause':tmPause();break;
+    case'tmReset':tmReset();break;
+    case'goTimer':if(TM&&plan(TM.planId)){const p=plan(TM.planId);const ids=[];(function path(n,acc){acc.push(n.id);if(n.id===TM.nodeId){ids.push(...acc);return true;}for(const c of n.children)if(path(c.node,acc))return true;acc.pop();return false;})(p.root,[]);RUN={planId:p.id,path:ids,done:false};TAB='now';render();}break;
+    case'newPlan':{const p=P('…',null);p.root.text='';S.plans.unshift(p);ED={planId:p.id,sel:p.root.id,view:'canvas',pick:null,z:ED.z||1};TAB='plans';CONF=null;save();window.scrollTo(0,0);render();focusText(p.root.id);break;}
+    case'pickOut':ED.pick={mode:'out',id};ED.sel=null;CONF=null;render();break;
+    case'pickIns':ED.pick={mode:'ins',id,i:+el.dataset.i};ED.sel=null;CONF=null;render();break;
+    case'pickType':addFromPick(el.dataset.k);break;
+    case'pickCancel':ED.pick=null;render();break;
+    case'tidy':{const p=plan(ED.planId);if(p)walk(p.root,n=>{delete n.pos;});CONF=null;save();render();break;}
+    case'zoom':ED.z=Math.round(Math.min(1.6,Math.max(.6,(ED.z||1)+(+el.dataset.k)*.2))*10)/10;render();break;
+    case'exView':EXV=el.dataset.k;render();break;
+    case'copyEx':{const c=clonePlan(EXAMPLE);S.plans.unshift(c);save();ED={planId:c.id,sel:null,view:'canvas',pick:null,z:ED.z||1};TAB='plans';window.scrollTo(0,0);render();break;}
+    case'edit':ED={planId:id,sel:null,view:ED.view||'canvas',pick:null,z:ED.z||1};CONF=null;window.scrollTo(0,0);render();break;
+    case'closeEd':ED.planId=null;CONF=null;render();break;
+    case'view':ED.view=el.dataset.k;ED.pick=null;render();break;
+    case'sel':ED.sel=ED.sel===id?null:id;ED.pick=null;CONF=null;render();break;
+    case'gsel':ED.sel=id;ED.pick=null;CONF=null;render();focusNode(id);break;
+    case'cycle':{const r=findAny(id);if(r){const o=['none','ok','bad'];r.node.status=o[(o.indexOf(r.node.status)+1)%3];save();render();}break;}
+    case'closePanel':ED.sel=null;CONF=null;render();break;
+    case'ask':CONF=el.dataset.k;render();break;
+    case'noConf':CONF=null;render();break;
+    case'delNode':delNode(id);break;
+    case'delPlan':S.plans=S.plans.filter(p=>p.id!==ED.planId);ED={planId:null,sel:null,view:'canvas',pick:null,z:1};CONF=null;save();render();break;
+    case'reveal':DR.revealed=true;render();break;
+    case'drillRate':{const p=plan(DR.order[DR.i]);if(p){p.drill[el.dataset.s]=(p.drill[el.dataset.s]||0)+1;save();}DR.i++;DR.revealed=false;render();break;}
+    case'drillNext':DR.i++;DR.revealed=false;render();break;
+    case'drillRestart':buildDeck();render();break;
+    case'copy':{const t=$('#c-exp');const v=t.value;const ok=()=>{el.textContent='Skopiowano';};
+      try{navigator.clipboard.writeText(v).then(ok,()=>{t.focus();t.select();el.textContent='Zaznaczono, skopiuj ręcznie';});}catch(err){t.focus();t.select();el.textContent='Zaznaczono, skopiuj ręcznie';}break;}
+    case'doImport':{const t=$('#c-imp');let msg='';try{const d=JSON.parse(t.value);if(!d||!Array.isArray(d.plans))throw new Error('x');S=normalize(d);save();CONF=null;RUN=null;DR=null;ED={planId:null,sel:null,view:'canvas',pick:null,z:1};applyMotion();render();msg='Wczytano '+S.plans.length+' planów.';}
+      catch(err){msg='To nie wygląda na kopię planów. Wklej cały tekst z pola „Kopia (JSON)”.';CONF=null;render();}
+      const m=$('#impmsg');if(m){m.hidden=false;m.textContent=msg;}break;}
+    case'doReset':S=fresh();save();CONF=null;RUN=null;DR=null;ED={planId:null,sel:null,view:'canvas',pick:null,z:1};applyMotion();render();break;
+  }
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&TAB==='plans'&&(ED.sel||ED.pick)){ED.sel=null;ED.pick=null;CONF=null;render();return;}
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('[role="button"][data-act]')&&e.target.tagName!=='BUTTON'){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}));}});
+
+/* edycja pól węzła */
+document.addEventListener('input',e=>{
+  const el=e.target;
+  if(el.dataset.f){const r=findAny(el.dataset.id);if(!r)return;const n=r.node,f=el.dataset.f;
+    if(f==='text'){n.text=el.value;const rt=document.getElementById('rt-'+n.id);if(rt)rt.innerHTML=(n.type==='trigger'?'<b>'+lab('trigger')+'</b> ':'')+txt(n.text);}
+    else if(f==='note')n.note=el.value;
+    else if(f==='label'&&r.link)r.link.label=el.value;
+    else if(f==='contact')n.contact=el.value;
+    else if(f==='toolmin'){const v=parseInt(el.value,10);if(v>0)n.tool.min=Math.min(120,v);}
+    save();
+    if((f==='text'||f==='label')&&ED.view!=='list'){const cv=$('#canvas');const p=plan(ED.planId);if(cv&&p)cv.innerHTML=graph(p,true,ED.z||1);}
+    return;}
+  if(el.dataset.c&&el.tagName!=='SELECT'){setCfg(el.dataset.c,el.value);}
+});
+document.addEventListener('change',e=>{
+  const el=e.target;
+  if(el.dataset.f){const r=findAny(el.dataset.id);if(!r)return;const n=r.node,f=el.dataset.f;
+    if(f==='type'){n.type=el.value;if(isBranch(n))n.children.forEach((c,i)=>{if(!c.label)c.label=n.type==='question'?(['Tak','Nie'][i]||'Inna odpowiedź'):'Opcja '+(i+1);});if(n.type!=='action')n.tool={kind:'none',min:0};save();render();}
+    else if(f==='toolkind'){n.tool={kind:el.value,min:el.value==='none'?0:defMin(el.value)};save();render();}
+    else if(f==='szop'){plan(ED.planId).szop=el.value;save();}
+    return;}
+  if(el.dataset.c){setCfg(el.dataset.c,el.value);if(el.dataset.c==='motion')applyMotion();if(el.dataset.c==='tags'||el.dataset.c.startsWith('labels'))renderTabs();}
+});
+function setCfg(path,v){const C=cfg();
+  if(path==='motion')C.motion=v;
+  else if(path==='sound')C.sound=v==='1';
+  else if(path==='tags')C.tags=v.split(',').map(s=>s.trim()).filter(Boolean);
+  else{const [a,b]=path.split('.');if(a==='labels')C.labels[b]=v||defCfg().labels[b];else{const n=parseInt(v,10);if(n>0)C[a][b]=n;}}
+  save();}
+
+try{matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',applyMotion);}catch(e){}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&TM&&TM.running)wake();});
+applyMotion();render();
+})();
+</script>
+
+</body></html>

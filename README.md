@@ -1,23 +1,43 @@
-# Pasek zdrowia — monitor SZOP i baterii
+# ADHD — narzędzia czubekxd
+
+Trzy małe narzędzia do samomonitorowania i ogarniania dnia. Każde to osobna strona statyczna:
+żadnego backendu, żadnego konta, dane zostają w przeglądarce.
+
+Strona startowa: **https://czubekxd.github.io/ADHD/**
+
+| Folder | Narzędzie | Dane w `localStorage` |
+|---|---|---|
+| [`pasek/`](pasek/) | **Pasek zdrowia × SZOP** — energia, czynniki SZOP, czerwone flagi, regeneracja (opis niżej) | `mcz.dane.v1` |
+| [`tablica/`](tablica/) | **Tablica scoringowa** — dzienna tablica zadań z punktacją 1/3/8/21, plan tygodnia, historia; specyfikacja w [`tablica/SPEC.md`](tablica/SPEC.md) | `tablica-scoringowa-v1` |
+| [`plany/`](plany/) | **Plany Jeżeli… to…** — drzewa kroków na trudne momenty, tryb „Teraz”, ćwiczenia z kart | `plany-jezeli-v1` |
+
+W korzeniu leży `index.html` — strona startowa z kafelkami wszystkich narzędzi.
+Nowe narzędzie dopisujesz w tablicy `TOOLS` na jej dole.
+
+Wszystkie narzędzia są pod tym samym adresem `czubekxd.github.io`, ale każde trzyma dane
+pod własnym kluczem, więc nie wchodzą sobie w drogę. Licencja: [MIT](LICENSE).
+
+---
+
+# Pasek zdrowia × SZOP
 
 Narzędzie do notowania własnego poziomu energii, czynników SZOP (stres, zmęczenie,
 oczekiwania, przebodźcowanie) i czerwonych flag przeciążenia, z dashboardem
-pokazującym, kiedy przychodzą kłopoty i co na nie realnie działa.
-
-Strona statyczna — żadnego backendu, żadnych zależności, żadnego procesu budowania.
+pokazującym, kiedy przychodzą kłopoty i co na nie realnie działa. Pliki leżą w `pasek/`.
 
 ## Wrzucenie na GitHub Pages
 
 1. Załóż repozytorium na GitHubie (może być prywatne — Pages działa też
    na prywatnych repo na planie Pro; na darmowym musi być publiczne).
-2. Wrzuć do niego wszystkie pliki z tego katalogu — `index.html` musi wylądować
-   w katalogu głównym repozytorium.
+2. Wrzuć do niego wszystkie pliki z tego katalogu, zachowując foldery —
+   `index.html` strony startowej musi wylądować w katalogu głównym repozytorium.
 3. W repozytorium: **Settings → Pages**.
 4. W sekcji *Build and deployment* ustaw **Source: Deploy from a branch**,
    gałąź `main`, katalog `/ (root)`. Zapisz.
-5. Po minucie strona będzie pod `https://TWOJA-NAZWA.github.io/NAZWA-REPO/`.
+5. Po minucie strona startowa będzie pod `https://TWOJA-NAZWA.github.io/NAZWA-REPO/`,
+   a Pasek pod `…/NAZWA-REPO/pasek/`.
 
-Aplikacja działa też po zwykłym otwarciu `index.html` z dysku, bez serwera.
+Każde narzędzie działa też po zwykłym otwarciu jego `index.html` z dysku, bez serwera.
 
 ## Gdzie mieszkają dane
 
@@ -100,7 +120,7 @@ Urlop czy dzień chorobowy oznaczasz jednym kliknięciem w Historii.
 
 ```bash
 npm install jsdom
-node test.js
+node pasek/test.js
 ```
 
 Przechodzi przez formularz, walidację, wszystkie widoki, filtry, eksport i import.
