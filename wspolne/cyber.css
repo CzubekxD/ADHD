@@ -1,0 +1,105 @@
+/* ---------------------------------------------------------------
+   MOTYW CYBER — wspólny dla Paska, Tablicy, Planów i strony startowej
+   (WOOP ma własną, pełną wersję tego motywu w swoim pliku).
+   Zawsze ciemny: neonowy cyjan, żółć, magenta i zieleń, ścięte rogi, siatka i skanlinie.
+   Selektor html[data-skin="cyber"]:root jest mocniejszy od jasnego i ciemnego motywu każdego narzędzia,
+   więc wygrywa niezależnie od kolejności arkuszy.
+   --------------------------------------------------------------- */
+
+/* przełącznik — wygląda tak samo jak w WOOP */
+.skin{display:inline-flex;align-items:center;gap:7px;border:1px solid rgb(128 128 140 / .35);background:transparent;border-radius:999px;
+  padding:4px 10px 4px 4px;min-height:32px;font:600 11px/1 "Share Tech Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;letter-spacing:.1em;
+  color:inherit;opacity:.8;cursor:pointer;transition:color .25s,border-color .25s,box-shadow .25s,opacity .25s;flex:none}
+.skin:hover{opacity:1}
+.skin .knob{width:30px;height:18px;border-radius:999px;background:rgb(128 128 140 / .25);position:relative;transition:background-color .25s}
+.skin .knob::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:currentColor;opacity:.7;
+  transition:transform .32s cubic-bezier(.3,1.5,.5,1),background-color .25s,box-shadow .25s}
+.skin[aria-checked="true"]{color:#00F0FF;border-color:#00F0FF;box-shadow:0 0 14px rgb(0 240 255 / .45);opacity:1}
+.skin[aria-checked="true"] .knob{background:#FF2A6D}
+.skin[aria-checked="true"] .knob::after{transform:translateX(12px);background:#fff;opacity:1;box-shadow:0 0 8px #fff}
+@media (prefers-reduced-motion: reduce){.skin,.skin .knob,.skin .knob::after{transition:none}}
+
+/* zmiana motywu: koło rozlewa się od przełącznika */
+html.vt-skin *{view-transition-name:none!important}
+html.vt-skin::view-transition-old(root),html.vt-skin::view-transition-new(root){animation:none;mix-blend-mode:normal}
+
+html[data-skin="cyber"]:root{
+  color-scheme:dark;
+  --cy-bg:#07060D; --cy-surface:#0E0C1A; --cy-sunk:#181433; --cy-ink:#E9F7FF; --cy-muted:#9490BD; --cy-line:#2C2656;
+  --cy-cyan:#00F0FF; --cy-yellow:#FCEE0A; --cy-pink:#FF2A6D; --cy-green:#05FFA1; --cy-violet:#B967FF; --cy-orange:#FF9E3D;
+  --cy-display:"Chakra Petch",system-ui,sans-serif;
+  --cy-mono:"Share Tech Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --cy-glow:0 0 14px rgb(0 240 255 / .45);
+
+  /* Plany Jeżeli… to… */
+  --bg:var(--cy-bg); --surface:var(--cy-surface); --sunk:var(--cy-sunk); --ink:var(--cy-ink); --muted:var(--cy-muted); --line:var(--cy-line);
+  --accent:var(--cy-cyan); --accent-ink:var(--cy-bg);
+  --ok:var(--cy-green); --ok-bg:#03281D; --bad:var(--cy-pink); --bad-bg:#2E0A18; --none:#6B6790; --none-bg:#15122A;
+  --t-trigger:var(--cy-cyan); --t-question:var(--cy-yellow); --t-choice:var(--cy-violet); --t-action:#8FD3FF; --t-escalate:var(--cy-pink);
+
+  /* Tablica scoringowa i strona startowa */
+  --page:var(--cy-bg); --card:var(--cy-surface); --surface-1:#100E1F; --ink-2:#C6D6EA;
+  --grid:#211C42; --axis:#3A3270; --ring:rgb(0 240 255 / .22); --rest:#1A1636; --goldwash:rgb(252 238 10 / .08);
+  --bar:var(--cy-cyan); --bar-soft:#06343A; --total:var(--cy-pink); --gold:var(--cy-yellow); --gold-soft:#2A2805;
+  --t1:var(--cy-green); --t2:var(--cy-yellow); --t3:var(--cy-orange); --t4:var(--cy-pink);
+  --t1-bg:#03281D; --t2-bg:#262404; --t3-bg:#2B1A06; --t4-bg:#2E0A18;
+  --good:var(--cy-green);
+  --shadow:0 0 0 1px rgb(0 240 255 / .12),0 0 22px rgb(0 240 255 / .07);
+
+  /* Pasek zdrowia × SZOP */
+  --tlo:var(--cy-bg); --powierzchnia:var(--cy-surface); --powierzchnia-2:#100E1F;
+  --tusz:var(--cy-ink); --przygaszony:var(--cy-muted); --slaby:#6F6A9C;
+  --linia:rgb(0 240 255 / .14); --linia-mocna:rgb(0 240 255 / .32);
+  --akcent:var(--cy-cyan); --akcent-tlo:rgb(0 240 255 / .10);
+  --alarm:var(--cy-pink); --alarm-tlo:rgb(255 42 109 / .12);
+  --promien:2px;
+  --mono:var(--cy-mono);
+}
+
+/* tło: siatka i skanlinie */
+html[data-skin="cyber"] body{background-color:var(--cy-bg)!important;color:var(--cy-ink);
+  background-image:linear-gradient(rgb(0 240 255 / .045) 1px,transparent 1px),linear-gradient(90deg,rgb(0 240 255 / .045) 1px,transparent 1px)!important;
+  background-size:36px 36px!important;background-attachment:fixed!important}
+html[data-skin="cyber"] body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:600;
+  background:repeating-linear-gradient(0deg,rgb(0 0 0 / .22) 0 1px,transparent 1px 3px)}
+
+/* nagłówki */
+html[data-skin="cyber"] h1,html[data-skin="cyber"] h2{font-family:var(--cy-display);text-transform:uppercase;letter-spacing:.03em;
+  text-shadow:0 0 14px rgb(0 240 255 / .35)}
+html[data-skin="cyber"] h1::before{content:"// ";color:var(--cy-pink);text-shadow:0 0 10px var(--cy-pink)}
+html[data-skin="cyber"] .brand,html[data-skin="cyber"] .tytul h1{color:var(--cy-cyan);text-shadow:0 0 10px rgb(0 240 255 / .6)}
+html[data-skin="cyber"] .brand .arr{color:var(--cy-pink)}
+
+/* przyciski i pola: kanciaste, mono */
+html[data-skin="cyber"] button:not(.skin):not(.state):not(.delbtn),
+html[data-skin="cyber"] input:not([type=checkbox]):not([type=radio]),
+html[data-skin="cyber"] select,html[data-skin="cyber"] textarea{border-radius:2px!important}
+html[data-skin="cyber"] .btn,html[data-skin="cyber"] button.act,html[data-skin="cyber"] .iconbtn,html[data-skin="cyber"] .przycisk{
+  font-family:var(--cy-mono);text-transform:uppercase;letter-spacing:.06em}
+html[data-skin="cyber"] .btn.primary,html[data-skin="cyber"] button.act.primary,html[data-skin="cyber"] .przycisk.glowny{box-shadow:var(--cy-glow)}
+html[data-skin="cyber"] input:not([type=checkbox]):not([type=radio]),html[data-skin="cyber"] select,html[data-skin="cyber"] textarea{background-color:#05040A}
+html[data-skin="cyber"] input[type=checkbox],html[data-skin="cyber"] input[type=radio]{accent-color:var(--cy-cyan)}
+
+/* karty: ścięte rogi, cyjanowa krawędź */
+html[data-skin="cyber"] :is(.tool,.note,.card,.wpanel,.stat,.trig,.stage,.plan,.sect,.graphwrap,.karta){
+  border-radius:0!important;border-color:rgb(0 240 255 / .28)!important;box-shadow:inset 0 0 28px rgb(0 240 255 / .05)!important;
+  clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}
+html[data-skin="cyber"] :is(.wday,.ptask,.hbar .t,.badge,.chip,.tool .chip,.plakietka,.zeton,.st,.crumb,.pill,.seg,.contact){border-radius:2px!important}
+html[data-skin="cyber"] .canvas{border-radius:0;border-color:rgb(0 240 255 / .28);
+  background-image:radial-gradient(rgb(0 240 255 / .25) 1.2px,transparent 1.2px)}
+
+/* paski nawigacji */
+html[data-skin="cyber"] :is(nav.tabs,nav#tabs,nav.zakladki){border-color:rgb(0 240 255 / .35)!important}
+html[data-skin="cyber"] nav.tabs{background:rgb(14 12 26 / .95);box-shadow:0 -1px 18px -6px rgb(0 240 255 / .5)}
+html[data-skin="cyber"] :is(nav.tabs,nav#tabs,nav.zakladki) button{font-family:var(--cy-mono);letter-spacing:.04em}
+html[data-skin="cyber"] :is(nav.tabs button[aria-current="page"],nav#tabs button[aria-selected="true"],nav.zakladki button[aria-selected="true"]){
+  color:var(--cy-cyan)!important;text-shadow:0 0 8px rgb(0 240 255 / .6)}
+html[data-skin="cyber"] header.top{background:rgb(7 6 13 / .92);border-bottom-color:rgb(0 240 255 / .35);box-shadow:0 1px 18px -6px rgb(0 240 255 / .5)}
+
+/* komunikaty */
+html[data-skin="cyber"] :is(.toast){background:var(--cy-cyan)!important;color:var(--cy-bg)!important;font-family:var(--cy-mono);border-radius:2px;box-shadow:var(--cy-glow)}
+
+/* Tablica: duża liczba i złoty dzień */
+html[data-skin="cyber"] .hero .big{font-family:var(--cy-display);text-shadow:0 0 18px rgb(0 240 255 / .5)}
+html[data-skin="cyber"] .hero .big.done{text-shadow:0 0 18px rgb(252 238 10 / .6)}
+

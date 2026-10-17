@@ -492,6 +492,9 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
   .hbar { grid-template-columns:minmax(74px,100px) 1fr auto; font-size:12px; }
 }
 </style>
+<link rel="stylesheet" href="../wspolne/cyber.css">
+<script src="../wspolne/cyber.js"></script>
+<script src="../wspolne/skroty.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -501,6 +504,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
   <span class="sub" id="todayLabel"></span>
   <span class="sub" id="verTag" title="wersja tablicy"></span>
   <span class="spacer"></span>
+  <span data-cyber></span>
   <button class="iconbtn" id="btnExport" title="Kopia danych">Eksport</button>
   <button class="iconbtn" id="btnImport">Import</button>
   <button class="iconbtn" id="btnTheme" title="Motyw">Motyw</button>
@@ -1073,7 +1077,7 @@ function migrate(p) {
   return p;
 }
 function seedFirstRun(s) { s.today.tasks = [pinnedTask(s)]; return s; }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ toast("Nie udało się zapisać danych w przeglądarce"); } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); if (window.Skroty) Skroty.zapisano(); } catch(e){ toast("Nie udało się zapisać danych w przeglądarce"); } }
 
 function catByName(n, s=S) { return s.categories.find(c => fold(c.name) === fold(n)); }
 function catById(id) { return S.categories.find(c => c.id === id) || null; }
@@ -2973,6 +2977,14 @@ addEventListener("resize", () => {
 });
 renderAll();
 showTab("dzis");
+/* Ctrl+Z / Ctrl+Y cofają i ponawiają zmiany; Delete usuwa wiersz, na którym jest kursor albo myszka (w pustym polu nazwy też) */
+if (window.Skroty) Skroty.init({
+  snapshot: () => JSON.stringify(S),
+  restore: t => { S = bindS(JSON.parse(t)); save(); renderAll(); },
+  wiersz: "#todayRows tr, .ptask, #histTable tr",
+  przycisk: ".delbtn",
+  toast
+});
 </script>
 </body>
 </html>

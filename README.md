@@ -1,6 +1,6 @@
 # ADHD — narzędzia Mateusza
 
-Trzy małe narzędzia do samomonitorowania i ogarniania dnia. Każde to osobna strona statyczna:
+Cztery małe narzędzia do samomonitorowania i ogarniania dnia. Każde to osobna strona statyczna:
 żadnego backendu, żadnego konta, dane zostają w przeglądarce.
 
 Strona startowa ze wszystkimi narzędziami: **https://czubekxd.github.io/ADHD/**
@@ -10,14 +10,26 @@ Strona startowa ze wszystkimi narzędziami: **https://czubekxd.github.io/ADHD/**
 | **Pasek zdrowia × SZOP** — energia, czynniki SZOP, czerwone flagi, regeneracja (opis niżej) | **https://czubekxd.github.io/ADHD/pasek/** | [`pasek/`](pasek/) |
 | **Tablica scoringowa** — dzienna tablica zadań z punktacją 1/3/8/21, plan tygodnia, historia; specyfikacja w [`tablica/SPEC.md`](tablica/SPEC.md) | **https://czubekxd.github.io/ADHD/tablica/** | [`tablica/`](tablica/) |
 | **Plany Jeżeli… to…** — drzewa kroków na trudne momenty, tryb „Teraz”, ćwiczenia z kart | **https://czubekxd.github.io/ADHD/plany/** | [`plany/`](plany/) |
+| **WOOP** — życzenie, efekt, przeszkoda, plan; kreator krok po kroku i codzienny wpis, czy plan działa | **https://czubekxd.github.io/ADHD/woop/** | [`woop/`](woop/) |
 
-Klucze danych w `localStorage`: `mcz.dane.v1` (Pasek), `tablica-scoringowa-v1` (Tablica), `plany-jezeli-v1` (Plany).
+Klucze danych w `localStorage`: `mcz.dane.v1` (Pasek), `tablica-scoringowa-v1` (Tablica), `plany-jezeli-v1` (Plany), `woop-v1` (WOOP).
 
 W korzeniu leży `index.html` — strona startowa z kafelkami wszystkich narzędzi.
 Nowe narzędzie dopisujesz w tablicy `TOOLS` na jej dole.
 
 Wszystkie narzędzia są pod tym samym adresem `czubekxd.github.io`, ale każde trzyma dane
-pod własnym kluczem, więc nie wchodzą sobie w drogę. Licencja: [MIT](LICENSE).
+pod własnym kluczem, więc nie wchodzą sobie w drogę.
+
+## Wspólne dla wszystkich narzędzi
+
+Folder [`wspolne/`](wspolne/) trzyma to, co działa tak samo w każdym narzędziu:
+
+- **Skróty klawiszowe** ([`skroty.js`](wspolne/skroty.js)): <kbd>Ctrl</kbd>+<kbd>Z</kbd> cofa ostatnią zmianę,
+  <kbd>Ctrl</kbd>+<kbd>Y</kbd> (albo <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd>) ponawia, <kbd>Delete</kbd> usuwa zaznaczony
+  element — wiersz zadania lub wpisu, węzeł planu, kartę WOOP. W polu z tekstem oba klawisze działają zwyczajnie, na tekście.
+  Historia cofania żyje do odświeżenia strony.
+- **Motyw CYBER** ([`cyber.js`](wspolne/cyber.js), [`cyber.css`](wspolne/cyber.css)): przełącznik w nagłówku każdego narzędzia.
+  Ustawienie leży pod kluczem `adhd.skin`, więc włączone w jednym miejscu działa wszędzie. WOOP ma pełną wersję motywu u siebie. Licencja: [MIT](LICENSE).
 
 ---
 

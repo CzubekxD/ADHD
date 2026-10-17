@@ -386,6 +386,8 @@ html.vt-skin::view-transition-old(root),html.vt-skin::view-transition-new(root){
   .done-mark circle,.done-mark path{stroke-dashoffset:0}
 }
 </style>
+<script src="../wspolne/skroty.js"></script>
+<script src="../wspolne/kopia.js"></script>
 </head>
 <body>
 
@@ -459,12 +461,13 @@ function normalize(d){const f=fresh();d=d&&typeof d==='object'?d:f;
   d.config=Object.assign(f.config,d.config&&typeof d.config==='object'?d.config:{});return d;}
 let STORE_OK=true;
 function load(){try{const r=localStorage.getItem(KEY);return r?normalize(JSON.parse(r)):null;}catch(e){STORE_OK=false;return null;}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));STORE_OK=true;}catch(e){STORE_OK=false;}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));STORE_OK=true;if(window.Skroty)Skroty.zapisano();}catch(e){STORE_OK=false;}}
 let S=load()||fresh();
 const byId=id=>EXAMPLES.find(x=>x.id===id)||S.items.find(x=>x.id===id);
 
 /* ---------- stan widoku ---------- */
 let TAB='moje', WIZ=null, RUN=null, CONF=null, SHOW_ARCH=false, IMG=null;
+let IMP_TXT='';   // treść kopii do wczytania — przeżywa przerysowanie strony
 let JUST=null;      /* świeżo kliknięty wpis dnia — tylko on dostaje animację „pop” */
 let PREV_PROG=0;    /* poprzedni stan paska postępu, żeby przejść od niego do nowego */
 function newDraft(src){return{editId:src?src.id:null,step:0,d:{wish:'',outcome:'',obstacle:'',ifText:'',thenText:'',szop:'',...(src?{wish:src.wish,outcome:src.outcome,obstacle:src.obstacle,ifText:src.ifText,thenText:src.thenText,szop:src.szop}:{})}};}
@@ -473,12 +476,14 @@ function saveDraft(){try{if(WIZ)sessionStorage.setItem(KEY+'-draft',JSON.stringi
 try{const r=sessionStorage.getItem(KEY+'-draft');if(r){WIZ=JSON.parse(r);TAB='nowy';}}catch(e){}
 
 /* motyw: zapisany w config, więc wraca razem z kopią JSON */
-function applySkin(){const on=S.config.skin==='cyber';const de=document.documentElement;
+/* wspólny klucz 'adhd.skin' włącza motyw we wszystkich narzędziach naraz; config.skin zostaje dla kopii JSON */
+function skinOn(){try{const v=localStorage.getItem('adhd.skin');if(v!==null)return v==='cyber';}catch(e){}return S.config.skin==='cyber';}
+function applySkin(){const on=skinOn();const de=document.documentElement;
   if(on)de.dataset.skin='cyber';else delete de.dataset.skin;
   $('#skinBtn').setAttribute('aria-checked',on);}
 function toggleSkin(btn){
-  const on=S.config.skin!=='cyber';
-  const apply=()=>{S.config.skin=on?'cyber':'';save();applySkin();};
+  const on=!skinOn();
+  const apply=()=>{S.config.skin=on?'cyber':'';try{localStorage.setItem('adhd.skin',on?'cyber':'off');}catch(e){}save();applySkin();};
   const burst=()=>{if(!on)return;const b=$('.brand');b.classList.remove('burst');b.getBoundingClientRect();b.classList.add('burst');setTimeout(()=>b.classList.remove('burst'),900);};
   if(!document.startViewTransition||calm()||document.hidden){apply();burst();return;}
   const r=btn.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
@@ -740,10 +745,10 @@ function vData(){
   <div class="grid2">
   <section class="sect"><h2>Kopia</h2><p>WOOP-y są zapisane tylko w tej przeglądarce. Skopiuj kopię, żeby zrobić backup albo przenieść je na telefon.</p>
     <div class="field"><label for="d-exp">Kopia (JSON)</label><textarea id="d-exp" rows="4" readonly>${esc(JSON.stringify(S))}</textarea></div>
-    <div class="row"><button class="btn small" data-act="copy">Kopiuj kopię</button><span class="meta">${S.items.length} WOOP · ${S.items.reduce((a,x)=>a+Object.keys(x.checks).length,0)} wpisów dziennych</span></div></section>
+    <div class="row"><button class="btn small" data-act="copy">Kopiuj kopię</button><button class="btn small" data-act="dlFile">Pobierz plik</button><span class="meta">${S.items.length} WOOP · ${S.items.reduce((a,x)=>a+Object.keys(x.checks).length,0)} wpisów dziennych</span></div></section>
   <section class="sect"><h2>Wczytaj kopię</h2><p>Dołączenie dodaje tylko WOOP-y, których jeszcze tu nie ma, i uzupełnia ich dzienne wpisy. Zastąpienie kasuje to, co jest teraz.</p>
-    <div class="field"><label for="d-imp">Wklej kopię</label><textarea id="d-imp" rows="3" placeholder='{"version":1,"items":[…]}'></textarea></div>
-    <div class="row"><button class="btn small" data-act="doImport" data-m="merge">Dołącz</button>${CONF==='imp'?'':`<button class="btn small ghost danger" data-act="ask" data-k="imp">Zastąp wszystko</button>`}</div>
+    <div class="field"><label for="d-imp">Wklej kopię</label><textarea id="d-imp" rows="3" placeholder='{"version":1,"items":[…]}'>${esc(IMP_TXT)}</textarea></div>
+    <div class="row"><button class="btn small" data-act="ulFile">Wczytaj plik</button><button class="btn small" data-act="doImport" data-m="merge">Dołącz</button>${CONF==='imp'?'':`<button class="btn small ghost danger" data-act="ask" data-k="imp">Zastąp wszystko</button>`}</div>
     ${conf('imp','Zastąpić wszystkie WOOP-y wklejoną kopią?','doImport','Zastąp','data-m="replace"')}<p id="impmsg" hidden></p></section>
   <section class="sect"><h2>Wyczyść</h2>${CONF==='reset'?conf('reset','Usunąć wszystkie WOOP-y i ich historię? Bez kopii nie da się tego cofnąć.','doReset','Usuń wszystko'):`<div class="row"><button class="btn small ghost danger" data-act="ask" data-k="reset">Usuń wszystkie dane</button></div>`}</section>
   </div>`;
@@ -822,8 +827,10 @@ document.addEventListener('click',e=>{
       try{navigator.clipboard.writeText(t.value).then(ok,fb);}catch(err){fb();}break;}
     case'copyMail':{const fb=()=>{const r=document.createRange();r.selectNodeContents($('#mailAddr'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Zaznaczono — skopiuj ręcznie');};
       try{navigator.clipboard.writeText(MAIL).then(()=>toast('Skopiowano adres'),fb);}catch(err){fb();}break;}
+    case'dlFile':Kopia.pobierz('woop-'+Kopia.dzis()+'.json',JSON.stringify(S,null,1));break;
+    case'ulFile':Kopia.wybierz().then(t=>{IMP_TXT=t;render();const m=$('#impmsg');if(m){m.hidden=false;m.textContent='Plik wczytany. Wybierz „Dołącz” albo „Zastąp wszystko”.';}}).catch(()=>{});break;
     case'doImport':{const mode=el.dataset.m;let msg='';
-      try{const inc=normalize(JSON.parse($('#d-imp').value));
+      try{const inc=normalize(JSON.parse($('#d-imp').value));IMP_TXT='';
         if(mode==='replace'){S=inc;msg='Wczytano '+S.items.length+' WOOP.';}
         else{let add=0,upd=0;inc.items.forEach(n=>{const o=S.items.find(x=>x.id===n.id);if(!o){S.items.push(n);add++;}else{Object.keys(n.checks).forEach(k=>{if(!o.checks[k]){o.checks[k]=n.checks[k];upd++;}});}});msg=`Dodano ${add} WOOP, uzupełniono ${upd} wpisów dziennych.`;}
         save();CONF=null;render();}
@@ -834,6 +841,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('input',e=>{
   const el=e.target;
+  if(el.id==='d-imp'){IMP_TXT=el.value;return;}
   if(el.dataset.f&&WIZ){WIZ.d[el.dataset.f]=el.value;saveDraft();
     if(el.dataset.f==='ifText'||el.dataset.f==='thenText'){const pv=$('#pv');if(pv)pv.innerHTML=WIZ.d.ifText.trim()||WIZ.d.thenText.trim()?planSentence(WIZ.d):'<span class="empty">Tu złoży się Twoje zdanie „Jeżeli…, to…”.</span>';}
     return;}
@@ -845,8 +853,25 @@ document.addEventListener('input',()=>{if(!WIZ||TAB!=='nowy'||RUN)return;const d
   const sv=document.querySelector('[data-act="saveWiz"]');if(sv)sv.disabled=n<4;});
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(document.querySelector('details.more[open]')){closeMenus();return;}if(CONF){CONF=null;render();}});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')render();});
+try{if(localStorage.getItem('adhd.skin')===null&&S.config.skin==='cyber')localStorage.setItem('adhd.skin','cyber');}catch(e){}
 applySkin();
 render();
+addEventListener('storage',e=>{if(e.key==='adhd.skin')applySkin();});
+/* Ctrl+Z / Ctrl+Y cofają i ponawiają zmiany; Delete usuwa kartę WOOP, na której jest kursor albo myszka */
+let HOVER=null;
+document.addEventListener('mouseover',e=>{const a=e.target.closest&&e.target.closest('article.woop[data-id]');if(a)HOVER=a;});
+if(window.Skroty)Skroty.init({
+  snapshot:()=>JSON.stringify(S),
+  restore:t=>{const skin=S.config.skin;S=normalize(JSON.parse(t));S.config.skin=skin;save();CONF=null;
+    if(RUN&&!byId(RUN.id))RUN=null;if(WIZ&&WIZ.editId&&!byId(WIZ.editId)){WIZ=null;saveDraft();}render();},
+  usun:()=>{
+    if(RUN||TAB!=='moje')return false;
+    const f=document.activeElement&&document.activeElement.closest?document.activeElement.closest('article.woop[data-id]'):null;
+    const a=f||(HOVER&&document.contains(HOVER)&&HOVER.matches(':hover')?HOVER:null);
+    const id=a&&a.dataset.id;if(!id||id==='example'||!byId(id))return false;
+    leave(id,()=>{S.items=S.items.filter(x=>x.id!==id);CONF=null;save();render();});return true;},
+  toast
+});
 })();
 </script>
 </body>

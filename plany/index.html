@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="stylesheet" href="../wspolne/cyber.css"><script src="../wspolne/cyber.js"></script><script src="../wspolne/skroty.js"></script><script src="../wspolne/kopia.js"></script></head><body>
 <title>Plany Jeżeli… to…</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
@@ -202,6 +202,8 @@ h2{font-size:18px;margin:0;font-weight:800}
 .grip{width:40px;height:4px;border-radius:4px;background:var(--line);align-self:center}
 .sheet .panel{margin-left:0;background:transparent;padding:0}
 .sheetspace{height:56vh}
+.top .cyberslot{margin-left:auto}
+.pill:not([hidden]) + .cyberslot{margin-left:8px}
 /* szeroki edytor: na dużym ekranie płótno bierze całą szerokość i wysokość okna, a panel węzła siedzi z boku zamiast zasłaniać plan */
 html.wide .app{max-width:none}
 html.wide .canvas{height:calc(100vh - 290px);height:calc(100dvh - 290px);min-height:360px}
@@ -223,6 +225,7 @@ html.wide .canvas{height:calc(100vh - 290px);height:calc(100dvh - 290px);min-hei
   <header class="top">
     <div class="brand">Jeżeli <span class="arr">→</span> to <small>plany</small></div>
     <button class="pill" id="pill" hidden data-act="goTimer"></button>
+    <span data-cyber class="cyberslot"></span>
   </header>
   <main id="main"></main>
 </div>
@@ -277,7 +280,7 @@ let S=load()||fresh();
 if(S.version!==2){S.version=2;}
 try{save0();}catch(e){}
 function save0(){localStorage.setItem(KEY,JSON.stringify(S));}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));if(window.Skroty)Skroty.zapisano();}catch(e){}}
 const cfg=()=>S.config;
 
 function walk(n,fn,parent,link){fn(n,parent,link);n.children.forEach(c=>walk(c.node,fn,n,c));}
@@ -323,7 +326,8 @@ let TAB='now';
 let RUN=null;      // {planId, path:[ids], done}
 let ED={planId:null,sel:null,view:'canvas',pick:null,z:1};
 let DR=null;       // {order, i, revealed, done}
-let CONF=null;     // klucz potwierdzenia w stronie
+let CONF=null;
+let IMP_TXT='';    // treść kopii do wczytania — przeżywa przerysowanie strony     // klucz potwierdzenia w stronie
 let TM=null;       // timer
 
 /* ---------- render ---------- */
@@ -651,8 +655,8 @@ function vSettings(){const C=cfg();
     <div class="field"><label for="c-tags">Tagi</label><input id="c-tags" data-c="tags" value="${esc(C.tags.join(', '))}"></div></section>
   <section class="sect"><h2>Dane</h2><p>Plany są zapisane tylko w tej przeglądarce. Skopiuj kopię, żeby przenieść je na inne urządzenie.</p>
     <div class="field"><label for="c-exp">Kopia (JSON)</label><textarea id="c-exp" rows="4" readonly>${esc(JSON.stringify(S))}</textarea></div>
-    <div class="btnrow"><button class="btn small" data-act="copy">Kopiuj kopię</button></div>
-    <div class="field"><label for="c-imp">Wklej kopię, żeby ją wczytać</label><textarea id="c-imp" rows="3" placeholder='{"version":1,…}'></textarea></div>
+    <div class="btnrow"><button class="btn small" data-act="copy">Kopiuj kopię</button><button class="btn small" data-act="dlFile">Pobierz plik</button><button class="btn small" data-act="ulFile">Wczytaj plik</button></div>
+    <div class="field"><label for="c-imp">Wklej kopię, żeby ją wczytać</label><textarea id="c-imp" rows="3" placeholder='{"version":1,…}'>${esc(IMP_TXT)}</textarea></div>
     <p id="impmsg" hidden></p>
     ${CONF==='imp'?conf('imp','Wczytać kopię? Obecne plany zostaną zastąpione.','doImport','Wczytaj'):`<div class="btnrow"><button class="btn small" data-act="ask" data-k="imp">Wczytaj kopię</button></div>`}
     ${CONF==='reset'?conf('reset','Usunąć wszystkie plany i ustawienia? Tego nie da się cofnąć bez kopii.','doReset','Usuń wszystko'):`<div class="btnrow"><button class="btn small ghost danger" data-act="ask" data-k="reset">Wyczyść wszystko</button></div>`}
@@ -770,7 +774,9 @@ document.addEventListener('click',e=>{
     case'drillRestart':buildDeck();render();break;
     case'copy':{const t=$('#c-exp');const v=t.value;const ok=()=>{el.textContent='Skopiowano';};
       try{navigator.clipboard.writeText(v).then(ok,()=>{t.focus();t.select();el.textContent='Zaznaczono, skopiuj ręcznie';});}catch(err){t.focus();t.select();el.textContent='Zaznaczono, skopiuj ręcznie';}break;}
-    case'doImport':{const t=$('#c-imp');let msg='';try{const d=JSON.parse(t.value);if(!d||!Array.isArray(d.plans))throw new Error('x');S=normalize(d);save();CONF=null;RUN=null;DR=null;ED={planId:null,sel:null,view:'canvas',pick:null,z:1};applyMotion();render();msg='Wczytano '+S.plans.length+' planów.';}
+    case'dlFile':Kopia.pobierz('plany-'+Kopia.dzis()+'.json',JSON.stringify(S,null,1));break;
+    case'ulFile':Kopia.wybierz().then(t=>{IMP_TXT=t;CONF='imp';render();const m=$('#impmsg');if(m){m.hidden=false;m.textContent='Plik wczytany. Potwierdź „Wczytaj”, żeby zastąpić obecne plany.';}}).catch(()=>{});break;
+    case'doImport':{const t=$('#c-imp');let msg='';try{const d=JSON.parse(t.value);if(!d||!Array.isArray(d.plans))throw new Error('x');S=normalize(d);save();IMP_TXT='';CONF=null;RUN=null;DR=null;ED={planId:null,sel:null,view:'canvas',pick:null,z:1};applyMotion();render();msg='Wczytano '+S.plans.length+' planów.';}
       catch(err){msg='To nie wygląda na kopię planów. Wklej cały tekst z pola „Kopia (JSON)”.';CONF=null;render();}
       const m=$('#impmsg');if(m){m.hidden=false;m.textContent=msg;}break;}
     case'doReset':S=fresh();save();CONF=null;RUN=null;DR=null;ED={planId:null,sel:null,view:'canvas',pick:null,z:1};applyMotion();render();break;
@@ -783,6 +789,7 @@ document.addEventListener('keydown',e=>{
 /* edycja pól węzła */
 document.addEventListener('input',e=>{
   const el=e.target;
+  if(el.id==='c-imp'){IMP_TXT=el.value;return;}
   if(el.dataset.f){const r=findAny(el.dataset.id);if(!r)return;const n=r.node,f=el.dataset.f;
     if(f==='text'){n.text=el.value;const rt=document.getElementById('rt-'+n.id);if(rt)rt.innerHTML=(n.type==='trigger'?'<b>'+lab('trigger')+'</b> ':'')+txt(n.text);}
     else if(f==='note')n.note=el.value;
@@ -813,6 +820,21 @@ function setCfg(path,v){const C=cfg();
 try{matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',applyMotion);}catch(e){}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&TM&&TM.running)wake();});
 applyMotion();render();
+/* Ctrl+Z / Ctrl+Y cofają i ponawiają zmiany; Delete usuwa zaznaczony węzeł w edytorze */
+if(window.Skroty)Skroty.init({
+  snapshot:()=>JSON.stringify(S),
+  restore:t=>{S=normalize(JSON.parse(t));save();
+    if(ED.planId&&!plan(ED.planId))ED={planId:null,sel:null,view:ED.view||'canvas',pick:null,z:ED.z||1};
+    else if(ED.planId&&ED.sel&&!find(plan(ED.planId).root,ED.sel))ED.sel=null;
+    ED.pick=null;CONF=null;
+    if(RUN){const p=plan(RUN.planId);if(!p||RUN.path.some(id=>!find(p.root,id)))RUN=null;}
+    DR=null;applyMotion();render();},
+  usun:()=>{
+    if(TAB!=='plans'||!ED.planId||!ED.sel)return false;
+    const p=plan(ED.planId);const r=p&&find(p.root,ED.sel);
+    if(!r||!r.parent)return false;
+    delNode(ED.sel);return true;}
+});
 })();
 </script>
 
