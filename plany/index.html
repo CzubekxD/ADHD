@@ -202,6 +202,15 @@ h2{font-size:18px;margin:0;font-weight:800}
 .grip{width:40px;height:4px;border-radius:4px;background:var(--line);align-self:center}
 .sheet .panel{margin-left:0;background:transparent;padding:0}
 .sheetspace{height:56vh}
+/* szeroki edytor: na dużym ekranie płótno bierze całą szerokość i wysokość okna, a panel węzła siedzi z boku zamiast zasłaniać plan */
+html.wide .app{max-width:none}
+html.wide .canvas{height:calc(100vh - 290px);height:calc(100dvh - 290px);min-height:360px}
+@media (min-width:900px){
+  html.wide.side .app{padding-right:432px}
+  html.wide .sheet{left:auto;top:0;width:416px;justify-content:stretch}
+  html.wide .sheet .in{max-width:none;height:100%;max-height:none;border-radius:0;border:0;border-left:1px solid var(--line);box-shadow:-10px 0 30px rgb(0 0 0 / .18);padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+  html.wide .sheet .grip,html.wide .sheetspace{display:none}
+}
 .picks{display:grid;gap:8px}
 .pick{display:flex;gap:12px;align-items:center;text-align:left;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg);min-height:60px}
 .pick .ic{width:24px;height:24px}
@@ -322,6 +331,9 @@ function render(){
   renderTabs();
   const m=$('#main');
   const cv0=$('#canvas');const sc=cv0?[cv0.scrollLeft,cv0.scrollTop]:null;
+  const wide=!!(TAB==='plans'&&ED.planId&&plan(ED.planId)&&ED.view!=='list');
+  document.documentElement.classList.toggle('wide',wide);
+  document.documentElement.classList.toggle('side',!!(wide&&(ED.pick||ED.sel)));
   draw(m);
   const cv1=$('#canvas');if(sc&&cv1){cv1.scrollLeft=sc[0];cv1.scrollTop=sc[1];}
   tick();
@@ -433,7 +445,7 @@ function vEditor(){
   const body=ED.view==='list'?`<div class="tree">${tree(p.root,0,null,null)}</div>`
     :`<p class="hint">Przeciągnij węzeł, żeby go przesunąć. Dotknij, żeby go opisać. Plus po prawej dodaje kolejny węzeł, plus na linii wstawia węzeł pomiędzy.</p>
       <div class="canvaswrap"><div class="canvas" id="canvas">${graph(p,true,ED.z||1)}</div>
-      <div class="zoom" role="group" aria-label="Widok płótna">${hasManual(p)?`<button class="wide" data-act="ask" data-k="tidy">Uporządkuj</button>`:''}<button data-act="zoom" data-k="-1" aria-label="Pomniejsz">−</button><button data-act="zoom" data-k="1" aria-label="Powiększ">+</button></div></div>
+      <div class="zoom" role="group" aria-label="Widok płótna">${hasManual(p)?`<button class="wide" data-act="ask" data-k="tidy">Uporządkuj</button>`:''}<button class="wide" data-act="fit" aria-label="Dopasuj plan do okna">Cały plan</button><button data-act="zoom" data-k="-1" aria-label="Pomniejsz">−</button><button data-act="zoom" data-k="1" aria-label="Powiększ">+</button></div></div>
       ${CONF==='tidy'?`<div class="confirm"><p>Ułożyć węzły automatycznie? Ręczne położenie zostanie zapomniane.</p><div class="btnrow"><button class="btn small danger" data-act="tidy">Uporządkuj</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`:''}`;
   const del=CONF==='delPlan'?`<div class="confirm"><p>Usunąć cały plan razem z ${countN(p.root)-1} krokami?</p><div class="btnrow"><button class="btn small danger" data-act="delPlan">Usuń plan</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`
     :`<button class="btn small ghost danger" data-act="ask" data-k="delPlan">Usuń plan</button>`;
@@ -538,6 +550,12 @@ function graph(p,edit,z){
   const vx=b.minX-PAD,vy=b.minY-PAD-TOP,w=b.maxX-b.minX+PAD*2+RIGHT,h=b.maxY-b.minY+PAD*2+TOP;
   return`<svg id="${edit?'gsvg':'gsvg-ro'}" width="${Math.round(w*z)}" height="${Math.round(h*z)}" viewBox="${vx} ${vy} ${w} ${h}" role="group" aria-label="Węzły planu"><g id="ge">${P2.edges}</g><g id="gn">${P2.nodes}</g><g id="gp">${P2.plus}</g></svg>`;
 }
+/* dobiera powiększenie tak, żeby cały plan zmieścił się w oknie płótna */
+function fitZoom(max){const p=plan(ED.planId);const cv=$('#canvas');if(!p||!cv)return;
+  const b=layoutOf(p,true).box;const w=b.maxX-b.minX+48+56,h=b.maxY-b.minY+48+20;
+  const z=Math.min((cv.clientWidth-26)/w,(cv.clientHeight-26)/h);
+  ED.z=Math.round(Math.min(max||1.6,Math.max(.3,z))*100)/100;render();
+  const c=$('#canvas');if(c){c.scrollLeft=0;c.scrollTop=0;}}
 const hasManual=p=>{let m=false;walk(p.root,n=>{if(n.pos)m=true;});return m;};
 
 /* przeciąganie węzłów */
@@ -731,10 +749,11 @@ document.addEventListener('click',e=>{
     case'pickType':addFromPick(el.dataset.k);break;
     case'pickCancel':ED.pick=null;render();break;
     case'tidy':{const p=plan(ED.planId);if(p)walk(p.root,n=>{delete n.pos;});CONF=null;save();render();break;}
-    case'zoom':ED.z=Math.round(Math.min(1.6,Math.max(.6,(ED.z||1)+(+el.dataset.k)*.2))*10)/10;render();break;
+    case'zoom':ED.z=Math.round(Math.min(1.6,Math.max(.3,(ED.z||1)+(+el.dataset.k)*.1))*10)/10;render();break;
+    case'fit':fitZoom(1.6);break;
     case'exView':EXV=el.dataset.k;render();break;
-    case'copyEx':{const c=clonePlan(EXAMPLE);S.plans.unshift(c);save();ED={planId:c.id,sel:null,view:'canvas',pick:null,z:ED.z||1};TAB='plans';window.scrollTo(0,0);render();break;}
-    case'edit':ED={planId:id,sel:null,view:ED.view||'canvas',pick:null,z:ED.z||1};CONF=null;window.scrollTo(0,0);render();break;
+    case'copyEx':{const c=clonePlan(EXAMPLE);S.plans.unshift(c);save();ED={planId:c.id,sel:null,view:'canvas',pick:null,z:1};TAB='plans';window.scrollTo(0,0);render();fitZoom(1.2);break;}
+    case'edit':ED={planId:id,sel:null,view:ED.view||'canvas',pick:null,z:1};CONF=null;window.scrollTo(0,0);render();fitZoom(1.2);break;
     case'closeEd':ED.planId=null;CONF=null;render();break;
     case'view':ED.view=el.dataset.k;ED.pick=null;render();break;
     case'sel':ED.sel=ED.sel===id?null:id;ED.pick=null;CONF=null;render();break;
