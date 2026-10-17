@@ -67,12 +67,25 @@ footer {
 footer a { color:var(--ink-2); text-decoration:none; }
 footer a:hover { color:var(--bar); text-decoration:underline; }
 @media (prefers-reduced-motion: reduce) { .tool { transition:none; } .tool:hover { transform:none; } }
+header { position:relative; }
+header [data-cyber] { position:absolute; top:18px; right:0; }
+.keys { display:flex; flex-wrap:wrap; gap:6px 16px; margin:0; padding:0; list-style:none; color:var(--ink-2); font-size:14px; }
+button.b { font:inherit; font-size:14px; font-weight:600; cursor:pointer; border-radius:9px; padding:9px 14px; border:1px solid var(--ring); background:var(--card); color:var(--ink); }
+button.b:hover { border-color:var(--axis); }
+button.b.danger { color:var(--t3); border-color:var(--t3); }
+.brow { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.kmsg { margin-top:10px !important; color:var(--ink-2); font-size:14px; }
+kbd { font:12px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace; border:1px solid var(--axis); border-bottom-width:2px; border-radius:5px; padding:3px 6px; background:var(--card); color:var(--ink); }
 </style>
+<link rel="stylesheet" href="./wspolne/cyber.css">
+<script src="./wspolne/cyber.js"></script>
+<script src="./wspolne/kopia.js"></script>
 </head>
 <body>
 <div class="wrap">
 
   <header>
+    <span data-cyber></span>
     <h1>Narzędzia</h1>
     <p>Kilka małych rzeczy, które zbudowałem dla siebie, żeby ogarnąć dzień i własną głowę.
        Każda działa w całości w przeglądarce — bez konta, bez serwera, bez wysyłania czegokolwiek na zewnątrz.
@@ -89,6 +102,28 @@ footer a:hover { color:var(--bar); text-decoration:underline; }
     <p>Minus tego rozwiązania: dane nie przechodzą same między komputerem a telefonem, a wyczyszczenie danych
        witryny je kasuje. Dlatego każde narzędzie ma eksport i import kopii w formacie JSON — to jedyny sposób
        na backup i na przeniesienie się na inny sprzęt.</p>
+  </div>
+
+  <div class="note">
+    <h3>Wspólne we wszystkich narzędziach</h3>
+    <ul class="keys">
+      <li><kbd>Ctrl</kbd> + <kbd>Z</kbd> cofa ostatnią zmianę</li>
+      <li><kbd>Ctrl</kbd> + <kbd>Y</kbd> ponawia</li>
+      <li><kbd>Delete</kbd> usuwa zaznaczony wiersz, węzeł albo kartę</li>
+    </ul>
+    <p style="margin-top:10px">Przełącznik <b>CYBER</b> w prawym górnym rogu włącza neonowy motyw — od razu we wszystkich narzędziach.</p>
+  </div>
+
+  <div class="note">
+    <h3>Kopia wszystkiego</h3>
+    <p>Jeden plik z danymi wszystkich narzędzi z tej przeglądarki — na backup albo przeprowadzkę na inny komputer czy telefon.
+       Każde narzędzie ma też własny eksport i import, w swoich ustawieniach.</p>
+    <div class="brow"><button class="b" id="kopia-pobierz" type="button">Pobierz kopię wszystkiego</button><button class="b" id="kopia-wczytaj" type="button">Wczytaj kopię</button></div>
+    <div id="kopia-potw" hidden>
+      <p class="kmsg" id="kopia-opis"></p>
+      <div class="brow"><button class="b danger" id="kopia-tak" type="button">Zastąp dane</button><button class="b" id="kopia-nie" type="button">Anuluj</button></div>
+    </div>
+    <p class="kmsg" id="kopia-msg" role="status"></p>
   </div>
 
   <footer>
@@ -128,6 +163,13 @@ const TOOLS = [
     opis: "Gotowe scenariusze na trudne momenty, zbudowane jako drzewa kroków. W chwili kryzysu przechodzisz plan krok po kroku, z licznikiem, przerwą albo oddechem, a karty ćwiczeń pomagają zapamiętać plany na zapas.",
     chips: ["plany wdrożeniowe", "kryzys", "telefon"],
     href: "./plany/"
+  },
+  {
+    ico: "🧭",
+    nazwa: "WOOP",
+    opis: "Życzenie, efekt, przeszkoda, plan. Kreator prowadzi przez metodę krok po kroku, a codzienny wpis pokazuje, czy Twój plan „Jeżeli…, to…” działa.",
+    chips: ["cele", "kontrast myślowy", "plany jeżeli-to"],
+    href: "./woop/"
   }
 ];
 
@@ -138,6 +180,62 @@ document.getElementById("tools").innerHTML = TOOLS.map(t => `
     <div class="chips">${(t.chips || []).map(c => `<span class="chip">${c}</span>`).join("")}</div>
     <div class="go">${t.soon ? "w budowie" : "Otwórz →"}</div>
   </a>`).join("");
+
+/* ── KOPIA WSZYSTKICH NARZĘDZI ─────────────────────────────────────────────
+   Jeden plik JSON z danymi każdego narzędzia (klucze localStorage poniżej).
+   Wczytanie zastępuje tylko te narzędzia, których dane są w pliku. */
+const DANE = [
+  { klucz: "mcz.dane.v1",           nazwa: "Pasek zdrowia × SZOP", ile: d => (d.wpisy || []).length + " wpisów" },
+  { klucz: "tablica-scoringowa-v1", nazwa: "Tablica scoringowa",   ile: d => (d.history || []).length + " zapisanych dni" },
+  { klucz: "plany-jezeli-v1",       nazwa: "Plany Jeżeli… to…",    ile: d => (d.plans || []).length + " planów" },
+  { klucz: "woop-v1",               nazwa: "WOOP",                 ile: d => (d.items || []).length + " WOOP" },
+  { klucz: "adhd.skin",             nazwa: null }
+];
+const $k = id => document.getElementById(id);
+const msg = t => { $k("kopia-msg").textContent = t; };
+let doWczytania = null;
+
+$k("kopia-pobierz").addEventListener("click", () => {
+  const dane = {};
+  DANE.forEach(({ klucz }) => {
+    try { const v = localStorage.getItem(klucz); if (v != null) dane[klucz] = klucz === "adhd.skin" ? v : JSON.parse(v); } catch (e) {}
+  });
+  const ile = DANE.filter(x => x.nazwa && dane[x.klucz]).length;
+  if (!ile) { msg("W tej przeglądarce nie ma jeszcze danych żadnego narzędzia."); return; }
+  Kopia.pobierz("narzedzia-kopia-" + Kopia.dzis() + ".json",
+    JSON.stringify({ typ: "adhd-kopia", wersja: 1, utworzono: new Date().toISOString(), dane }, null, 1));
+  msg("Pobrano kopię " + ile + (ile === 1 ? " narzędzia." : " narzędzi."));
+});
+
+$k("kopia-wczytaj").addEventListener("click", () => {
+  Kopia.wybierz().then(tekst => {
+    let p;
+    try { p = JSON.parse(tekst); } catch (e) { msg("To nie jest plik JSON."); return; }
+    if (!p || p.typ !== "adhd-kopia" || !p.dane) {
+      msg("To nie jest kopia wszystkich narzędzi. Kopię jednego narzędzia wczytasz w jego ustawieniach."); return;
+    }
+    const lista = DANE.filter(x => x.nazwa && p.dane[x.klucz]).map(x => {
+      let opis = ""; try { opis = " (" + x.ile(p.dane[x.klucz]) + ")"; } catch (e) {}
+      return x.nazwa + opis;
+    });
+    if (!lista.length) { msg("Plik nie zawiera danych żadnego narzędzia."); return; }
+    doWczytania = p.dane;
+    $k("kopia-opis").textContent = "W pliku: " + lista.join(", ") + ". Wczytanie zastąpi dane tych narzędzi w tej przeglądarce.";
+    $k("kopia-potw").hidden = false; msg("");
+  }).catch(() => {});
+});
+$k("kopia-nie").addEventListener("click", () => { doWczytania = null; $k("kopia-potw").hidden = true; });
+$k("kopia-tak").addEventListener("click", () => {
+  if (!doWczytania) return;
+  let n = 0;
+  DANE.forEach(({ klucz, nazwa }) => {
+    const v = doWczytania[klucz];
+    if (v == null) return;
+    try { localStorage.setItem(klucz, typeof v === "string" ? v : JSON.stringify(v)); if (nazwa) n++; } catch (e) {}
+  });
+  doWczytania = null; $k("kopia-potw").hidden = true;
+  msg("Wczytano dane " + n + (n === 1 ? " narzędzia." : " narzędzi.") + " Otwórz narzędzie, żeby je zobaczyć.");
+});
 </script>
 </body>
 </html>

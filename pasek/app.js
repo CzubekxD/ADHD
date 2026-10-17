@@ -1172,9 +1172,8 @@ function rysujHistoria() {
 
   document.querySelectorAll('[data-usun]').forEach(b => {
     b.addEventListener('click', () => {
-      if (!confirm('Usunąć ten wpis? Tego się nie cofnie.')) return;
       Magazyn.usunWpis(b.dataset.usun);
-      rysujHistoria(); odswiezLicznik(); komunikat('Usunięto wpis');
+      rysujHistoria(); odswiezLicznik(); komunikat('Usunięto wpis · Ctrl+Z cofa');
     });
   });
   document.querySelectorAll('[data-wolny]').forEach(b => {
@@ -1447,6 +1446,16 @@ function odswiezLicznik() {
   $('#licznik-wpisow').textContent = n ? n + (n === 1 ? ' wpis' : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? ' wpisy' : ' wpisów')) : '';
 }
 
+/* przerysowuje bieżący widok bez przewijania — po Ctrl+Z / Ctrl+Y */
+function odswiezWidok() {
+  if (widok === 'wpis') rysujWpis();
+  else if (widok === 'dashboard') rysujDashboard();
+  else if (widok === 'flagi') rysujFlagi();
+  else if (widok === 'historia') rysujHistoria();
+  else if (widok === 'ostronie') rysujOStronie();
+  else rysujUstawienia();
+}
+
 function przelacz(nowy) {
   widok = nowy;
   document.querySelectorAll('nav.zakladki button').forEach(b =>
@@ -1466,6 +1475,13 @@ function start() {
     b.addEventListener('click', () => przelacz(b.dataset.widok)));
   odswiezLicznik();
   przelacz('wpis');
+  if (window.Skroty) Skroty.init({
+    snapshot: () => Magazyn.surowe(),
+    restore: tekst => { Magazyn.wczytajSurowe(tekst); KONF = Magazyn.konfiguracja(); odswiezLicznik(); odswiezWidok(); },
+    wiersz: 'table.historia tbody tr',
+    przycisk: '[data-usun]',
+    toast: komunikat
+  });
 }
 
 document.addEventListener('DOMContentLoaded', start);

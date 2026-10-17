@@ -42,9 +42,10 @@ const Magazyn = (() => {
   }
 
   function zapisz(stan) {
-    if (!dostepny) { pamiecZapasowa = stan; return { ok: true, ostrzezenie: 'pamiec-ulotna' }; }
+    if (!dostepny) { pamiecZapasowa = stan; if (window.Skroty) window.Skroty.zapisano(); return { ok: true, ostrzezenie: 'pamiec-ulotna' }; }
     try {
       localStorage.setItem(KLUCZ, JSON.stringify(stan));
+      if (window.Skroty) window.Skroty.zapisano();
       return { ok: true };
     } catch (e) {
       return { ok: false, blad: e.message };
@@ -197,7 +198,10 @@ const Magazyn = (() => {
     konfiguracja, zapiszKonfiguracje, resetujKonfiguracje,
     dniWolne, przelaczDzienWolny,
     eksportJSON, eksportCSV, importJSON, wyczyscWszystko,
-    noweId
+    noweId,
+    // dla skrótów Ctrl+Z / Ctrl+Y: cały stan jako tekst i powrót do niego
+    surowe: () => JSON.stringify(czytaj()),
+    wczytajSurowe: tekst => zapisz(Object.assign(pustyStan(), JSON.parse(tekst)))
   };
 })();
 
