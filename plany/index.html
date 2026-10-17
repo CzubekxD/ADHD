@@ -203,6 +203,48 @@ h2{font-size:18px;margin:0;font-weight:800}
 .sheet .panel{margin-left:0;background:transparent;padding:0}
 .sheetspace{height:56vh}
 .top .cyberslot{margin-left:auto}
+/* pytanie z odpowiedziami: edycja (jak w Formularzach) */
+.answers{display:flex;flex-direction:column;gap:6px}
+.ansrow{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(0,1fr) auto;gap:6px;align-items:center}
+.ansrow input,.ansrow select{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 10px;min-height:40px;font-size:15px}
+.ansrow input[readonly]{background:transparent;border-style:dashed}
+.ansrow .x{min-height:40px;min-width:40px;padding:0;border-radius:10px;border:1px solid transparent;background:none;color:var(--muted);font-size:16px}
+.ansrow .x:hover{color:var(--bad);border-color:var(--bad)}
+.ansL{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--sunk);color:var(--t-question);font-weight:800;font-family:var(--f-mono);font-size:14px;flex:none}
+@media (max-width:520px){.ansrow{grid-template-columns:28px minmax(0,1fr) auto}.ansrow select{grid-column:2/4}}
+/* pytanie z odpowiedziami: przebieg */
+.answers-run{display:flex;flex-direction:column;gap:8px}
+.ans{display:flex;align-items:center;gap:12px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;min-height:58px;font-size:16.5px;font-weight:600;width:100%}
+.ans:hover,.ans:focus-within{border-color:var(--t-question)}
+.ans .ansL{width:32px;height:32px;font-size:16px}
+.ans small{margin-left:auto;font-family:var(--f-mono);font-size:12px;color:var(--muted);font-weight:400;white-space:nowrap}
+.ans.other input{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 10px;min-height:42px;font-weight:400}
+/* koniec ścieżki: zadziałało? */
+.ask-end{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 18px;display:flex;flex-direction:column;gap:12px}
+.yn{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.yn .btn{min-height:64px;font-size:17px}
+.yn .yes{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.yn .no{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.pathlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.prow{width:100%;display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:15px}
+.prow:disabled{cursor:default}
+.prow .ic{margin-top:3px}
+.pans{display:block;font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-top:2px}
+.r-ok .prow{background:var(--ok-bg);border-color:var(--ok);animation:lit-ok .45s ease both;animation-delay:calc(var(--k,0) * 70ms)}
+.r-bad .prow{background:var(--bad-bg);border-color:var(--bad);animation:lit-bad .45s ease both;animation-delay:calc(var(--k,0) * 70ms)}
+@keyframes lit-ok{from{background:var(--surface);border-color:var(--line)}}
+@keyframes lit-bad{from{background:var(--surface);border-color:var(--line)}}
+.r-bad li.sel .prow{box-shadow:0 0 0 2px var(--bad) inset}
+.pedit{font-size:12.5px;color:var(--bad);font-weight:600;align-self:center;white-space:nowrap}
+.fixgrid{display:grid;gap:14px;max-width:1100px}
+.fixpanel{background:var(--sunk);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px}
+.fixpanel .panel{background:transparent;padding:0;margin-left:0}
+@media (min-width:900px){.fixgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}.fixpanel{position:sticky;top:80px}}
+/* odpowiedź prowadząca do istniejącego kroku albo do końca */
+.gvr{fill:var(--sunk);stroke:var(--t-question);stroke-width:1.5;stroke-dasharray:4 3}
+.gvr.end{fill:var(--surface);stroke:var(--line)}
+.gvt{font-size:11.5px;fill:var(--muted)}
+.gv{cursor:pointer}
 .pill:not([hidden]) + .cyberslot{margin-left:8px}
 /* szeroki edytor: na dużym ekranie płótno bierze całą szerokość i wysokość okna, a panel węzła siedzi z boku zamiast zasłaniać plan */
 html.wide .app{max-width:none}
@@ -259,11 +301,21 @@ function examplePlan(){const p=P('uciekam w telefon lub Internet, żeby odsuną�
         ['Wyjaśnienie wymagań',N('action','Wyjaśniam wymagania')],
         ['Świadome przesunięcie',N('action','Świadomie przesuwam zadanie')]
       ])]));p.id='example';return p;}
-const EXAMPLE=examplePlan();
+const EXAMPLE=examplePlan();fixNodes(EXAMPLE.root);
 /* treści wyzwalaczy z pierwszego prototypu, usuwane przy migracji do wersji 2 */
 const OLD_SEED=['pojawiają się nowe cele lub wytyczne i czuję, że wymagania mnie przerastają','zadanie wydaje mi się za duże i zaczynam je odkładać','po niepowodzeniu mam ochotę porzucić wszystkie rutyny','kolejny raz wracam myślami do tej samej porażki','uciekam w telefon lub Internet, żeby odsunąć trudne zadanie','mam ochotę rzucić wszystko'];
 function fresh(){return{version:2,config:defCfg(),plans:[]};}
-function clonePlan(src){const c=JSON.parse(JSON.stringify(src));c.id=uid();c.runs=[];c.drill={ok:0,miss:0};walk(c.root,n=>{n.id=uid();n.status='none';});return c;}
+function clonePlan(src){const c=JSON.parse(JSON.stringify(src));c.id=uid();c.runs=[];c.drill={ok:0,miss:0};const map={};
+  walk(c.root,n=>{const o=n.id;n.id=uid();map[o]=n.id;n.status='none';});
+  walk(c.root,n=>n.children.forEach(k=>{if(k.goto&&k.goto!=='end')k.goto=map[k.goto]||'end';}));return c;}
+/* wersja 3: „Wybór” wchodzi do „Pytania”; odpowiedź może prowadzić do własnego kroku, do istniejącego kroku albo do końca planu */
+function fixNodes(root){walk(root,n=>{n.children=n.children||[];n.tool=n.tool||{kind:'none',min:0};n.status=n.status||'none';
+  if(n.type==='choice'){n.type='question';n.qtype='single';}
+  if(n.type==='question'&&!n.qtype)n.qtype=(n.children.length===2&&n.children.every((c,i)=>String(c.label||'').trim().toLowerCase()===['tak','nie'][i]))?'yesno':'single';
+  n.children.forEach(c=>{if(!c.node&&!c.goto)c.goto='end';});});
+  fixGotos(root);}
+function fixGotos(root){const ids=new Set();walk(root,n=>ids.add(n.id));
+  walk(root,n=>n.children.forEach(c=>{if(!c.node&&c.goto!=='end'&&!ids.has(c.goto))c.goto='end';}));}
 function normalize(d){
   if((d.version||1)<2){d.plans=(d.plans||[]).filter(p=>!(p&&p.root&&OLD_SEED.includes(p.root.text)));d.version=2;}
   const c=defCfg();d.config=Object.assign(c,d.config||{});
@@ -272,7 +324,7 @@ function normalize(d){
   d.config.defaults=Object.assign(defCfg().defaults,d.config.defaults||{});
   if(!Array.isArray(d.config.tags))d.config.tags=defCfg().tags;
   d.plans=(d.plans||[]).filter(p=>p&&p.root);
-  d.plans.forEach(p=>{p.runs=p.runs||[];p.drill=p.drill||{ok:0,miss:0};walk(p.root,n=>{n.children=n.children||[];n.tool=n.tool||{kind:'none',min:0};n.status=n.status||'none';});});
+  d.plans.forEach(p=>{p.runs=p.runs||[];p.drill=p.drill||{ok:0,miss:0};fixNodes(p.root);});
   return d;
 }
 function load(){try{const r=localStorage.getItem(KEY);if(r){const d=JSON.parse(r);if(d&&Array.isArray(d.plans))return normalize(d);}}catch(e){}return null;}
@@ -283,9 +335,12 @@ function save0(){localStorage.setItem(KEY,JSON.stringify(S));}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));if(window.Skroty)Skroty.zapisano();}catch(e){}}
 const cfg=()=>S.config;
 
-function walk(n,fn,parent,link){fn(n,parent,link);n.children.forEach(c=>walk(c.node,fn,n,c));}
-function find(n,id,parent,link){if(n.id===id)return{node:n,parent:parent||null,link:link||null};for(const c of n.children){const r=find(c.node,id,n,c);if(r)return r;}return null;}
-function countN(n){return 1+n.children.reduce((a,c)=>a+countN(c.node),0);}
+function walk(n,fn,parent,link){fn(n,parent,link);(n.children||[]).forEach(c=>{if(c.node)walk(c.node,fn,n,c);});}
+function find(n,id,parent,link){if(n.id===id)return{node:n,parent:parent||null,link:link||null};for(const c of n.children){if(!c.node)continue;const r=find(c.node,id,n,c);if(r)return r;}return null;}
+function countN(n){return 1+n.children.reduce((a,c)=>a+(c.node?countN(c.node):0),0);}
+const LET=i=>String.fromCharCode(65+i);
+const short=(t,m)=>{t=String(t||'').trim()||'(bez opisu)';return t.length>m?t.slice(0,m-1)+'…':t;};
+function gotoText(p,g){if(!g||g==='end')return'Koniec planu';const r=p?find(p.root,g):findAny(g);return r?'Wróć do: '+short(r.node.text,40):'Koniec planu';}
 function tally(n){const a={ok:0,bad:0,none:0};walk(n,x=>{if(x.type!=='trigger')a[x.status]++;});return a;}
 const plan=id=>id===EXAMPLE.id?EXAMPLE:S.plans.find(p=>p.id===id);
 const isBranch=n=>n.type==='question'||n.type==='choice';
@@ -335,7 +390,7 @@ function render(){
   renderTabs();
   const m=$('#main');
   const cv0=$('#canvas');const sc=cv0?[cv0.scrollLeft,cv0.scrollTop]:null;
-  const wide=!!(TAB==='plans'&&ED.planId&&plan(ED.planId)&&ED.view!=='list');
+  const wide=!!(TAB==='plans'&&ED.planId&&plan(ED.planId)&&ED.view!=='list')||!!(TAB==='now'&&RUN&&RUN.done&&RUN.result==='bad');
   document.documentElement.classList.toggle('wide',wide);
   document.documentElement.classList.toggle('side',!!(wide&&(ED.pick||ED.sel)));
   draw(m);
@@ -375,18 +430,23 @@ function vRun(){
   let next='';
   if(n.type==='trigger'){
     next=n.children.length?`<button class="btn primary" data-act="next">To robię →</button>`:`<p class="note">Ten plan nie ma jeszcze kroków.</p>`;
+  }else if(n.type==='question'){
+    next=n.children.length?`<div class="answers-run" role="group" aria-label="Odpowiedzi">${n.children.map((c,i)=>c.other
+      ?`<div class="ans other"><span class="ansL">${LET(i)}</span><input id="run-other" placeholder="${esc(c.label||'Inne…')}" aria-label="Twoja odpowiedź"><button class="btn small primary" data-act="answer" data-i="${i}">Dalej →</button></div>`
+      :`<button class="ans" data-act="answer" data-i="${i}"><span class="ansL">${LET(i)}</span><span>${esc(c.label||('Odpowiedź '+LET(i)))}</span>${c.node?'':`<small>${c.goto==='end'?'■ koniec':'↪ wraca'}</small>`}</button>`).join('')}</div>`
+      :`<p class="note">To pytanie nie ma jeszcze odpowiedzi. Dodaj je w edytorze.</p><button class="btn" data-act="finish">Zakończ ścieżkę</button>`;
   }else if(isBranch(n)&&n.children.length){
-    next=`<div class="btnrow stack">${n.children.map((c,i)=>`<button class="btn ${i===0?'':''}" data-act="branch" data-i="${i}">${esc(c.label||('Opcja '+(i+1)))}</button>`).join('')}</div>`;
+    next=`<div class="btnrow stack">${n.children.map((c,i)=>`<button class="btn" data-act="branch" data-i="${i}">${esc(c.label||('Opcja '+(i+1)))}</button>`).join('')}</div>`;
   }else if(n.children.length===1){
     next=`<button class="btn primary" data-act="next">Zrobione, dalej →</button>`;
   }else if(n.children.length>1){
-    next=`<div class="btnrow stack">${n.children.map((c,i)=>`<button class="btn" data-act="branch" data-i="${i}">${esc(c.label||c.node.text)}</button>`).join('')}</div>`;
+    next=`<div class="btnrow stack">${n.children.map((c,i)=>`<button class="btn" data-act="branch" data-i="${i}">${esc(c.label||(c.node?c.node.text:gotoText(p,c.goto)))}</button>`).join('')}</div>`;
   }else{
-    next=`<button class="btn primary" data-act="finish">Koniec ścieżki</button>`;
+    next=`<button class="btn primary" data-act="finish">Zrobione → koniec ścieżki</button>`;
   }
   const eyebrow=n.type==='trigger'?`${ic('trigger')}${lab('trigger')}…`:`${ic(n.type)}${lab(n.type)} · krok ${nodes.length-1}`;
   const contact=n.type==='escalate'?(n.contact?`<div class="contact">${esc(n.contact)}</div>`:`<p class="note todo">Dopisz w edytorze, do kogo się zwracasz.</p>`):'';
-  const rate=n.type==='trigger'?'':`<div class="rate" role="group" aria-label="Ocena kroku">
+  const rate=n.type==='trigger'||n.type==='question'?'':`<div class="rate" role="group" aria-label="Ocena kroku">
       <button class="ok" data-act="rate" data-s="ok" aria-pressed="${n.status==='ok'}">✓ Działa</button>
       <button class="bad" data-act="rate" data-s="bad" aria-pressed="${n.status==='bad'}">✕ Nie działa</button></div>`;
   return`<div class="crumbs" aria-label="Przebyta ścieżka">${crumbs}</div>
@@ -419,13 +479,22 @@ function toolHtml(n){
 function defMin(k){const d=cfg().defaults;return k==='break'?d.brk:k==='breath'?d.breath:d.timer;}
 
 function vSummary(){
-  const p=plan(RUN.planId);
-  const nodes=RUN.path.map(id=>find(p.root,id)).filter(r=>r&&r.node.type!=='trigger');
-  return`<div><h1>Ścieżka zakończona</h1><p class="lede">Oceń kroki, które przeszedłeś. Ocena zostaje w planie i widać ją w edytorze.</p></div>
-  <div class="sum">${nodes.map(r=>{const n=r.node;return`<div class="sumrow"><div class="tx">${ic(n.type)}<span>${txt(n.text)}</span></div>
-    <div class="rate"><button class="ok" data-act="rateId" data-id="${n.id}" data-s="ok" aria-pressed="${n.status==='ok'}">✓ Działa</button>
-    <button class="bad" data-act="rateId" data-id="${n.id}" data-s="bad" aria-pressed="${n.status==='bad'}">✕ Nie działa</button></div></div>`;}).join('')}</div>
-  <div class="btnrow stack"><button class="btn primary" data-act="stop">Gotowe</button><button class="btn" data-act="start" data-id="${p.id}">Przejdź plan jeszcze raz</button></div>`;
+  const p=plan(RUN.planId);if(!p){RUN=null;return vHome();}
+  const rows=RUN.path.map(id=>find(p.root,id)).filter(r=>r&&r.node.type!=='trigger');
+  const res=RUN.result||null,ans=RUN.answers||{},isEx=p.id===EXAMPLE.id;
+  const list=`<ol class="pathlist ${res?'r-'+res:''}" aria-label="Przebyta ścieżka">${rows.map((r,k)=>{const n=r.node;const a=ans[n.id];const sel=res==='bad'&&RUN.editId===n.id;
+    return`<li class="${sel?'sel':''}" style="--k:${k}"><button class="prow" ${res==='bad'&&!isEx?`data-act="sumEdit" data-id="${n.id}"`:'disabled'}>${ic(n.type)}<span class="grow">${txt(n.text)}${a?`<small class="pans">${LET(a.i)} · ${esc(a.text||a.label||'')}</small>`:''}</span>${res==='bad'&&!isEx?`<span class="pedit">${sel?'edytujesz':'edytuj'}</span>`:''}</button></li>`;}).join('')}</ol>`;
+  if(!res)return`<section class="ask-end"><span class="eyebrow">koniec ścieżki · ${rows.length} ${rows.length===1?'krok':rows.length<5?'kroki':'kroków'}</span><h1>Zadziałało?</h1>
+      <div class="yn"><button class="btn yes" data-act="verdict" data-s="ok">✓ Tak</button><button class="btn no" data-act="verdict" data-s="bad">✕ Nie</button></div></section>
+    ${list}<div class="btnrow"><button class="btn ghost small" data-act="back2">← Wróć do ostatniego kroku</button></div>`;
+  if(res==='ok')return`<div><h1>Zadziałało</h1><p class="lede">Kroki tej ścieżki świecą w planie na zielono.</p></div>${list}
+    <div class="btnrow stack"><button class="btn primary" data-act="stop">Gotowe</button><button class="btn" data-act="start" data-id="${p.id}">Przejdź plan jeszcze raz</button></div>`;
+  const er=RUN.editId&&find(p.root,RUN.editId);
+  const side=isEx?`<p class="lede">To przykład — skopiuj go do swoich planów, żeby go poprawić.</p><button class="btn" data-act="copyEx">Skopiuj do moich planów</button>`
+    :er?`<span class="eyebrow">${ic(er.node.type)}${lab(er.node.type)} · popraw ten krok</span>${panel(er.node,er.parent,er.link,0,true)}`:'';
+  return`<div><h1>Nie zadziałało</h1><p class="lede">Ścieżka świeci w planie na czerwono. Popraw krok, który zawiódł — kliknij inny krok na liście, żeby edytować jego.</p></div>
+    <div class="fixgrid">${list}<div class="fixpanel">${side}</div></div>
+    <div class="btnrow"><button class="btn primary" data-act="stop">Gotowe</button>${isEx?'':`<button class="btn" data-act="openEd" data-id="${er?er.node.id:''}">Otwórz w edytorze</button>`}<button class="btn ghost" data-act="start" data-id="${p.id}">Przejdź jeszcze raz</button></div>`;
 }
 
 /* Plany: lista */
@@ -445,7 +514,7 @@ function vEditor(){
   const p=plan(ED.planId);
   const head=`<div class="edhead"><button class="btn small ghost" data-act="closeEd">← Plany</button><span class="grow"></span>
     <div class="seg" role="group" aria-label="Widok"><button data-act="view" data-k="canvas" aria-pressed="${ED.view!=='list'}">Węzły</button><button data-act="view" data-k="list" aria-pressed="${ED.view==='list'}">Lista</button></div></div>`;
-  const legend=`<div class="legend">${['trigger','question','choice','action','escalate'].map(t=>`<span>${ic(t)}${lab(t)}</span>`).join('')}</div>`;
+  const legend=`<div class="legend">${['trigger','question','action','escalate'].map(t=>`<span>${ic(t)}${lab(t)}</span>`).join('')}</div>`;
   const body=ED.view==='list'?`<div class="tree">${tree(p.root,0,null,null)}</div>`
     :`<p class="hint">Przeciągnij węzeł, żeby go przesunąć. Dotknij, żeby go opisać. Plus po prawej dodaje kolejny węzeł, plus na linii wstawia węzeł pomiędzy.</p>
       <div class="canvaswrap"><div class="canvas" id="canvas">${graph(p,true,ED.z||1)}</div>
@@ -459,35 +528,50 @@ function vEditor(){
 function nodeSheet(p){const r=find(p.root,ED.sel);
   return`<div class="sheet" role="dialog" aria-label="Edycja węzła"><div class="in"><div class="grip"></div><span class="eyebrow">${ic(r.node.type)}${lab(r.node.type)}</span>${panel(r.node,r.parent,r.link,0)}</div></div>`;}
 function pickSheet(){const pk=ED.pick;
-  const D={action:'Konkretny krok, może mieć licznik',question:'Rozgałęzienie z odpowiedziami, np. tak / nie',choice:'Kilka dróg do wybrania',escalate:'Zwracam się do kogoś o pomoc'};
+  const D={action:'Konkretny krok, może mieć licznik',question:'Tak / nie albo odpowiedzi A, B, C — każda prowadzi swoją ścieżką',escalate:'Zwracam się do kogoś o pomoc'};
   return`<div class="sheet" role="dialog" aria-label="Dodaj węzeł"><div class="in"><div class="grip"></div><h2>${pk.mode==='ins'?'Wstaw węzeł pomiędzy':'Dodaj węzeł'}</h2>
-    <div class="picks">${['action','question','choice','escalate'].map(t=>`<button class="pick" data-act="pickType" data-k="${t}">${ic(t)}<span><b>${lab(t)}</b><small>${D[t]}</small></span></button>`).join('')}</div>
+    <div class="picks">${['action','question','escalate'].map(t=>`<button class="pick" data-act="pickType" data-k="${t}">${ic(t)}<span><b>${lab(t)}</b><small>${D[t]}</small></span></button>`).join('')}</div>
     <button class="btn ghost" data-act="pickCancel">Anuluj</button></div></div>`;}
 function tree(n,d,parent,link){
   let h='';
-  if(parent&&(isBranch(parent)||parent.children.length>1))h+=`<div class="blabel" style="--d:${d}">↳ ${esc(link.label||'(bez etykiety)')}</div>`;
+  if(parent&&(isBranch(parent)||parent.children.length>1)){const li=parent.children.indexOf(link);h+=`<div class="blabel" style="--d:${d}">↳ ${parent.type==='question'?LET(li)+' · ':''}${esc(link.label||'(bez etykiety)')}</div>`;}
   const sel=ED.sel===n.id;
   const toolTag=n.tool&&n.tool.kind!=='none'?`<span class="tool-ic">${toolName(n.tool.kind)} ${n.tool.min||defMin(n.tool.kind)}′</span>`:'';
   const cyc=n.type==='trigger'?'':`<span class="cyc st-${n.status}" role="button" tabindex="0" data-act="cycle" data-id="${n.id}" aria-label="Ocena: ${ST[n.status].word}. Zmień">${n.status==='none'?'':ST[n.status].sym}</span>`;
   h+=`<div class="row ${sel?'sel':''} st-${n.type==='trigger'?'none':n.status}" style="--d:${d}" role="button" tabindex="0" data-act="sel" data-id="${n.id}" aria-expanded="${sel}">
     ${ic(n.type)}<span class="rt" id="rt-${n.id}">${n.type==='trigger'?'<b>'+lab('trigger')+'</b> ':''}${txt(n.text)}</span>${toolTag}${cyc}</div>`;
-  n.children.forEach(c=>{h+=tree(c.node,d+1,n,c);});
+  n.children.forEach((c,i)=>{
+    if(c.node)h+=tree(c.node,d+1,n,c);
+    else h+=`<div class="blabel" style="--d:${d+1}">↳ ${n.type==='question'?LET(i)+' · ':''}${esc(c.label||'(bez etykiety)')} → <b>${esc(gotoText(plan(ED.planId),c.goto))}</b></div>`;});
   return h;
 }
 function toolName(k){return{timer:'timer',break:'przerwa',breath:'oddech'}[k]||'';}
-function panel(n,parent,link,d){
+function gotoOptions(n,c){const p=plan(ED.planId)||(findAny(n.id)||{}).p;let o=`<option value="own" ${c.node?'selected':''}>→ własny krok</option><option value="end" ${!c.node&&c.goto==='end'?'selected':''}>■ koniec planu</option>`;
+  if(p)walk(p.root,m=>{if(m.id===n.id||m.type==='trigger')return;if(c.node&&find(c.node,m.id))return;
+    o+=`<option value="${m.id}" ${!c.node&&c.goto===m.id?'selected':''}>↪ ${esc(short(m.text,34))}</option>`;});
+  return o;}
+function answersEditor(n){const id=n.id;const yn=n.qtype==='yesno';
+  return`<div class="field"><label>Odpowiedzi</label><div class="seg" role="group" aria-label="Rodzaj odpowiedzi">
+      <button data-act="qtype" data-id="${id}" data-k="yesno" aria-pressed="${yn}">Tak / Nie</button><button data-act="qtype" data-id="${id}" data-k="single" aria-pressed="${!yn}">Wybór A / B / C</button></div></div>
+    <div class="answers">${n.children.map((c,i)=>`<div class="ansrow"><span class="ansL">${LET(i)}</span>
+      <input data-f="alabel" data-id="${id}" data-i="${i}" value="${esc(c.label)}" placeholder="${c.other?'Inne…':'Odpowiedź '+LET(i)}" aria-label="Odpowiedź ${LET(i)}" ${yn?'readonly':''}>
+      <select data-f="agoto" data-id="${id}" data-i="${i}" aria-label="Dokąd prowadzi odpowiedź ${LET(i)}">${gotoOptions(n,c)}</select>
+      ${yn?'<span></span>':`<button class="x" data-act="delAns" data-id="${id}" data-i="${i}" aria-label="Usuń odpowiedź ${LET(i)}">✕</button>`}</div>`).join('')}</div>
+    ${yn?'':`<div class="btnrow"><button class="btn small" data-act="addAns" data-id="${id}">+ Odpowiedź</button>${n.children.some(c=>c.other)?'':`<button class="btn small" data-act="addOther" data-id="${id}">+ „Inne…” do wpisania</button>`}</div>`}`;}
+function panel(n,parent,link,d,compact){
   const C=cfg();const id=n.id;
-  const typeSel=n.type==='trigger'?'':`<div class="field"><label for="f-type-${id}">Typ węzła</label><select id="f-type-${id}" data-f="type" data-id="${id}">${['question','choice','action','escalate'].map(t=>`<option value="${t}" ${n.type===t?'selected':''}>${esc(C.labels[t])}</option>`).join('')}</select></div>`;
-  const labelF=parent&&(isBranch(parent)||parent.children.length>1)?`<div class="field"><label for="f-label-${id}">Etykieta gałęzi (odpowiedź)</label><input id="f-label-${id}" data-f="label" data-id="${id}" value="${esc(link.label)}"></div>`:'';
+  const typeSel=n.type==='trigger'?'':`<div class="field"><label for="f-type-${id}">Typ węzła</label><select id="f-type-${id}" data-f="type" data-id="${id}">${['question','action','escalate'].map(t=>`<option value="${t}" ${n.type===t?'selected':''}>${esc(C.labels[t])}</option>`).join('')}</select></div>`;
+  const labelF=parent&&(isBranch(parent)||parent.children.length>1)?`<div class="field"><label for="f-label-${id}">${parent&&parent.type==='question'?'Odpowiedź '+LET(parent.children.indexOf(link))+', która tu prowadzi':'Etykieta gałęzi'}</label><input id="f-label-${id}" data-f="label" data-id="${id}" value="${esc(link.label)}"></div>`:'';
   const szop=n.type==='trigger'?`<div class="field"><label for="f-szop-${id}">Czynnik SZOP (opcjonalnie)</label><select id="f-szop-${id}" data-f="szop" data-id="${id}"><option value="">brak</option>${C.tags.map(t=>`<option ${plan(ED.planId).szop===t?'selected':''}>${esc(t)}</option>`).join('')}</select></div>`:'';
   const tool=n.type==='action'?`<div class="two"><div class="field"><label for="f-tk-${id}">Narzędzie</label><select id="f-tk-${id}" data-f="toolkind" data-id="${id}">
       ${[['none','brak'],['timer','timer kroku'],['break','koniec przerwy'],['breath','oddech']].map(([v,l])=>`<option value="${v}" ${n.tool.kind===v?'selected':''}>${l}</option>`).join('')}</select></div>
       <div class="field"><label for="f-tm-${id}">Minuty</label><input id="f-tm-${id}" type="number" min="1" max="120" inputmode="numeric" data-f="toolmin" data-id="${id}" value="${n.tool.kind==='none'?'':(n.tool.min||defMin(n.tool.kind))}" ${n.tool.kind==='none'?'disabled':''}></div></div>`:'';
   const contact=n.type==='escalate'?`<div class="field"><label for="f-ct-${id}">Do kogo się zwracam (imię, numer)</label><input id="f-ct-${id}" data-f="contact" data-id="${id}" value="${esc(n.contact)}"></div>`:'';
-  const addNext=!isBranch(n)?`<button class="btn small" data-act="pickOut" data-id="${id}">+ Następny węzeł</button>`:'';
-  const addBr=isBranch(n)?`<button class="btn small" data-act="pickOut" data-id="${id}">+ Gałąź</button>`:'';
+  const addNext=!compact&&!isBranch(n)?`<button class="btn small" data-act="pickOut" data-id="${id}">+ Następny węzeł</button>`:'';
+  const addBr='';
+  const ans=n.type==='question'?answersEditor(n):'';
   let del='';
-  if(n.type!=='trigger'){
+  if(n.type!=='trigger'&&!compact){
     const below=countN(n)-1;const lift=n.children.length===1;
     del=CONF==='del:'+id?`<div class="confirm"><p>${lift?'Usunąć ten krok? Następne kroki zostaną podpięte wyżej.':below?`Usunąć ten krok i ${below} pod nim?`:'Usunąć ten krok?'}</p><div class="btnrow"><button class="btn small danger" data-act="delNode" data-id="${id}">Usuń</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`
       :`<button class="btn small ghost danger" data-act="ask" data-k="del:${id}">Usuń krok</button>`;
@@ -496,8 +580,8 @@ function panel(n,parent,link,d){
     ${typeSel}${labelF}
     <div class="field"><label for="f-text-${id}">${n.type==='trigger'?'Jeżeli…':'Treść'}</label><textarea id="f-text-${id}" data-f="text" data-id="${id}" rows="2">${esc(n.text)}</textarea></div>
     ${n.type==='trigger'?'':`<div class="field"><label for="f-note-${id}">Dopisek (opcjonalnie)</label><textarea id="f-note-${id}" data-f="note" data-id="${id}" rows="2">${esc(n.note)}</textarea></div>`}
-    ${szop}${tool}${contact}
-    <div class="btnrow">${addNext}${addBr}<button class="btn small primary" data-act="closePanel">Gotowe</button></div>${del}</div>`;
+    ${ans}${szop}${tool}${contact}
+    ${compact?'':`<div class="btnrow">${addNext}${addBr}<button class="btn small primary" data-act="closePanel">Gotowe</button></div>${del}`}</div>`;
 }
 
 /* graf w stylu węzłów */
@@ -505,32 +589,40 @@ function wrap(t,max,lines){const w=String(t).split(/\s+/);const out=[];let cur='
   for(const x of w){if((cur+' '+x).trim().length>max&&cur){out.push(cur);cur=x;}else cur=(cur+' '+x).trim();}
   if(cur)out.push(cur);
   if(out.length>lines){const o=out.slice(0,lines);o[lines-1]=o[lines-1].replace(/.{0,2}$/,'')+'…';return o;}return out;}
-const GW=180,GH=72,GGY=34,GHR=14;
+const GW=180,GH=72,GGY=34,GHR=14,VW=160,VH=40;
 /* układ: automatyczne drzewo, nadpisane ręcznym położeniem (n.pos);
    węzły bez własnego położenia trzymają się rodzica, więc przesuwają się razem z nim */
 function layoutOf(p,edit){
-  const GX=edit?88:48;let leaf=0;const auto={};const order=[];
+  const GX=edit?88:48;let leaf=0;const auto={};const order=[];const kids={};
   (function lay(n,d){let y;
-    if(!n.children.length){y=leaf*(GH+GGY);leaf++;}else{const ys=n.children.map(c=>lay(c.node,d+1));y=(ys[0]+ys[ys.length-1])/2;}
+    /* odpowiedź bez własnego kroku rysujemy jako małą pigułkę „koniec” albo „wróć do…” */
+    kids[n.id]=n.children.map((c,i)=>({c,i,node:c.node||{id:n.id+'~'+i,type:'goto',virt:true,owner:n.id,idx:i,goto:c.goto||'end',text:gotoText(p,c.goto),children:[]}}));
+    const ks=kids[n.id];
+    if(!ks.length){y=leaf*(GH+GGY);leaf++;}else{const ys=ks.map(k=>lay(k.node,d+1));y=(ys[0]+ys[ys.length-1])/2;}
     auto[n.id]={x:d*(GW+GX),y};order.push(n);return y;})(p.root,0);
   const pos={};
   (function fin(n,parent){
     if(n.pos)pos[n.id]={x:n.pos.x,y:n.pos.y};
     else if(!parent)pos[n.id]={x:auto[n.id].x,y:auto[n.id].y};
     else{const pp=pos[parent.id],pa=auto[parent.id],a=auto[n.id];pos[n.id]={x:pp.x+(a.x-pa.x),y:pp.y+(a.y-pa.y)};}
-    n.children.forEach(c=>fin(c.node,n));})(p.root,null);
+    (kids[n.id]||[]).forEach(k=>fin(k.node,n));})(p.root,null);
   const box={minX:Infinity,minY:Infinity,maxX:-Infinity,maxY:-Infinity};
   order.forEach(n=>{const q=pos[n.id];box.minX=Math.min(box.minX,q.x);box.minY=Math.min(box.minY,q.y);box.maxX=Math.max(box.maxX,q.x+GW);box.maxY=Math.max(box.maxY,q.y+GH);});
-  return{pos,order,GX,box};
+  return{pos,order,GX,box,kids};
 }
 function graphLayers(p,edit,L){
   const pos=L.pos;let edges='',nodes='',plus='';
   L.order.forEach(n=>{const a=pos[n.id];const br=isBranch(n);
-    n.children.forEach((c,i)=>{const b=pos[c.node.id];const x1=a.x+GW,y1=a.y+GH/2,x2=b.x,y2=b.y+GH/2;
+    if(n.virt){const end=n.goto==='end';
+      nodes+=`<g class="gv" data-vnode="${n.id}" ${edit?`data-act="gsel" data-id="${n.owner}" role="button" tabindex="0"`:''} transform="translate(${a.x},${a.y+(GH-VH)/2})" aria-label="${esc(n.text)}">
+        <rect class="gvr ${end?'end':''}" width="${VW}" height="${VH}" rx="${VH/2}"/><text class="gtx gvt" x="${VW/2}" y="${VH/2+4}" text-anchor="middle">${esc(wrap((end?'■ ':'↪ ')+n.text,24,1)[0])}</text></g>`;
+      if(edit)plus+=`<g class="gplus sm" data-act="ownStep" data-id="${n.owner}" data-i="${n.idx}" transform="translate(${a.x+VW+18},${a.y+GH/2})" role="button" tabindex="0" aria-label="Dodaj tu własny krok"><circle r="11"/><text>+</text></g>`;
+      return;}
+    (L.kids[n.id]||[]).forEach(({c,i,node:kn})=>{const b=pos[kn.id];const x1=a.x+GW,y1=a.y+GH/2,x2=b.x,y2=b.y+GH/2;
       const k=Math.max(40,Math.abs(x2-x1)/2);const c1x=x1+k,c2x=x2-k;
       edges+=`<path class="gedge" d="M${x1} ${y1} C${c1x} ${y1}, ${c2x} ${y2}, ${x2} ${y2}"/>`;
-      if(c.label&&(br||n.children.length>1))edges+=`<text class="glb" x="${x2+2}" y="${b.y-7}">${esc(wrap(c.label,24,1)[0])}</text>`;
-      if(edit){const mx=(x1+3*c1x+3*c2x+x2)/8,my=(y1+y2)/2;
+      if(n.type==='question'||(c.label&&n.children.length>1))edges+=`<text class="glb" x="${x2+2}" y="${b.y+(kn.virt?(GH-VH)/2:0)-7}">${esc(wrap((n.type==='question'?LET(i)+' · ':'')+(c.label||(c.other?'Inne…':'')),26,1)[0])}</text>`;
+      if(edit&&!kn.virt){const mx=(x1+3*c1x+3*c2x+x2)/8,my=(y1+y2)/2;
         plus+=`<g class="gplus sm" data-act="pickIns" data-id="${n.id}" data-i="${i}" transform="translate(${mx},${my})" role="button" tabindex="0" aria-label="Wstaw węzeł pomiędzy"><circle r="11"/><text>+</text></g>`;}
     });
     if(edit&&(br||!n.children.length)){
@@ -584,6 +676,7 @@ window.addEventListener('pointermove',e=>{
   const L=layoutOf(p,true);const P2=graphLayers(p,true,L);
   DRAG.svg.querySelector('#ge').innerHTML=P2.edges;DRAG.svg.querySelector('#gp').innerHTML=P2.plus;
   DRAG.svg.querySelectorAll('#gn .gnode').forEach(g=>{const q=L.pos[g.dataset.node];if(q)g.setAttribute('transform',`translate(${q.x},${q.y})`);});
+  DRAG.svg.querySelectorAll('#gn [data-vnode]').forEach(g=>{const q=L.pos[g.dataset.vnode];if(q)g.setAttribute('transform',`translate(${q.x},${q.y+(GH-VH)/2})`);});
   const cv=$('#canvas');if(cv){const c=cv.getBoundingClientRect();const E=36,V=12;
     if(e.clientX<c.left+E)cv.scrollLeft-=V;else if(e.clientX>c.right-E)cv.scrollLeft+=V;
     if(e.clientY<c.top+E)cv.scrollTop-=V;else if(e.clientY>c.bottom-E)cv.scrollTop+=V;}
@@ -605,7 +698,7 @@ window.addEventListener('pointercancel',endDrag);
 /* Ćwiczenia */
 function buildDeck(){const ids=S.plans.slice().sort((a,b)=>((b.drill.miss-b.drill.ok)-(a.drill.miss-a.drill.ok))||(Math.random()-.5)).map(p=>p.id);DR={order:ids,i:0,revealed:false};}
 function outline(n){if(!n.children.length)return'';
-  return`<ul class="outline">${n.children.map(c=>`<li>${c.label&&(isBranch(n)||n.children.length>1)?`<span class="lab">↳ ${esc(c.label)}</span>`:''}<span class="ln">${ic(c.node.type)}<span>${txt(c.node.text)}</span></span>${c.node.children.length?outline(c.node).replace('class="outline"',''):''}</li>`).join('')}</ul>`;}
+  return`<ul class="outline">${n.children.map((c,i)=>`<li>${(c.label||n.type==='question')&&(isBranch(n)||n.children.length>1)?`<span class="lab">↳ ${n.type==='question'?LET(i)+' · ':''}${esc(c.label||(c.other?'Inne…':''))}</span>`:''}${c.node?`<span class="ln">${ic(c.node.type)}<span>${txt(c.node.text)}</span></span>${c.node.children.length?outline(c.node).replace('class="outline"',''):''}`:`<span class="ln">→ ${esc(gotoText(null,c.goto))}</span>`}</li>`).join('')}</ul>`;}
 function vDrill(){
   if(!S.plans.length)return`<h1>Ćwiczenia</h1><p class="empty">Dodaj plany, żeby ćwiczyć.</p>`;
   if(!DR||DR.order.some(id=>!plan(id)))buildDeck();
@@ -623,7 +716,7 @@ function vDrill(){
 let EXV='list';
 function vExample(){const p=EXAMPLE;
   return`<div><h1>Przykład</h1><p class="lede">Jeden plan pokazujący, jak działają węzły. Nie jest zapisany wśród Twoich planów. Możesz go przejść albo skopiować i przerobić po swojemu.</p></div>
-  <div class="legend">${['trigger','question','choice','action','escalate'].map(t=>`<span>${ic(t)}${lab(t)}</span>`).join('')}</div>
+  <div class="legend">${['trigger','question','action','escalate'].map(t=>`<span>${ic(t)}${lab(t)}</span>`).join('')}</div>
   <div class="edhead"><span class="grow"></span><div class="seg" role="group" aria-label="Widok"><button data-act="exView" data-k="list" aria-pressed="${EXV==='list'}">Lista</button><button data-act="exView" data-k="graph" aria-pressed="${EXV==='graph'}">Graf</button></div></div>
   ${EXV==='graph'?`<div class="graphwrap">${graph(p,false,1)}</div>`
     :`<div class="card"><span class="eyebrow">${ic('trigger')}${lab('trigger')}…</span><p class="big">${esc(p.root.text)}</p><span class="eyebrow">to…</span>${outline(p.root)}</div>`}
@@ -650,7 +743,7 @@ function vSettings(){const C=cfg();
       <div class="field"><label for="c-dbr">Oddech (min)</label><input id="c-dbr" type="number" min="1" max="30" inputmode="numeric" data-c="defaults.breath" value="${C.defaults.breath}"></div>
     </div></section>
   <section class="sect"><h2>Nazwy typów węzłów</h2>
-    <div class="grid2">${['trigger','question','choice','action','escalate'].map(t=>`<div class="field"><label for="c-l-${t}">${ic(t)} ${t==='trigger'?'wyzwalacz':t==='question'?'pytanie':t==='choice'?'wybór':t==='action'?'działanie':'eskalacja'}</label><input id="c-l-${t}" data-c="labels.${t}" value="${esc(C.labels[t])}"></div>`).join('')}</div></section>
+    <div class="grid2">${['trigger','question','action','escalate'].map(t=>`<div class="field"><label for="c-l-${t}">${ic(t)} ${t==='trigger'?'wyzwalacz':t==='question'?'pytanie':t==='choice'?'wybór':t==='action'?'działanie':'eskalacja'}</label><input id="c-l-${t}" data-c="labels.${t}" value="${esc(C.labels[t])}"></div>`).join('')}</div></section>
   <section class="sect"><h2>Tagi wyzwalaczy</h2><p>Oddzielone przecinkami. Domyślnie czynniki SZOP.</p>
     <div class="field"><label for="c-tags">Tagi</label><input id="c-tags" data-c="tags" value="${esc(C.tags.join(', '))}"></div></section>
   <section class="sect"><h2>Dane</h2><p>Plany są zapisane tylko w tej przeglądarce. Skopiuj kopię, żeby przenieść je na inne urządzenie.</p>
@@ -708,24 +801,36 @@ function tick(){
 setInterval(tick,250);
 
 /* ---------- akcje ---------- */
+/* idzie dalej po odpowiedzi: własny krok, powrót do istniejącego kroku albo koniec planu */
+function follow(c){const p=plan(RUN.planId);
+  if(c&&c.node)RUN.path.push(c.node.id);
+  else if(c&&c.goto&&c.goto!=='end'&&find(p.root,c.goto))RUN.path.push(c.goto);
+  else{RUN.done=true;RUN.result=null;}
+  window.scrollTo(0,0);render();}
 function startRun(id){const p=plan(id);if(!p)return;RUN={planId:id,path:[p.root.id],done:false};TAB='now';CONF=null;window.scrollTo(0,0);render();}
 function setStatus(id,s){const r=findAny(id);if(!r)return;r.node.status=r.node.status===s?'none':s;save();render();}
-function defLabel(n,k){return n.type==='question'?(['Tak','Nie'][k]||'Inna odpowiedź'):'Opcja '+(k+1);}
+function defLabel(n,k){return n.type==='question'&&n.qtype==='yesno'?(['Tak','Nie'][k]||''):'';}
 /* tworzy węzeł z wybranego typu: na wyjściu węzła albo wstawiony na linii */
 function addFromPick(type){const pk=ED.pick;const p=plan(ED.planId);if(!pk||!p)return;
   const r=find(p.root,pk.id);if(!r){ED.pick=null;render();return;}
-  const n=r.node;const nn=N(type,'');
+  const n=r.node;const nn=N(type,'');if(type==='question')nn.qtype='yesno';
+  /* nowe pytanie dostaje od razu odpowiedzi Tak i Nie; brakująca odpowiedź dostaje pusty krok do opisania */
+  const fill=()=>{if(nn.type!=='question')return;while(nn.children.length<2)nn.children.push({label:'',node:N('action','')});
+    if(nn.children.length>2)nn.qtype='single';nn.children.forEach((c,i)=>{if(nn.qtype==='yesno')c.label=['Tak','Nie'][i];});};
   if(pk.mode==='ins'){const link=n.children[pk.i];if(!link)return;const old=link.node;
-    nn.children=[{label:isBranch(nn)?defLabel(nn,0):'',node:old}];link.node=nn;}
-  else if(isBranch(n)){n.children.push({label:defLabel(n,n.children.length),node:nn});}
-  else{nn.children=n.children.map((c,i)=>({label:isBranch(nn)?defLabel(nn,i):c.label,node:c.node}));n.children=[{label:'',node:nn}];}
+    nn.children=[{label:'',node:old}];fill();link.node=nn;}
+  else if(isBranch(n)){if(n.qtype==='yesno'&&n.children.length>=2)n.qtype='single';n.children.push({label:defLabel(n,n.children.length),node:nn});fill();}
+  else{nn.children=n.children.map(c=>Object.assign({},c,{label:nn.type==='question'?'':c.label}));fill();n.children=[{label:'',node:nn}];}
   ED.pick=null;ED.sel=nn.id;CONF=null;save();render();focusNode(nn.id);focusText(nn.id);}
 function focusNode(id){setTimeout(()=>{const cv=$('#canvas');const el=cv&&cv.querySelector(`[data-node="${id}"]`);if(!cv||!el)return;
   const r=el.getBoundingClientRect(),c=cv.getBoundingClientRect();
   cv.scrollLeft+=r.left-c.left-(c.width-r.width)/2;cv.scrollTop+=r.top-c.top-Math.min(40,(c.height-r.height)/2);},40);}
 function delNode(id){const r=findAny(id);if(!r||!r.parent)return;const par=r.parent;const i=par.children.indexOf(r.link);
-  if(r.node.children.length===1){par.children[i]={label:r.link.label,node:r.node.children[0].node};}else par.children.splice(i,1);
-  ED.sel=null;CONF=null;save();render();}
+  if(r.node.children.length===1){par.children[i]=Object.assign({},r.node.children[0],{label:r.link.label});}
+  else if(par.type==='question'){par.children[i]={label:r.link.label,other:r.link.other,node:null,goto:'end'};}
+  else par.children.splice(i,1);
+  fixGotos(r.p.root);ED.sel=null;CONF=null;save();render();}
+const toastSk=t=>{if(window.Skroty)Skroty.komunikat(t);};
 function focusText(id){setTimeout(()=>{const el=document.getElementById('f-text-'+id);if(el){try{el.focus({preventScroll:true});}catch(e){el.focus();}}},60);}
 
 document.addEventListener('click',e=>{
@@ -735,18 +840,41 @@ document.addEventListener('click',e=>{
   switch(a){
     case'tab':TAB=el.dataset.k;CONF=null;window.scrollTo(0,0);render();break;
     case'start':startRun(id);break;
-    case'next':{const p=plan(RUN.planId);const cur=find(p.root,RUN.path[RUN.path.length-1]).node;if(cur.children[0]){RUN.path.push(cur.children[0].node.id);window.scrollTo(0,0);render();}break;}
-    case'branch':{const p=plan(RUN.planId);const cur=find(p.root,RUN.path[RUN.path.length-1]).node;const c=cur.children[+el.dataset.i];if(c){RUN.path.push(c.node.id);window.scrollTo(0,0);render();}break;}
+    case'next':{const p=plan(RUN.planId);const cur=find(p.root,RUN.path[RUN.path.length-1]).node;if(cur.children[0])follow(cur.children[0]);break;}
+    case'branch':{const p=plan(RUN.planId);const cur=find(p.root,RUN.path[RUN.path.length-1]).node;const c=cur.children[+el.dataset.i];if(c)follow(c);break;}
+    case'answer':{const p=plan(RUN.planId);const cur=find(p.root,RUN.path[RUN.path.length-1]).node;const i=+el.dataset.i;const c=cur.children[i];if(!c)break;
+      const other=c.other?(($('#run-other')||{}).value||'').trim():'';
+      if(c.other&&!other){const f=$('#run-other');if(f)f.focus();break;}
+      RUN.answers=RUN.answers||{};RUN.answers[cur.id]={i,label:c.label||'',text:other};follow(c);break;}
+    case'verdict':{const p=plan(RUN.planId);const v=el.dataset.s;RUN.result=v;
+      const ids=RUN.path.filter(x=>{const r=find(p.root,x);return r&&r.node.type!=='trigger';});
+      ids.forEach(x=>{const r=find(p.root,x);if(r)r.node.status=v;});
+      p.runs.push({at:Date.now(),path:RUN.path.slice(),ok:v==='ok',answers:RUN.answers||{}});p.runs=p.runs.slice(-50);
+      if(v==='bad'){const ns=ids.map(x=>find(p.root,x).node);const acts=ns.filter(n=>n.type!=='question');const last=acts[acts.length-1]||ns[ns.length-1];RUN.editId=last?last.id:null;ED.planId=p.id;}
+      save();window.scrollTo(0,0);render();break;}
+    case'sumEdit':RUN.editId=id;ED.planId=RUN.planId;render();break;
+    case'back2':RUN.done=false;RUN.result=null;render();break;
+    case'openEd':{const pid=RUN.planId;RUN=null;ED={planId:pid,sel:id||null,view:'canvas',pick:null,z:1};TAB='plans';CONF=null;window.scrollTo(0,0);render();fitZoom(1.2);if(id)focusNode(id);break;}
+    case'qtype':{const r=findAny(id);if(!r)break;const n=r.node;const k=el.dataset.k;
+      if(k==='yesno'){if(n.children.length>2){toastSk('Tak / Nie ma dwie odpowiedzi — najpierw usuń nadmiarowe');break;}
+        while(n.children.length<2)n.children.push({label:'',node:N('action','')});n.children.forEach((c,i)=>{c.label=['Tak','Nie'][i];delete c.other;});}
+      else if(n.qtype==='yesno'){n.children.forEach(c=>{if(c.label==='Tak'||c.label==='Nie')c.label='';});}
+      n.qtype=k;save();render();break;}
+    case'addAns':{const r=findAny(id);if(!r)break;r.node.children.push({label:'',node:N('action','')});save();render();
+      setTimeout(()=>{const ins=document.querySelectorAll(`[data-f="alabel"][data-id="${id}"]`);const f=ins[ins.length-1];if(f)f.focus();},40);break;}
+    case'addOther':{const r=findAny(id);if(!r)break;r.node.children.push({label:'Inne',other:true,node:N('action','')});save();render();break;}
+    case'delAns':{const r=findAny(id);if(!r)break;r.node.children.splice(+el.dataset.i,1);fixGotos(r.p.root);save();render();toastSk('Usunięto odpowiedź · Ctrl+Z cofa');break;}
+    case'ownStep':{const r=findAny(id);if(!r)break;const c=r.node.children[+el.dataset.i];if(!c)break;c.node=N('action','');delete c.goto;ED.sel=c.node.id;ED.pick=null;save();render();focusNode(c.node.id);focusText(c.node.id);break;}
     case'jump':RUN.path=RUN.path.slice(0,+el.dataset.i+1);render();break;
     case'back':if(RUN.path.length>1){RUN.path.pop();render();}else{RUN=null;render();}break;
-    case'finish':{const p=plan(RUN.planId);p.runs.push({at:Date.now(),path:RUN.path.slice()});p.runs=p.runs.slice(-50);RUN.done=true;save();window.scrollTo(0,0);render();break;}
+    case'finish':RUN.done=true;RUN.result=null;window.scrollTo(0,0);render();break;
     case'stop':{const wasEx=RUN&&RUN.planId===EXAMPLE.id;RUN=null;if(wasEx)TAB='ex';render();break;}
     case'rate':setStatus(RUN.path[RUN.path.length-1],el.dataset.s);break;
     case'rateId':setStatus(id,el.dataset.s);break;
     case'tmStart':tmStart(id);break;
     case'tmPause':tmPause();break;
     case'tmReset':tmReset();break;
-    case'goTimer':if(TM&&plan(TM.planId)){const p=plan(TM.planId);const ids=[];(function path(n,acc){acc.push(n.id);if(n.id===TM.nodeId){ids.push(...acc);return true;}for(const c of n.children)if(path(c.node,acc))return true;acc.pop();return false;})(p.root,[]);RUN={planId:p.id,path:ids,done:false};TAB='now';render();}break;
+    case'goTimer':if(TM&&plan(TM.planId)){const p=plan(TM.planId);const ids=[];(function path(n,acc){acc.push(n.id);if(n.id===TM.nodeId){ids.push(...acc);return true;}for(const c of n.children)if(c.node&&path(c.node,acc))return true;acc.pop();return false;})(p.root,[]);RUN={planId:p.id,path:ids,done:false};TAB='now';render();}break;
     case'newPlan':{const p=P('…',null);p.root.text='';S.plans.unshift(p);ED={planId:p.id,sel:p.root.id,view:'canvas',pick:null,z:ED.z||1};TAB='plans';CONF=null;save();window.scrollTo(0,0);render();focusText(p.root.id);break;}
     case'pickOut':ED.pick={mode:'out',id};ED.sel=null;CONF=null;render();break;
     case'pickIns':ED.pick={mode:'ins',id,i:+el.dataset.i};ED.sel=null;CONF=null;render();break;
@@ -794,17 +922,22 @@ document.addEventListener('input',e=>{
     if(f==='text'){n.text=el.value;const rt=document.getElementById('rt-'+n.id);if(rt)rt.innerHTML=(n.type==='trigger'?'<b>'+lab('trigger')+'</b> ':'')+txt(n.text);}
     else if(f==='note')n.note=el.value;
     else if(f==='label'&&r.link)r.link.label=el.value;
+    else if(f==='alabel'){const c=n.children[+el.dataset.i];if(c)c.label=el.value;}
     else if(f==='contact')n.contact=el.value;
     else if(f==='toolmin'){const v=parseInt(el.value,10);if(v>0)n.tool.min=Math.min(120,v);}
     save();
-    if((f==='text'||f==='label')&&ED.view!=='list'){const cv=$('#canvas');const p=plan(ED.planId);if(cv&&p)cv.innerHTML=graph(p,true,ED.z||1);}
+    if((f==='text'||f==='label'||f==='alabel')&&ED.view!=='list'){const cv=$('#canvas');const p=plan(ED.planId);if(cv&&p)cv.innerHTML=graph(p,true,ED.z||1);}
     return;}
   if(el.dataset.c&&el.tagName!=='SELECT'){setCfg(el.dataset.c,el.value);}
 });
 document.addEventListener('change',e=>{
   const el=e.target;
   if(el.dataset.f){const r=findAny(el.dataset.id);if(!r)return;const n=r.node,f=el.dataset.f;
-    if(f==='type'){n.type=el.value;if(isBranch(n))n.children.forEach((c,i)=>{if(!c.label)c.label=n.type==='question'?(['Tak','Nie'][i]||'Inna odpowiedź'):'Opcja '+(i+1);});if(n.type!=='action')n.tool={kind:'none',min:0};save();render();}
+    if(f==='agoto'){const c=n.children[+el.dataset.i];if(!c)return;const v=el.value;
+      if(v==='own'){if(!c.node){c.node=N('action','');delete c.goto;}}
+      else{let lost=0;if(c.node)walk(c.node,m=>{if(String(m.text||'').trim())lost++;});c.node=null;c.goto=v;fixGotos((findAny(n.id)||{p:plan(ED.planId)}).p.root);if(lost)toastSk(`Odpięto ${lost} ${lost===1?'krok':'kroki'} · Ctrl+Z cofa`);}
+      save();render();return;}
+    if(f==='type'){n.type=el.value;if(n.type==='question'&&!n.qtype)n.qtype='single';if(isBranch(n))n.children.forEach((c,i)=>{if(!c.label&&n.qtype==='yesno')c.label=['Tak','Nie'][i]||'';});if(n.type!=='action')n.tool={kind:'none',min:0};save();render();}
     else if(f==='toolkind'){n.tool={kind:el.value,min:el.value==='none'?0:defMin(el.value)};save();render();}
     else if(f==='szop'){plan(ED.planId).szop=el.value;save();}
     return;}
