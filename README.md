@@ -1,4 +1,4 @@
-# ADHD — narzędzia czubekxd
+# ADHD — narzędzia Mateusza
 
 Trzy małe narzędzia do samomonitorowania i ogarniania dnia. Każde to osobna strona statyczna:
 żadnego backendu, żadnego konta, dane zostają w przeglądarce.
