@@ -29,7 +29,17 @@ Folder [`wspolne/`](wspolne/) trzyma to, co działa tak samo w każdym narzędzi
   element — wiersz zadania lub wpisu, węzeł planu, kartę WOOP. W polu z tekstem oba klawisze działają zwyczajnie, na tekście.
   Historia cofania żyje do odświeżenia strony.
 - **Motyw CYBER** ([`cyber.js`](wspolne/cyber.js), [`cyber.css`](wspolne/cyber.css)): przełącznik w nagłówku każdego narzędzia.
-  Ustawienie leży pod kluczem `adhd.skin`, więc włączone w jednym miejscu działa wszędzie. WOOP ma pełną wersję motywu u siebie. Licencja: [MIT](LICENSE).
+  Ustawienie leży pod kluczem `adhd.skin`, więc włączone w jednym miejscu działa wszędzie. WOOP ma pełną wersję motywu u siebie. Licencja: [PolyForm Noncommercial 1.0.0](LICENSE).
+
+## Licencja
+
+Kod jest otwarty i darmowy do **użytku niekomercyjnego**: prywatnie, do nauki, w hobbystycznych projektach,
+w organizacjach non-profit, szkołach i instytucjach publicznych. Możesz go pobrać, zmieniać i dzielić się nim dalej —
+razem z plikiem [`LICENSE`](LICENSE) i linijką `Required Notice`.
+
+**Nie wolno** go sprzedawać ani używać komercyjnie, w tym robić z niego płatnej aplikacji czy usługi online.
+Pełne warunki: [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0).
+Wersje opublikowane wcześniej na licencji MIT zostają na MIT dla tych, którzy je wtedy pobrali.
 
 ---
 
