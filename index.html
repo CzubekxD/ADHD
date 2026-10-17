@@ -1,40 +1,143 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" data-theme="auto">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<title>Pasek zdrowia — SZOP i bateria</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Narzędzia — czubekxd</title>
+<meta name="description" content="Zestaw małych narzędzi do samomonitorowania i ogarniania dnia. Wszystko działa w przeglądarce, bez konta i bez serwera.">
+<style>
+:root {
+  color-scheme: light;
+  --page:#f4f4f1; --card:#ffffff; --surface:#fcfcfb;
+  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
+  --bar:#2a78d6; --gold:#b07800; --t3:#ec835a;
+  --shadow:0 1px 2px rgba(11,11,11,.05), 0 6px 20px rgba(11,11,11,.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page:#0d0d0d; --card:#1a1a19; --surface:#1a1a19;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.12);
+    --bar:#3987e5; --gold:#c98500; --t3:#ec835a;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
+  }
+}
+* { box-sizing:border-box; }
+html, body { margin:0; padding:0; }
+body {
+  background:var(--page); color:var(--ink); padding:0 16px 64px;
+  font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif; -webkit-text-size-adjust:100%;
+}
+.wrap { max-width:900px; margin:0 auto; }
+header { padding:56px 0 8px; }
+h1 { font-size:30px; margin:0 0 10px; letter-spacing:-.02em; }
+header p { margin:0; color:var(--ink-2); font-size:15.5px; max-width:62ch; }
+h2 { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:40px 0 14px; font-weight:600; }
+
+.tools { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
+.tool {
+  display:flex; flex-direction:column; gap:10px; text-decoration:none; color:inherit;
+  background:var(--card); border:1px solid var(--ring); border-radius:14px; padding:20px;
+  box-shadow:var(--shadow); transition:transform .18s cubic-bezier(.2,.9,.3,1), border-color .18s ease, box-shadow .18s ease;
+}
+.tool:hover { transform:translateY(-3px); border-color:var(--axis); box-shadow:0 2px 4px rgba(0,0,0,.06), 0 12px 28px rgba(0,0,0,.10); }
+.tool .top { display:flex; align-items:center; gap:10px; }
+.tool .ico { font-size:22px; line-height:1; }
+.tool .nm { font-size:17px; font-weight:650; letter-spacing:-.01em; }
+.tool .desc { color:var(--ink-2); font-size:14px; margin:0; }
+.tool .chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:2px; }
+.tool .chip { font-size:11px; color:var(--muted); border:1px solid var(--grid); border-radius:20px; padding:2px 9px; }
+.tool .go { margin-top:auto; padding-top:8px; font-size:13.5px; font-weight:600; color:var(--bar); }
+.tool.soon { opacity:.62; pointer-events:none; }
+.tool.soon .go { color:var(--muted); }
+
+.note { margin-top:34px; background:var(--surface); border:1px solid var(--ring); border-radius:14px; padding:18px 20px; }
+.note h3 { font-size:14px; margin:0 0 8px; }
+.note p { margin:0 0 8px; color:var(--ink-2); font-size:14px; }
+.note p:last-child { margin-bottom:0; }
+.note a, header a { color:var(--bar); }
+
+footer {
+  display:flex; gap:18px; flex-wrap:wrap; justify-content:center; align-items:center;
+  margin-top:40px; padding-top:18px; border-top:1px solid var(--grid);
+  font-size:12.5px; color:var(--muted);
+}
+footer a { color:var(--ink-2); text-decoration:none; }
+footer a:hover { color:var(--bar); text-decoration:underline; }
+@media (prefers-reduced-motion: reduce) { .tool { transition:none; } .tool:hover { transform:none; } }
+</style>
 </head>
 <body>
+<div class="wrap">
 
-<div class="osnowa">
-
-  <header class="gora">
-    <div class="tytul">
-      <h1>Pasek zdrowia</h1>
-      <span class="podtytul" id="licznik-wpisow"></span>
-    </div>
-    <nav class="zakladki" role="tablist" aria-label="Sekcje aplikacji">
-      <button role="tab" data-widok="wpis"       aria-selected="true">Nowy wpis</button>
-      <button role="tab" data-widok="dashboard"  aria-selected="false">Dashboard</button>
-      <button role="tab" data-widok="flagi"      aria-selected="false">Czerwone flagi</button>
-      <button role="tab" data-widok="historia"   aria-selected="false">Historia</button>
-      <button role="tab" data-widok="ustawienia" aria-selected="false">Ustawienia</button>
-      <button role="tab" data-widok="ostronie"   aria-selected="false">O stronie</button>
-    </nav>
+  <header>
+    <h1>Narzędzia</h1>
+    <p>Kilka małych rzeczy, które zbudowałem dla siebie, żeby ogarnąć dzień i własną głowę.
+       Każda działa w całości w przeglądarce — bez konta, bez serwera, bez wysyłania czegokolwiek na zewnątrz.
+       Chcesz użyć u siebie? Bierz, kod jest otwarty.</p>
   </header>
 
-  <main id="widok" role="tabpanel"></main>
+  <h2>Do użycia</h2>
+  <div class="tools" id="tools"></div>
+
+  <div class="note">
+    <h3>Jak to działa z danymi</h3>
+    <p>Wszystko, co wpiszesz, zostaje w pamięci Twojej przeglądarki, na tym jednym urządzeniu.
+       Nic nie leci na serwer, bo serwera nie ma — to są zwykłe pliki HTML.</p>
+    <p>Minus tego rozwiązania: dane nie przechodzą same między komputerem a telefonem, a wyczyszczenie danych
+       witryny je kasuje. Dlatego każde narzędzie ma eksport i import kopii w formacie JSON — to jedyny sposób
+       na backup i na przeniesienie się na inny sprzęt.</p>
+  </div>
+
+  <footer>
+    <span>czubekxd</span>
+    <a href="https://github.com/czubekxd/ADHD" target="_blank" rel="noopener">kod na GitHubie ↗</a>
+    <a href="https://github.com/czubekxd/ADHD/blob/main/LICENSE" target="_blank" rel="noopener">licencja MIT</a>
+    <a href="https://buycoffee.to/czubekxd" target="_blank" rel="noopener">postaw kawę ☕</a>
+  </footer>
 
 </div>
 
-<script src="config.js"></script>
-<script src="storage.js"></script>
-<script src="app.js"></script>
+<script>
+/* ──────────────────────────────────────────────────────────────────────────
+   DOPISYWANIE NARZĘDZI
+   Jedna pozycja = jeden obiekt poniżej. Kolejność na liście = kolejność tutaj.
+   Pola: ikona (emoji), nazwa, opis, chips (słowa kluczowe), href (ścieżka do katalogu).
+   Dodaj   soon: true   żeby pokazać coś jako "w budowie" — kafelek będzie wyszarzony i nieklikalny.
+   ────────────────────────────────────────────────────────────────────────── */
+const TOOLS = [
+  {
+    ico: "🔋",
+    nazwa: "Pasek zdrowia × SZOP",
+    opis: "Monitor obciążenia według SZOP: stres, zmęczenie, oczekiwania, przebodźcowanie. Poziom baterii, czerwone flagi, strategie regeneracji i analiza tego, co naprawdę Cię zjada.",
+    chips: ["samomonitorowanie", "SZOP", "czerwone flagi"],
+    href: "./pasek/"
+  },
+  {
+    ico: "🎯",
+    nazwa: "Tablica scoringowa",
+    opis: "Dzienna tablica zadań z punktacją ustawioną tak, żeby ciężkie rzeczy opłacały się bardziej niż pięć łatwych. Plan tygodnia, import z Asany i statystyka tego, o której realnie domykasz.",
+    chips: ["zadania", "punktacja", "plan tygodnia"],
+    href: "./tablica/"
+  },
+  {
+    ico: "⚡",
+    nazwa: "Plany Jeżeli… to…",
+    opis: "Gotowe scenariusze na trudne momenty, zbudowane jako drzewa kroków. W chwili kryzysu przechodzisz plan krok po kroku, z licznikiem, przerwą albo oddechem, a karty ćwiczeń pomagają zapamiętać plany na zapas.",
+    chips: ["plany wdrożeniowe", "kryzys", "telefon"],
+    href: "./plany/"
+  }
+];
+
+document.getElementById("tools").innerHTML = TOOLS.map(t => `
+  <a class="tool${t.soon ? " soon" : ""}" href="${t.soon ? "#" : t.href}">
+    <div class="top"><span class="ico">${t.ico}</span><span class="nm">${t.nazwa}</span></div>
+    <p class="desc">${t.opis}</p>
+    <div class="chips">${(t.chips || []).map(c => `<span class="chip">${c}</span>`).join("")}</div>
+    <div class="go">${t.soon ? "w budowie" : "Otwórz →"}</div>
+  </a>`).join("");
+</script>
 </body>
 </html>
