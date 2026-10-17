@@ -6,6 +6,17 @@ pokazującym, kiedy przychodzą kłopoty i co na nie realnie działa.
 
 Strona statyczna — żadnego backendu, żadnych zależności, żadnego procesu budowania.
 
+## Narzędzia w repozytorium
+
+| Ścieżka | Narzędzie | Dane w `localStorage` |
+|---|---|---|
+| `/` | Pasek zdrowia — monitor SZOP i baterii (ten plik opisuje go poniżej) | `mcz.dane.v1` |
+| [`plany/`](plany/) | Plany Jeżeli… to… — drzewa węzłów, tryb „Teraz” krok po kroku, ćwiczenia z kart | `plany-jezeli-v1` |
+| [`tablica/`](tablica/) | Tablica scoringowa — dzienna tablica zadań z punktacją; na razie specyfikacja w [`tablica/SPEC.md`](tablica/SPEC.md) | `tablica-scoringowa-v1` |
+
+Każde narzędzie to osobna strona z własnym kluczem danych, więc nie wchodzą sobie w drogę.
+Na GitHub Pages są pod `…/ADHD/plany/` i `…/ADHD/tablica/`.
+
 ## Wrzucenie na GitHub Pages
 
 1. Załóż repozytorium na GitHubie (może być prywatne — Pages działa też
