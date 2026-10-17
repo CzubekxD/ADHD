@@ -501,11 +501,12 @@ function vSummary(){
 function vPlans(){
   return`<div class="edhead"><h1 class="grow">Plany</h1><button class="btn small primary" data-act="newPlan">+ Nowy plan</button></div>
   ${S.plans.length?'':'<p class="empty">Brak planów. Dodaj pierwszy albo skopiuj przykład z zakładki Przykład.</p>'}
-  ${S.plans.map(p=>{const t=tally(p.root);return`<article class="plan">
+  ${S.plans.map(p=>{const t=tally(p.root);return`<article class="plan" data-id="${p.id}">
     <span class="eyebrow">${ic('trigger')}${lab('trigger')}…${p.szop?` <span class="chip">${esc(p.szop)}</span>`:''}</span>
     <div class="tx">${esc(p.root.text||'(bez opisu)')}</div>
     <div class="tally">${t.ok?badge('ok').replace(ST.ok.word,t.ok+' '+ST.ok.word):''}${t.bad?badge('bad').replace(ST.bad.word,t.bad+' '+ST.bad.word):''}<span class="st st-none">${countN(p.root)-1} kroków</span><span class="st st-none">uruchomiony ${p.runs.length}×</span></div>
-    <div class="btnrow"><button class="btn small" data-act="edit" data-id="${p.id}">Edytuj</button><button class="btn small ghost" data-act="start" data-id="${p.id}">Uruchom</button></div>
+    <div class="btnrow"><button class="btn small" data-act="edit" data-id="${p.id}">Edytuj</button><button class="btn small ghost" data-act="start" data-id="${p.id}">Uruchom</button><span class="grow"></span>${CONF==='delp:'+p.id?'':`<button class="btn small ghost danger" data-act="ask" data-k="delp:${p.id}">Skasuj plan</button>`}</div>
+    ${CONF==='delp:'+p.id?`<div class="confirm"><p>Skasować plan „${esc(short(p.root.text,50))}” razem z ${countN(p.root)-1} krokami? Ctrl+Z cofa.</p><div class="btnrow"><button class="btn small danger" data-act="delPlanId" data-id="${p.id}">Skasuj</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`:''}
   </article>`;}).join('')}`;
 }
 
@@ -520,8 +521,8 @@ function vEditor(){
       <div class="canvaswrap"><div class="canvas" id="canvas">${graph(p,true,ED.z||1)}</div>
       <div class="zoom" role="group" aria-label="Widok płótna">${hasManual(p)?`<button class="wide" data-act="ask" data-k="tidy">Uporządkuj</button>`:''}<button class="wide" data-act="fit" aria-label="Dopasuj plan do okna">Cały plan</button><button data-act="zoom" data-k="-1" aria-label="Pomniejsz">−</button><button data-act="zoom" data-k="1" aria-label="Powiększ">+</button></div></div>
       ${CONF==='tidy'?`<div class="confirm"><p>Ułożyć węzły automatycznie? Ręczne położenie zostanie zapomniane.</p><div class="btnrow"><button class="btn small danger" data-act="tidy">Uporządkuj</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`:''}`;
-  const del=CONF==='delPlan'?`<div class="confirm"><p>Usunąć cały plan razem z ${countN(p.root)-1} krokami?</p><div class="btnrow"><button class="btn small danger" data-act="delPlan">Usuń plan</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`
-    :`<button class="btn small ghost danger" data-act="ask" data-k="delPlan">Usuń plan</button>`;
+  const del=CONF==='delPlan'?`<div class="confirm"><p>Skasować cały plan razem z ${countN(p.root)-1} krokami? Ctrl+Z cofa.</p><div class="btnrow"><button class="btn small danger" data-act="delPlan">Skasuj plan</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`
+    :`<button class="btn small ghost danger" data-act="ask" data-k="delPlan">Skasuj plan</button>`;
   const sheet=ED.pick?pickSheet():(ED.sel&&find(p.root,ED.sel)?nodeSheet(p):'');
   return head+legend+body+`<div class="btnrow"><button class="btn small" data-act="start" data-id="${p.id}">Uruchom ten plan</button></div>`+del+(sheet?`<div class="sheetspace"></div>${sheet}`:'');
 }
@@ -831,6 +832,9 @@ function delNode(id){const r=findAny(id);if(!r||!r.parent)return;const par=r.par
   else par.children.splice(i,1);
   fixGotos(r.p.root);ED.sel=null;CONF=null;save();render();}
 const toastSk=t=>{if(window.Skroty)Skroty.komunikat(t);};
+/* kasuje cały plan; Ctrl+Z go przywraca */
+function killPlan(id){if(!S.plans.some(p=>p.id===id))return;S.plans=S.plans.filter(p=>p.id!==id);
+  if(ED.planId===id)ED={planId:null,sel:null,view:ED.view||'canvas',pick:null,z:1};if(RUN&&RUN.planId===id)RUN=null;DR=null;CONF=null;save();render();toastSk('Skasowano plan · Ctrl+Z cofa');}
 function focusText(id){setTimeout(()=>{const el=document.getElementById('f-text-'+id);if(el){try{el.focus({preventScroll:true});}catch(e){el.focus();}}},60);}
 
 document.addEventListener('click',e=>{
@@ -895,7 +899,8 @@ document.addEventListener('click',e=>{
     case'ask':CONF=el.dataset.k;render();break;
     case'noConf':CONF=null;render();break;
     case'delNode':delNode(id);break;
-    case'delPlan':S.plans=S.plans.filter(p=>p.id!==ED.planId);ED={planId:null,sel:null,view:'canvas',pick:null,z:1};CONF=null;save();render();break;
+    case'delPlanId':killPlan(id);break;
+    case'delPlan':killPlan(ED.planId);break;
     case'reveal':DR.revealed=true;render();break;
     case'drillRate':{const p=plan(DR.order[DR.i]);if(p){p.drill[el.dataset.s]=(p.drill[el.dataset.s]||0)+1;save();}DR.i++;DR.revealed=false;render();break;}
     case'drillNext':DR.i++;DR.revealed=false;render();break;
@@ -963,6 +968,10 @@ if(window.Skroty)Skroty.init({
     if(RUN){const p=plan(RUN.planId);if(!p||RUN.path.some(id=>!find(p.root,id)))RUN=null;}
     DR=null;applyMotion();render();},
   usun:()=>{
+    /* na liście planów Delete kasuje plan, na którym jest kursor albo myszka */
+    if(TAB==='plans'&&!ED.planId){const a=document.activeElement;const f=a&&a.closest?a.closest('article.plan[data-id]'):null;
+      const h=[...document.querySelectorAll('article.plan[data-id]')].find(x=>x.matches(':hover'));const card=f||h;
+      if(!card)return false;killPlan(card.dataset.id);return true;}
     if(TAB!=='plans'||!ED.planId||!ED.sel)return false;
     const p=plan(ED.planId);const r=p&&find(p.root,ED.sel);
     if(!r||!r.parent)return false;
