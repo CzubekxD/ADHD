@@ -30,7 +30,7 @@
 
   function przelacz(btn) {
     const on = !czytaj();
-    const zastosuj = () => { zapisz(on); ustaw(on); };
+    const zastosuj = () => { zapisz(on); ustaw(on); dispatchEvent(new CustomEvent('adhd:skin', { detail: { on } })); };
     if (!document.startViewTransition || spokojnie() || document.hidden || !btn) { zastosuj(); return; }
     // nowy wygląd rozlewa się kołem od przełącznika
     const r = btn.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;

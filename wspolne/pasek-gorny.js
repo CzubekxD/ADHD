@@ -35,7 +35,7 @@
     el.innerHTML = `<div class="pg-in">
       <div class="pg-menu">
         <button class="pg-narzedzie" type="button" aria-haspopup="menu" aria-expanded="false" data-pg="narzedzia">
-          ${ja ? `<span class="pg-znak">${window.znakNarzedzia ? znakNarzedzia(ja) : esc(ja.znak)}</span><span class="pg-nazwa">${esc(ja.nazwa)}</span>`
+          ${ja ? `<span class="pg-znak">${window.znakNarzedzia ? znakNarzedzia(ja) : esc(ja.znak)}</span>${ja.nazwaHtml ? `<span class="pg-nazwa brand" aria-label="${esc(ja.nazwa)}">${ja.nazwaHtml}</span>` : `<span class="pg-nazwa">${esc(ja.nazwa)}</span>`}`
                : `<span class="pg-znak">${IKONA.dom}</span><span class="pg-nazwa">Narzędzia</span>`}
           ${IKONA.w_dol}
         </button>
@@ -92,6 +92,16 @@
 
     if (window.Cyber && window.Cyber.zamontuj) window.Cyber.zamontuj();
     if (window.Chmura && window.Chmura.zamontuj) window.Chmura.zamontuj();
+    // włączenie CYBER: krótki „glitch” animowanego znaku (WOOP)
+    if (!el.dataset.burst) {
+      el.dataset.burst = '1';
+      addEventListener('adhd:skin', e => {
+        const b = el.querySelector('.brand');
+        if (!b || !(e.detail && e.detail.on)) return;
+        b.classList.remove('burst'); b.getBoundingClientRect(); b.classList.add('burst');
+        setTimeout(() => b.classList.remove('burst'), 900);
+      });
+    }
   }
 
   function start() { document.querySelectorAll('[data-pasek-gorny]').forEach(zbuduj); }

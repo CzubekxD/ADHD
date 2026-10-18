@@ -156,7 +156,9 @@
       <span class="pp-akcja cicha">${esc(n.start || 'Otwórz')}</span></a>`;
   }
   function widzet(n, s, korzen) {
-    const glowa = `<div class="pp-glowa">${znak(n)}<a class="pp-nazwa-n" href="${esc(korzen + n.href)}">${esc(n.nazwa)}</a></div>`;
+    // ten sam układ co kafelek: miniatura u góry, ikona i nazwa, potem liczba dnia i przycisk
+    const mini = n.mini ? `<a class="pp-mini" href="${esc(korzen + n.href)}" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 220 92">${n.mini}</svg></a>` : '';
+    const glowa = mini + `<div class="pp-glowa">${znak(n, true)}<a class="pp-tytul pp-nazwa-n" href="${esc(korzen + n.href)}">${esc(n.nazwa)}</a></div>`;
     const tekst = s.zyczenie != null ? s.zyczenie : s.naglowek;
     const gora = tekst != null
       ? `<p class="pp-zyczenie">${esc(tekst)}</p><div class="pp-wiersz"><p class="pp-podpis">${esc(s.podpis)}</p>${s.obok || ''}</div>`
