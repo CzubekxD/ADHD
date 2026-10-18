@@ -52,6 +52,13 @@ Folder [`wspolne/`](wspolne/) trzyma to, co działa tak samo w każdym narzędzi
 - **Motyw CYBER** ([`cyber.js`](wspolne/cyber.js), [`cyber.css`](wspolne/cyber.css)): przełącznik w nagłówku każdego narzędzia.
   Ustawienie leży pod kluczem `adhd.skin`, więc włączone w jednym miejscu działa wszędzie. WOOP ma pełną wersję motywu u siebie. Licencja: [PolyForm Noncommercial 1.0.0](LICENSE).
 
+## Publikacja
+
+Stronę publikuje workflow [`.github/workflows/strona.yml`](.github/workflows/strona.yml) przy każdej zmianie w `main`
+(ustawienie: Settings → Pages → Source: **GitHub Actions**). Przed publikacją dopisuje do linków numer wersji
+(`system.css?v=abc1234`), a [`wspolne/wersja.js`](wspolne/wersja.js) przeładowuje stronę, jeśli przeglądarka pokazuje
+starszą wersję z pamięci. Nie trzeba więc Ctrl+F5 po zmianach. Pliki w repozytorium zostają bez numerów wersji.
+
 ## Licencja
 
 Kod jest otwarty i darmowy do **użytku niekomercyjnego**: prywatnie, do nauki, w hobbystycznych projektach,

@@ -1,0 +1,36 @@
+# Publikacja strony na GitHub Pages przy każdej zmianie w main.
+# Przed wysłaniem dopisuje do linków numer wersji (?v=abc1234), więc przeglądarka
+# od razu pobiera nowe style i skrypty — bez Ctrl+F5. Pliki w repozytorium się nie zmieniają.
+# Wymaga jednorazowo: Settings → Pages → Build and deployment → Source: GitHub Actions.
+name: Strona
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publikuj:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.wdrozenie.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Numer wersji w linkach do stylów i skryptów
+        run: python3 .github/wersja.py "${GITHUB_SHA::7}"
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: wdrozenie
+        uses: actions/deploy-pages@v4

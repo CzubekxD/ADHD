@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pl" data-kolor="lupek">
 <head>
+<meta name="adhd-wersja" content="dev"><script src="./wspolne/wersja.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Narzędzia — czubekxd</title>
@@ -69,7 +70,8 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 /* informacje i kopia */
 .pp-info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:var(--s-4)}
 @media (max-width:900px){.pp-info{grid-template-columns:minmax(0,1fr)}}
-.note{background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);padding:16px 18px;min-width:0}
+.note{background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);padding:16px 18px;min-width:0;display:flex;flex-direction:column}
+.note .brow{margin-top:auto;padding-top:10px}
 .note h2{font-size:15px;margin:0 0 8px}
 .note p{margin:0 0 8px;color:var(--s-tusz-2);font-size:14px}
 .note p:last-child{margin-bottom:0}
@@ -77,6 +79,8 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 .keys{display:grid;gap:6px;margin:0 0 8px;padding:0;list-style:none;color:var(--s-tusz-2);font-size:14px}
 kbd{font:600 12px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace;border:1px solid var(--s-linia-mocna);border-bottom-width:2px;border-radius:5px;padding:3px 6px;background:var(--s-pow-2);color:var(--s-tusz)}
 .brow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.kopia-stan{font-size:14px;color:var(--s-przygaszony)}
+.kopia-stan.dawno{align-self:flex-start;color:var(--s-uwaga);background:var(--s-uwaga-tlo);border-radius:999px;padding:3px 12px;font-weight:600}
 .kmsg{margin-top:10px !important;font-size:14px}
 @media (max-width:520px){.pp-naglowek h1{font-size:26px}.pp-liczba{font-size:34px}}
 @media (prefers-reduced-motion:reduce){a.pp-w{transition:none}}
@@ -115,11 +119,12 @@ html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
         <li><span><kbd>Ctrl</kbd> + <kbd>Y</kbd></span> ponawia</li>
         <li><span><kbd>Delete</kbd></span> usuwa zaznaczony wiersz, węzeł albo kartę</li>
       </ul>
-      <p><b>CYBER</b> w pasku u góry włącza neonowy motyw we wszystkich narzędziach naraz.</p>
+      <p><b>CYBER</b> w pasku u góry: neonowy motyw wszędzie naraz.</p>
     </section>
     <section class="note" id="kopia">
       <h2>Kopia wszystkiego</h2>
       <p>Jeden plik z danymi wszystkich narzędzi z tej przeglądarki, na backup albo przeprowadzkę.</p>
+      <p class="kopia-stan" id="kopia-stan"></p>
       <div class="brow"><button class="s-przycisk maly" id="kopia-pobierz" type="button">Pobierz kopię</button><button class="s-przycisk maly" id="kopia-wczytaj" type="button">Wczytaj kopię</button></div>
       <div id="kopia-potw" hidden>
         <p class="kmsg" id="kopia-opis"></p>
@@ -145,9 +150,26 @@ html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
 /* ── PULPIT DNIA ──────────────────────────────────────────────────────────
    Narzędzia dopisujesz w wspolne/narzedzia.js, ich liczbę dnia w wspolne/pulpit.js. */
 const $k = id => document.getElementById(id);
+/* przypomnienie o kopii: kiedy ostatnio pobrano plik; po tygodniu napis robi się wyraźny */
+const OSTATNIA = "adhd.kopia.ostatnia";
+function stanKopii(zDanymi) {
+  const el = $k("kopia-stan"); if (!el) return;
+  let kiedy = null, sync = false;
+  try { kiedy = localStorage.getItem(OSTATNIA); sync = !!(JSON.parse(localStorage.getItem("adhd.chmura") || "null") || {}).wlaczona; } catch (e) {}
+  const dni = kiedy ? Math.floor((new Date(new Date().toDateString()) - new Date(new Date(kiedy).toDateString())) / 864e5) : null;
+  const opis = dni == null ? null : dni === 0 ? "dziś" : dni === 1 ? "wczoraj" : ile(dni, "dzień", "dni", "dni") + " temu";
+  let tekst;
+  if (sync) tekst = "Synchronizacja z Google Drive jest włączona" + (opis ? " · ostatnia kopia pliku: " + opis : "") + ".";
+  else if (opis) tekst = "Ostatnia kopia: " + opis + ".";
+  else tekst = zDanymi ? "Jeszcze nie pobrałeś kopii." : "";
+  el.textContent = tekst;
+  el.hidden = !tekst;
+  el.classList.toggle("dawno", !sync && !!zDanymi && (dni == null || dni >= 7));
+}
 function odswiezPulpit() {
   const teraz = new Date();
   const zDanymi = Pulpit.rysuj($k("pulpit"), { korzen: "./" });
+  stanKopii(zDanymi);
   const data = teraz.toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long" });
   $k("pp-data").textContent = zDanymi ? data.charAt(0).toUpperCase() + data.slice(1) : "";
   $k("pp-tytul").textContent = zDanymi ? "Dzisiaj" : "Narzędzia";
@@ -183,6 +205,8 @@ $k("kopia-pobierz").addEventListener("click", () => {
   if (!ile) { msg("W tej przeglądarce nie ma jeszcze danych żadnego narzędzia."); return; }
   Kopia.pobierz("narzedzia-kopia-" + Kopia.dzis() + ".json",
     JSON.stringify({ typ: "adhd-kopia", wersja: 1, utworzono: new Date().toISOString(), dane }, null, 1));
+  try { localStorage.setItem(OSTATNIA, new Date().toISOString()); } catch (e) {}
+  stanKopii();
   msg("Pobrano kopię " + ile + (ile === 1 ? " narzędzia." : " narzędzi."));
 });
 

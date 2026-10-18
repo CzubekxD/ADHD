@@ -15,6 +15,7 @@
      opis    — jedno zdanie do menu i kafelka
      nazwaHtml — opcjonalnie: własny, animowany znak nazwy w pasku na stronie narzędzia
      start   — tekst przycisku na kafelku, zanim ktoś zacznie
+     pytanie — nagłówek kafelka bez danych (każda karta ma nagłówek w tym samym miejscu)
      klucz   — klucz danych w localStorage (kopia, synchronizacja z Google Drive)
    Widżet na pulpicie (liczba dnia) dopisujesz w wspolne/pulpit.js.
    Paleta (w kolejności przydziału): szalwia, bursztyn, granat, sliwka,
@@ -23,14 +24,14 @@
 window.NARZEDZIA = [
   { id: 'pasek', nazwa: 'Pasek zdrowia × SZOP', znak: 'PZ', kolor: 'szalwia', klucz: 'mcz.dane.v1', href: 'pasek/',
     opis: 'Energia, czynniki SZOP, czerwone flagi i to, co realnie pomaga.',
-    start: 'Dodaj pierwszy wpis',
+    start: 'Dodaj pierwszy wpis', pytanie: 'Jak dziś bateria?',
     ikona: '<rect x="2.5" y="7" width="17" height="10" rx="2.5"/><path d="M22 10.5v3M6.5 10.5v3M10 10.5v3M13.5 10.5v3"/>',
     mini: [14, 26, 20, 40, 52, 34, 22, 46, 30, 18, 12].map((h, i) =>
         `<rect class="k" opacity="${(.4 + .08 * (i % 4)).toFixed(2)}" x="${22 + i * 16}" y="${78 - h}" width="10" height="${h}" rx="2"/>`).join('') +
       '<polyline class="ts" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="27,22 43,26 59,24 75,40 91,52 107,46 123,36 139,48 155,40 171,30 187,24"/><circle class="t" cx="187" cy="24" r="3.5"/>' },
   { id: 'tablica', nazwa: 'Tablica scoringowa', znak: 'TS', kolor: 'bursztyn', klucz: 'tablica-scoringowa-v1', href: 'tablica/',
     opis: 'Dzienna tablica zadań z punktacją, plan tygodnia i historia.',
-    start: 'Ułóż dzisiejszą tablicę',
+    start: 'Ułóż dzisiejszą tablicę', pytanie: 'Co dziś domkniesz?',
     ikona: '<path d="M4.5 20v-3M9.5 20v-6.5M14.5 20v-10M19.5 20V4"/>',
     mini: [['8', 1, 124], ['3', 0, 96], ['21', 0, 140]].map(([pkt, zrob, w], i) =>
       `<rect class="p ps" x="24" y="${10 + i * 26}" width="172" height="20" rx="5" stroke-width="1"/>` +
@@ -40,7 +41,7 @@ window.NARZEDZIA = [
       `<text class="na" x="178" y="${23.5 + i * 26}" text-anchor="middle" font-size="9">${pkt}</text>`).join('') },
   { id: 'plany', nazwa: 'Plany Jeżeli… to…', znak: 'JT', kolor: 'granat', klucz: 'plany-jezeli-v1', href: 'plany/',
     opis: 'Gotowe ścieżki na trudne momenty, krok po kroku.',
-    start: 'Zbuduj pierwszy plan',
+    start: 'Zbuduj pierwszy plan', pytanie: 'Co zrobisz, gdy zrobi się trudno?',
     ikona: '<circle cx="12" cy="5" r="2.2"/><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="19" r="2.2"/><path d="M12 7.2v2.6c0 2.4-6 2.6-6 6.9M12 9.8c0 2.4 6 2.6 6 6.9"/>',
     mini: '<path class="ks" fill="none" stroke-width="2" d="M86 46 C104 46 104 22 122 22 M86 46 C104 46 104 70 122 70 M178 22 C190 22 190 46 200 46 M178 70 C190 70 190 46 200 46"/>' +
       '<rect class="k" x="22" y="34" width="64" height="24" rx="6"/><text class="na" x="54" y="50" text-anchor="middle" font-size="10">Jeżeli…</text>' +
@@ -51,7 +52,7 @@ window.NARZEDZIA = [
     // animowany znak W-O-O-P w pasku (style i animacje są w woop/index.html, klasa .brand)
     nazwaHtml: '<b class="c1">W</b><b class="c2">O</b><b class="c3">O</b><b class="c4">P</b>',
     opis: 'Życzenie, efekt, przeszkoda, plan — i codzienny wpis, czy działa.',
-    start: 'Przejdź kreator WOOP',
+    start: 'Przejdź kreator WOOP', pytanie: 'Czego naprawdę chcesz?',
     ikona: '<path d="M2.5 20.5 9.5 10l3.6 5.2 2.2-3 6.2 8.3z"/><path d="M9.5 10V3.5l4.5 1.7-4.5 1.7"/>',
     mini: ['W', 'O', 'O', 'P'].map((l, i) =>
       `<rect x="${22 + i * 46}" y="${22 + (i % 2) * 6}" width="38" height="44" rx="7" class="${i === 3 ? 'k' : 'p ps'}" stroke-width="1"/>` +
