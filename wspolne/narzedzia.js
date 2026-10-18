@@ -13,6 +13,7 @@
      kolor   — następny wolny kolor z palety (lista poniżej)
      href    — folder narzędzia względem strony startowej
      opis    — jedno zdanie do menu i kafelka
+     nazwaHtml — opcjonalnie: własny, animowany znak nazwy w pasku na stronie narzędzia
      start   — tekst przycisku na kafelku, zanim ktoś zacznie
      klucz   — klucz danych w localStorage (kopia, synchronizacja z Google Drive)
    Widżet na pulpicie (liczba dnia) dopisujesz w wspolne/pulpit.js.
@@ -47,6 +48,8 @@ window.NARZEDZIA = [
       '<rect class="p ps" x="122" y="58" width="56" height="24" rx="6" stroke-width="1"/><text class="t" x="150" y="74" text-anchor="middle" font-size="10">nie</text>' +
       '<circle class="k" cx="202" cy="46" r="5"/>' },
   { id: 'woop', nazwa: 'WOOP', znak: 'W', kolor: 'sliwka', klucz: 'woop-v1', href: 'woop/',
+    // animowany znak W-O-O-P w pasku (style i animacje są w woop/index.html, klasa .brand)
+    nazwaHtml: '<b class="c1">W</b><b class="c2">O</b><b class="c3">O</b><b class="c4">P</b>',
     opis: 'Życzenie, efekt, przeszkoda, plan — i codzienny wpis, czy działa.',
     start: 'Przejdź kreator WOOP',
     ikona: '<path d="M2.5 20.5 9.5 10l3.6 5.2 2.2-3 6.2 8.3z"/><path d="M9.5 10V3.5l4.5 1.7-4.5 1.7"/>',

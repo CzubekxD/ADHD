@@ -98,9 +98,14 @@ html[data-narzedzie="woop"] main{padding-top:var(--s-5)}
   html[data-narzedzie="woop"] nav.tabs button svg{width:18px;height:18px}
   html[data-narzedzie="plany"] nav.tabs button[aria-current="page"],
   html[data-narzedzie="woop"] nav.tabs button[aria-current="page"]{background:none;color:var(--s-tusz);border-bottom-color:var(--s-akcent)}
-  html[data-narzedzie="woop"] nav.tabs .pill{display:none}
+  /* WOOP: wskaźnik zakładki dalej się przesuwa — na komputerze jako podkreślenie */
+  html[data-narzedzie="woop"] nav.tabs .in{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;max-width:680px;padding-left:0;padding-right:0}
+  html[data-narzedzie="woop"] nav.tabs button{justify-content:center;border-bottom:0}
+  html[data-narzedzie="woop"] nav.tabs .pill{display:block;top:auto;bottom:0;height:2px;border-radius:2px;background:var(--s-akcent);z-index:2}
   html[data-narzedzie="plany"] .app{padding-top:56px;padding-bottom:var(--s-7)}
-  html[data-narzedzie="woop"] body{padding-top:56px;padding-bottom:var(--s-7)}
+  /* miejsce na zakładki pod paskiem: odstęp pod paskiem, nie nad nim (pasek musi zostać na samej górze) */
+  html[data-narzedzie="woop"] body{padding-top:0;padding-bottom:var(--s-7)}
+  html[data-narzedzie="woop"] header.pg{margin-bottom:46px}
   html[data-narzedzie="plany"] html.wide .sheet,html[data-narzedzie="plany"].wide .sheet{top:calc(var(--pg-h) + 45px)}
 }
 
@@ -110,3 +115,10 @@ html[data-narzedzie="woop"] #skinBtn{display:none}
 /* ---------- stopki narzędzi: wspólny wygląd .s-stopka (cel 44 px) ---------- */
 html[data-narzedzie] footer.foot.s-stopka{justify-content:flex-start;gap:0 var(--s-2);font-size:14px;margin-top:var(--s-5)}
 html[data-narzedzie] footer.foot.s-stopka a{color:var(--s-tusz-2)}
+
+/* ---------- WOOP: animowany znak W-O-O-P we wspólnym pasku ---------- */
+html[data-narzedzie="woop"] .pg .brand{font-size:21px;gap:1px;align-items:center}
+html[data-narzedzie="woop"] .pg .brand b{line-height:1}
+/* WOOP był pisany pod stronę z body{margin:0}; bez tego pasek i treść odsuwały się o 8 px */
+html[data-narzedzie="woop"] body{margin:0}
+@media (min-width:900px){html[data-narzedzie="woop"] nav.tabs button span{white-space:nowrap}html[data-narzedzie="woop"] nav.tabs button svg{flex:none}}
