@@ -152,6 +152,7 @@
     return `<a class="pp-w pp-pusty" style="${styl(n)}" href="${esc(korzen + n.href)}">
       ${n.mini ? `<div class="pp-mini" aria-hidden="true"><svg viewBox="0 0 220 92">${n.mini}</svg></div>` : ''}
       <div class="pp-glowa">${znak(n, true)}<span class="pp-tytul">${esc(n.nazwa)}</span></div>
+      ${n.pytanie ? `<p class="pp-zyczenie">${esc(n.pytanie)}</p>` : ''}
       <p class="pp-opis">${esc(n.opis)}</p>
       <span class="pp-akcja cicha">${esc(n.start || 'Otwórz')}</span></a>`;
   }
