@@ -174,13 +174,8 @@
       try { return SKROTY[n.id] && n.klucz ? SKROTY[n.id](czytaj(n.klucz)) : null; } catch (e) { console.warn('[pulpit]', n.id, e); return null; }
     });
     const zDanymi = skroty.filter(Boolean).length;
-    // pierwsze wejście: same kafelki z miniaturami; gdy coś już ma dane, wszystkie widżety
-    // mają ten sam układ — narzędzie bez danych dostaje zdanie i przycisk na start
-    const html = lista.map((n, i) => {
-      if (skroty[i]) return widzet(n, skroty[i], korzen);
-      if (!zDanymi) return kafelek(n, korzen);
-      return widzet(n, { naglowek: 'Jeszcze nie zaczęte', podpis: n.opis, akcja: { tekst: n.start || 'Otwórz', href: n.href, glowna: false } }, korzen);
-    }).join('');
+    // narzędzie z danymi = widżet z liczbą dnia; bez danych = kafelek z miniaturą i przyciskiem na start
+    const html = lista.map((n, i) => skroty[i] ? widzet(n, skroty[i], korzen) : kafelek(n, korzen)).join('');
     cel.innerHTML = html;
     return zDanymi;
   }
