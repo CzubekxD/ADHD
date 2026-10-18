@@ -1,4 +1,4 @@
-<!doctype html><html lang="pl" data-narzedzie="plany" data-kolor="granat"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="stylesheet" href="../wspolne/cyber.css"><link rel="stylesheet" href="../wspolne/system.css"><script src="../wspolne/cyber.js"></script><script src="../wspolne/chmura.js"></script><script src="../wspolne/skroty.js"></script><script src="../wspolne/kopia.js"></script></head><body>
+<!doctype html><html lang="pl" data-narzedzie="plany" data-kolor="granat"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="stylesheet" href="../wspolne/cyber.css"><link rel="stylesheet" href="../wspolne/system.css"><script src="../wspolne/cyber.js"></script><script src="../wspolne/chmura.js"></script><script src="../wspolne/odmiana.js"></script><script src="../wspolne/skroty.js"></script><script src="../wspolne/kopia.js"></script></head><body>
 <title>Plany Jeżeli… to…</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
@@ -486,7 +486,7 @@ function toolHtml(n){
       <div class="bar"><i id="pbar"></i></div><div class="clock" id="clock">${fmt(min*60000)}</div>
       <p class="toolnote">Wdech ${b.in} s, wydech ${b.out} s</p>${ctl}</div>`;
   }
-  const note=k==='break'?`<p class="toolnote" id="tmnote">Po starcie pokażę godzinę końca przerwy.</p>`:`<p class="toolnote">Licznik ${min} minut na ten krok.</p>`;
+  const note=k==='break'?`<p class="toolnote" id="tmnote">Po starcie pokażę godzinę końca przerwy.</p>`:`<p class="toolnote">Licznik na ten krok: ${ile(min,'minuta','minuty','minut')}.</p>`;
   return`<div class="tool"><div class="clock" id="clock">${fmt(min*60000)}</div><div class="bar"><i id="pbar"></i></div>${note}${ctl}</div>`;
 }
 function defMin(k){const d=cfg().defaults;return k==='break'?d.brk:k==='breath'?d.breath:d.timer;}
@@ -497,7 +497,7 @@ function vSummary(){
   const res=RUN.result||null,ans=RUN.answers||{},isEx=p.id===EXAMPLE.id;
   const list=`<ol class="pathlist ${res?'r-'+res:''}" aria-label="Przebyta ścieżka">${rows.map((r,k)=>{const n=r.node;const a=ans[n.id];const sel=res==='bad'&&RUN.editId===n.id;
     return`<li class="${sel?'sel':''}" style="--k:${k}"><button class="prow" ${res==='bad'&&!isEx?`data-act="sumEdit" data-id="${n.id}"`:'disabled'}>${ic(n.type)}<span class="grow">${txt(n.text)}${a?`<small class="pans">${LET(a.i)} · ${esc(a.text||a.label||'')}</small>`:''}</span>${res==='bad'&&!isEx?`<span class="pedit">${sel?'edytujesz':'edytuj'}</span>`:''}</button></li>`;}).join('')}</ol>`;
-  if(!res)return`<section class="ask-end"><span class="eyebrow">koniec ścieżki · ${rows.length} ${rows.length===1?'krok':rows.length<5?'kroki':'kroków'}</span><h1>Zadziałało?</h1>
+  if(!res)return`<section class="ask-end"><span class="eyebrow">koniec ścieżki · ${ile(rows.length,'krok','kroki','kroków')}</span><h1>Zadziałało?</h1>
       <div class="yn"><button class="btn yes" data-act="verdict" data-s="ok">✓ Tak</button><button class="btn no" data-act="verdict" data-s="bad">✕ Nie</button></div></section>
     ${list}<div class="btnrow"><button class="btn ghost small" data-act="back2">← Wróć do ostatniego kroku</button></div>`;
   if(res==='ok')return`<div><h1>Zadziałało</h1><p class="lede">Kroki tej ścieżki świecą w planie na zielono.</p></div>${list}
@@ -517,7 +517,7 @@ function vPlans(){
   ${S.plans.map(p=>{const t=tally(p.root);return`<article class="plan" data-id="${p.id}">
     <span class="eyebrow">${ic('trigger')}${lab('trigger')}…${p.szop?` <span class="chip">${esc(p.szop)}</span>`:''}</span>
     <div class="tx">${esc(p.root.text||'(bez opisu)')}</div>
-    <div class="tally">${t.ok?badge('ok').replace(ST.ok.word,t.ok+' '+ST.ok.word):''}${t.bad?badge('bad').replace(ST.bad.word,t.bad+' '+ST.bad.word):''}<span class="st st-none">${countN(p.root)-1} kroków</span><span class="st st-none">uruchomiony ${p.runs.length}×</span></div>
+    <div class="tally">${t.ok?badge('ok').replace(ST.ok.word,t.ok+' '+ST.ok.word):''}${t.bad?badge('bad').replace(ST.bad.word,t.bad+' '+ST.bad.word):''}<span class="st st-none">${ile(countN(p.root)-1,'krok','kroki','kroków')}</span><span class="st st-none">uruchomiony ${p.runs.length}×</span></div>
     <div class="btnrow"><button class="btn small" data-act="edit" data-id="${p.id}">Edytuj</button><button class="btn small ghost" data-act="start" data-id="${p.id}">Uruchom</button><span class="grow"></span>${CONF==='delp:'+p.id?'':`<button class="btn small ghost danger" data-act="ask" data-k="delp:${p.id}">Skasuj plan</button>`}</div>
     ${CONF==='delp:'+p.id?`<div class="confirm"><p>Skasować plan „${esc(short(p.root.text,50))}” razem z ${countN(p.root)-1} krokami? Ctrl+Z cofa.</p><div class="btnrow"><button class="btn small danger" data-act="delPlanId" data-id="${p.id}">Skasuj</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`:''}
   </article>`;}).join('')}`;
@@ -772,7 +772,7 @@ function connect(L,tid){
     else{render();return;}}
   else{render();return;}
   fixGotos(p.root);ED.pick=null;save();render();
-  toastSk(lost?`Połączono · odpięto ${lost} ${lost===1?'krok':'kroki'} · Ctrl+Z cofa`:'Połączono · Ctrl+Z cofa');
+  toastSk(lost?`Połączono · odpięto ${ile(lost,'krok','kroki','kroków')} · Ctrl+Z cofa`:'Połączono · Ctrl+Z cofa');
 }
 
 /* Ćwiczenia */
@@ -1022,7 +1022,7 @@ document.addEventListener('change',e=>{
   if(el.dataset.f){const r=findAny(el.dataset.id);if(!r)return;const n=r.node,f=el.dataset.f;
     if(f==='agoto'){const c=n.children[+el.dataset.i];if(!c)return;const v=el.value;
       if(v==='own'){if(!c.node){c.node=N('action','');delete c.goto;}}
-      else{let lost=0;if(c.node)walk(c.node,m=>{if(String(m.text||'').trim())lost++;});c.node=null;c.goto=v;fixGotos((findAny(n.id)||{p:plan(ED.planId)}).p.root);if(lost)toastSk(`Odpięto ${lost} ${lost===1?'krok':'kroki'} · Ctrl+Z cofa`);}
+      else{let lost=0;if(c.node)walk(c.node,m=>{if(String(m.text||'').trim())lost++;});c.node=null;c.goto=v;fixGotos((findAny(n.id)||{p:plan(ED.planId)}).p.root);if(lost)toastSk(`Odpięto ${ile(lost,'krok','kroki','kroków')} · Ctrl+Z cofa`);}
       save();render();return;}
     if(f==='type'){n.type=el.value;if(n.type==='question'&&!n.qtype)n.qtype='single';if(isBranch(n))n.children.forEach((c,i)=>{if(!c.label&&n.qtype==='yesno')c.label=['Tak','Nie'][i]||'';});if(n.type!=='action')n.tool={kind:'none',min:0};save();render();}
     else if(f==='toolkind'){n.tool={kind:el.value,min:el.value==='none'?0:defMin(el.value)};save();render();}

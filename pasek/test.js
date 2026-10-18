@@ -33,7 +33,7 @@ window.addEventListener('error', e => bledy.push('window error: ' + e.message));
 const staryError = console.error;
 console.error = (...a) => { bledy.push('console.error: ' + a.join(' ')); staryError(...a); };
 
-['config.js', 'storage.js', 'app.js'].forEach(f => {
+['../wspolne/odmiana.js', 'config.js', 'storage.js', 'app.js'].forEach(f => {
   window.eval(fs.readFileSync(path.join(__dirname, f), 'utf8'));
 });
 

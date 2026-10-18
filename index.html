@@ -78,14 +78,17 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 kbd{font:600 12px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace;border:1px solid var(--s-linia-mocna);border-bottom-width:2px;border-radius:5px;padding:3px 6px;background:var(--s-pow-2);color:var(--s-tusz)}
 .brow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .kmsg{margin-top:10px !important;font-size:14px}
-footer{display:flex;gap:8px 20px;flex-wrap:wrap;align-items:center;padding-top:var(--s-4);border-top:1px solid var(--s-linia);font-size:14px;color:var(--s-przygaszony)}
-footer a{color:var(--s-tusz-2);text-decoration:none}
-footer a:hover{color:var(--s-akcent);text-decoration:underline}
+footer.s-stopka{margin-left:calc(-1 * var(--s-2));border-top:0;position:relative}
+footer.s-stopka::before{content:"";position:absolute;top:0;left:var(--s-2);right:0;border-top:1px solid var(--s-linia)}
 @media (max-width:520px){.pp-naglowek h1{font-size:26px}.pp-liczba{font-size:34px}}
 @media (prefers-reduced-motion:reduce){a.pp-w{transition:none}}
+/* CYBER: przyciski pulpitu tym samym pismem co .s-przycisk */
+html[data-skin="cyber"] .pp-akcja{font-family:"Share Tech Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;box-shadow:0 0 14px color-mix(in srgb,var(--k) 45%,transparent)}
+html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
 </style>
 <script src="./wspolne/cyber.js"></script>
 <script src="./wspolne/chmura.js"></script>
+<script src="./wspolne/odmiana.js"></script>
 <script src="./wspolne/kopia.js"></script>
 </head>
 <body>
@@ -128,7 +131,7 @@ footer a:hover{color:var(--s-akcent);text-decoration:underline}
     </section>
   </div>
 
-  <footer>
+  <footer class="s-stopka">
     <span>czubekxd</span>
     <a href="https://github.com/czubekxd/ADHD" target="_blank" rel="noopener">kod na GitHubie ↗</a>
     <a href="https://github.com/czubekxd/ADHD/blob/main/LICENSE" target="_blank" rel="noopener">licencja niekomercyjna</a>

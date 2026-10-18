@@ -391,6 +391,7 @@ html.vt-skin::view-transition-old(root),html.vt-skin::view-transition-new(root){
 <link rel="stylesheet" href="../wspolne/przejscie.css">
 <script src="../wspolne/cyber.js"></script>
 <script src="../wspolne/chmura.js"></script>
+<script src="../wspolne/odmiana.js"></script>
 <script src="../wspolne/skroty.js"></script>
 <script src="../wspolne/kopia.js"></script>
 </head>
@@ -533,7 +534,7 @@ function render(){
   else if(TAB==='metoda')m.innerHTML=vMethod();
   else if(TAB==='o')m.innerHTML=vAbout();
   else m.innerHTML=vData();
-  m.insertAdjacentHTML('beforeend',`<footer class="foot"><a href="https://czubekxd.github.io/ADHD/" target="_blank" rel="noopener">wszystkie narzędzia ↗</a><a href="https://czubekxd.github.io/ADHD/plany/" target="_blank" rel="noopener">Plany Jeżeli… to… ↗</a><a href="https://buycoffee.to/czubekxd" target="_blank" rel="noopener">postaw kawę ☕</a><span>czubekxd · licencja niekomercyjna</span></footer>`);
+  m.insertAdjacentHTML('beforeend',`<footer class="foot s-stopka"><a href="../">wszystkie narzędzia</a><a href="../plany/">Plany Jeżeli… to…</a><a href="https://buycoffee.to/czubekxd" target="_blank" rel="noopener">postaw kawę ☕</a><span>czubekxd · licencja niekomercyjna</span></footer>`);
   if(fsel){const n=m.querySelector(fsel);if(n)try{n.focus({preventScroll:true});}catch(e){}}
   /* pasek postępu: start od poprzedniej wartości, żeby było widać przejście */
   const pr=m.querySelector('.prog i');
@@ -751,7 +752,7 @@ function vData(){
   <div class="grid2">
   <section class="sect"><h2>Kopia</h2><p>WOOP-y są zapisane tylko w tej przeglądarce. Skopiuj kopię, żeby zrobić backup albo przenieść je na telefon.</p>
     <div class="field"><label for="d-exp">Kopia (JSON)</label><textarea id="d-exp" rows="4" readonly>${esc(JSON.stringify(S))}</textarea></div>
-    <div class="row"><button class="btn small" data-act="copy">Kopiuj kopię</button><button class="btn small" data-act="dlFile">Pobierz plik</button><span class="meta">${S.items.length} WOOP · ${S.items.reduce((a,x)=>a+Object.keys(x.checks).length,0)} wpisów dziennych</span></div></section>
+    <div class="row"><button class="btn small" data-act="copy">Kopiuj kopię</button><button class="btn small" data-act="dlFile">Pobierz plik</button><span class="meta">${S.items.length} WOOP · ${(n=>ile(n,'wpis dzienny','wpisy dzienne','wpisów dziennych'))(S.items.reduce((a,x)=>a+Object.keys(x.checks).length,0))}</span></div></section>
   <section class="sect"><h2>Wczytaj kopię</h2><p>Dołączenie dodaje tylko WOOP-y, których jeszcze tu nie ma, i uzupełnia ich dzienne wpisy. Zastąpienie kasuje to, co jest teraz.</p>
     <div class="field"><label for="d-imp">Wklej kopię</label><textarea id="d-imp" rows="3" placeholder='{"version":1,"items":[…]}'>${esc(IMP_TXT)}</textarea></div>
     <div class="row"><button class="btn small" data-act="ulFile">Wczytaj plik</button><button class="btn small" data-act="doImport" data-m="merge">Dołącz</button>${CONF==='imp'?'':`<button class="btn small ghost danger" data-act="ask" data-k="imp">Zastąp wszystko</button>`}</div>
