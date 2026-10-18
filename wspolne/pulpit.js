@@ -170,12 +170,16 @@
     opcje = opcje || {};
     const korzen = opcje.korzen || './';
     const lista = window.NARZEDZIA || [];
-    let zDanymi = 0;
-    const html = lista.map(n => {
-      let s = null;
-      try { s = SKROTY[n.id] && n.klucz ? SKROTY[n.id](czytaj(n.klucz)) : null; } catch (e) { console.warn('[pulpit]', n.id, e); }
-      if (s) { zDanymi++; return widzet(n, s, korzen); }
-      return kafelek(n, korzen);
+    const skroty = lista.map(n => {
+      try { return SKROTY[n.id] && n.klucz ? SKROTY[n.id](czytaj(n.klucz)) : null; } catch (e) { console.warn('[pulpit]', n.id, e); return null; }
+    });
+    const zDanymi = skroty.filter(Boolean).length;
+    // pierwsze wejście: same kafelki z miniaturami; gdy coś już ma dane, wszystkie widżety
+    // mają ten sam układ — narzędzie bez danych dostaje zdanie i przycisk na start
+    const html = lista.map((n, i) => {
+      if (skroty[i]) return widzet(n, skroty[i], korzen);
+      if (!zDanymi) return kafelek(n, korzen);
+      return widzet(n, { naglowek: 'Jeszcze nie zaczęte', podpis: n.opis, akcja: { tekst: n.start || 'Otwórz', href: n.href, glowna: false } }, korzen);
     }).join('');
     cel.innerHTML = html;
     return zDanymi;
