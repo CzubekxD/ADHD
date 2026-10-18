@@ -497,6 +497,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
 <link rel="stylesheet" href="../wspolne/przejscie.css">
 <script src="../wspolne/cyber.js"></script>
 <script src="../wspolne/chmura.js"></script>
+<script src="../wspolne/odmiana.js"></script>
 <script src="../wspolne/skroty.js"></script>
 </head>
 <body>
@@ -961,9 +962,9 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
   </div>
 </section>
 
-<footer class="foot">
+<footer class="foot s-stopka">
   <span>Tablica scoringowa · <span id="verFoot"></span></span>
-  <a href="https://czubekxd.github.io/ADHD/" target="_blank" rel="noopener">Pasek zdrowia ↗</a>
+  <a href="../">wszystkie narzędzia</a>
   <a href="https://github.com/czubekxd/ADHD" target="_blank" rel="noopener">kod na GitHubie ↗</a>
   <a href="https://buycoffee.to/czubekxd" target="_blank" rel="noopener">postaw kawę ☕</a>
 </footer>
@@ -1433,7 +1434,7 @@ function renderHero() {
   else if (s.heavyDone === 0) tail = ` &nbsp;·&nbsp; <span style="color:var(--muted)">ciężkie: ${s.heavyDone}/${s.heavyTotal}${s.running ? ", " + s.running + " w toku" : ""}</span>`;
   if (s.oldest > 0) tail += ` &nbsp;·&nbsp; <span style="color:var(--t4)">najstarsze wisi ${s.oldest} ${s.oldest === 1 ? "dzień" : "dni"}</span>`;
   document.getElementById("heroMeta").innerHTML =
-    `<b>${s.earned}</b> / ${s.possible} pkt &nbsp;·&nbsp; <b>${s.done}</b> / ${s.total} zadań` + tail;
+    `<b>${s.earned}</b> / ${s.possible} pkt &nbsp;·&nbsp; <b>${s.done}</b> / ${s.total} ${s.total === 1 ? "zadania" : "zadań"}` + tail;
   renderNudge(s);
   const d = new Date(S.today.date + "T12:00:00");
   document.getElementById("todayLabel").textContent = plDate(S.today.date) + ", " + DOW[d.getDay()];
@@ -1714,12 +1715,12 @@ function renderCats() {
       paint(); save(); renderToday(); renderCats();
     });
     paint(); tdP.appendChild(b);
-    const tdU = document.createElement("td"); tdU.className = "sub"; tdU.textContent = used ? `${used} zadań` : "—";
+    const tdU = document.createElement("td"); tdU.className = "sub"; tdU.textContent = used ? ile(used, "zadanie", "zadania", "zadań") : "—";
     const tdD = document.createElement("td"); tdD.className = "del";
     const del = document.createElement("button"); del.className = "delbtn"; del.textContent = "×";
     del.title = "usuń kategorię";
     del.addEventListener("click", async () => {
-      if (used && !await ask(`Kategoria „${c.name}” jest użyta w ${used} zadaniach. Usunąć mimo to?\nZadania zostaną bez kategorii.`, "Usuń")) return;
+      if (used && !await ask(`Kategoria „${c.name}” jest użyta w ${used} ${used === 1 ? "zadaniu" : "zadaniach"}. Usunąć mimo to?\nZadania zostaną bez kategorii.`, "Usuń")) return;
       S.categories.splice(i,1);
       [...S.today.tasks, ...S.tomorrow].forEach(t => { if (t.catId === c.id) t.catId = null; });
       save(); renderCats(); renderToday();
@@ -1791,7 +1792,7 @@ function renderHistory() {
   else {
     const max = Math.max(...rows.map(r => r.earned), 1);
     host.innerHTML = `<div class="days">${rows.map(r => `
-      <div class="day${r.perfect ? " gold" : ""}" data-t="${esc(plDate(r.date))} · ${r.earned}/${r.possible} pkt · ${Math.round(r.possible ? r.earned/r.possible*100 : 0)}% · ${r.done}/${r.total} zadań${r.perfect ? " · 100%" : ""}">
+      <div class="day${r.perfect ? " gold" : ""}" data-t="${esc(plDate(r.date))} · ${r.earned}/${r.possible} pkt · ${Math.round(r.possible ? r.earned/r.possible*100 : 0)}% · ${r.done}/${r.total} ${r.total === 1 ? "zadania" : "zadań"}${r.perfect ? " · 100%" : ""}">
         <i style="height:${Math.max(r.earned/max*100, 1.5)}%"></i>
       </div>`).join("")}</div>
       <div class="row sub" style="justify-content:space-between; margin-top:6px">
@@ -2003,7 +2004,7 @@ async function applyImport(raw) {
         S = bindS(Object.assign(d, p, { categories: p.categories?.length ? p.categories : d.categories }));
         delete S.__migrated;
         save(); renderAll(); renderData();
-        toast(`Wczytano kopię — ${(S.history || []).length} dni historii`);
+        toast(`Wczytano kopię — ${ile((S.history || []).length, "dzień", "dni", "dni")} historii`);
         return;
       }
       // kategorie: scal po nazwie
@@ -2118,7 +2119,7 @@ function pullTomorrow() {
   S.tomorrow.forEach(t => S.today.tasks.push({ id:uid(), name:t.name, catId:t.catId, points:t.points, done:false,
     carry:t.carry||0, started:!!t.started, startDay:t.startDay||null }));
   const n = S.tomorrow.length; S.tomorrow = [];
-  save(); renderAll(); showTab("dzis"); toast(`Przeniesiono ${n} zadań na dziś`);
+  save(); renderAll(); showTab("dzis"); toast(`Przeniesiono ${ile(n, "zadanie", "zadania", "zadań")} na dziś`);
 }
 document.getElementById("btnAddChecks").addEventListener("click", () => {
   let n = 0;
@@ -2142,7 +2143,7 @@ document.getElementById("btnSaveRoll").addEventListener("click", () => {
   freshBoard(false);
   renderAll();
   toast((saved ? `Zapisano ${s0.earned}/${s0.possible} pkt. ` : "")
-    + (n ? `${n} niezamkniętych zadań poszło na Jutro.` : "Wszystko domknięte — nic nie poszło na jutro. ★"));
+    + (n ? `${n} ${odm(n, "niezamknięte zadanie poszło", "niezamknięte zadania poszły", "niezamkniętych zadań poszło")} na Jutro.` : "Wszystko domknięte — nic nie poszło na jutro. ★"));
 });
 document.getElementById("btnReset").addEventListener("click", async () => {
   if (!await ask("Wyczyścić dzisiejszą tablicę?\nZapisana historia zostaje nietknięta.", "Wyczyść")) return;
@@ -2480,7 +2481,7 @@ function renderOrderChart() {
     const heavy = list.filter(c => c.p >= HEAVY);
     note.innerHTML = `Pierwsze domknięcie o <b>${hhmm(list[0].m)}</b> (${list[0].p} pkt), ostatnie o <b>${hhmm(list[list.length-1].m)}</b>.`
       + (heavy.length ? ` Ciężkie zadania padły o <b>${heavy.map(c => hhmm(c.m)).join(", ")}</b>.` : ` Nic ciężkiego jeszcze nie padło.`)
-      + (doneNoTime ? ` <span style="color:var(--muted)">(${doneNoTime} domkniętych bez znacznika godziny)</span>` : "");
+      + (doneNoTime ? ` <span style="color:var(--muted)">(${doneNoTime} ${odm(doneNoTime, "domknięte", "domknięte", "domkniętych")} bez znacznika godziny)</span>` : "");
   }
 }
 
@@ -2533,7 +2534,7 @@ function renderHistOrder() {
         <h3>Punkty wg godziny</h3>
         <div class="hrs">${hours.map((h, i) => {
           const pct = Math.round(ptsHour[i] / maxH * 100);
-          return `<div class="hr${ptsHour[i] === maxH ? " top" : ""}" title="${String(h).padStart(2,"0")}:00 — ${ptsHour[i]} pkt, ${byHour[i].length} zadań">
+          return `<div class="hr${ptsHour[i] === maxH ? " top" : ""}" title="${String(h).padStart(2,"0")}:00 — ${ptsHour[i]} pkt, ${ile(byHour[i].length, "zadanie", "zadania", "zadań")}">
             <div class="track"><div class="fill" data-w="${pct}" style="height:0%"></div></div>
             <div class="hl">${String(h).padStart(2,"0")}</div></div>`;
         }).join("")}</div>
@@ -2814,8 +2815,8 @@ function impParse() {
   const info = document.getElementById("impInfo");
   const frag = impChunks(text).filter(x => x.trim()).length;
   if (info) info.textContent = impItems.length
-    ? `Rozpoznano ${impItems.length} ${impItems.length === 1 ? "zadanie" : "zadań"} z ${frag} fragmentów tekstu.`
-    : `Nic nie rozpoznałem — tekst ma ${frag} fragmentów, ale wszystkie wypadły jako nagłówki dni, breadcrumby albo zbyt krótkie wpisy.`;
+    ? `Rozpoznano ${ile(impItems.length, "zadanie", "zadania", "zadań")} z ${frag} ${frag === 1 ? "fragmentu" : "fragmentów"} tekstu.`
+    : `Nic nie rozpoznałem — tekst ma ${ile(frag, "fragment", "fragmenty", "fragmentów")}, ale wszystkie wypadły jako nagłówki dni, breadcrumby albo zbyt krótkie wpisy.`;
   if (!impItems.length) toast("Nie znalazłem żadnych zadań w tym tekście");
 }
 function impRender() {
@@ -2889,7 +2890,7 @@ function impPush(where) {
   impItems = impItems.filter(i => !i.take);
   save(); impRender(); renderAll();
   document.getElementById("impText").value = "";
-  toast(`Dodano ${take.length} ${take.length === 1 ? "zadanie" : "zadań"} do ${where === "today" ? "Dziś" : "Jutra"}`);
+  toast(`Dodano ${ile(take.length, "zadanie", "zadania", "zadań")} do ${where === "today" ? "Dziś" : "Jutra"}`);
   showTab(where === "today" ? "dzis" : "plan");
 }
 

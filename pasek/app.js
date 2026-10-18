@@ -926,7 +926,7 @@ function macierz(dane, zmiany) {
     const kolorTekstu = sila > 0.5
       ? '#FFFFFF'
       : (czyCiemnyMotyw() ? '#E2E5E1' : (sr >= 0 ? '#22463A' : '#5A231E'));
-    return `<td style="background:${tlo};color:${kolorTekstu}" title="${delty.length} wpisów">${zeZnakiem(sr)}</td>`;
+    return `<td style="background:${tlo};color:${kolorTekstu}" title="${ile(delty.length, 'wpis', 'wpisy', 'wpisów')}">${zeZnakiem(sr)}</td>`;
   }
 
   return `<div class="macierz-otoczka"><table class="macierz">
@@ -1009,7 +1009,7 @@ function rysujFlagi() {
       <div class="karta metryka">
         <h3>Ile</h3>
         <p class="liczba-duza">${zFlaga.length}</p>
-        <p class="pod">${zFlaga.length === 1 ? 'raz' : 'razy'} na ${wszystkie.length} wpisów · ${udzial}%</p>
+        <p class="pod">${zFlaga.length === 1 ? 'raz' : 'razy'} na ${ile(wszystkie.length, 'wpis', 'wpisy', 'wpisów')} · ${udzial}%</p>
       </div>
       <div class="karta metryka">
         <h3>Kiedy najczęściej</h3>
@@ -1347,7 +1347,7 @@ function podepnijUstawienia() {
       if (!wynik.ok) { komunikat(wynik.blad); return; }
       KONF = Magazyn.konfiguracja();
       odswiezLicznik();
-      komunikat('Wczytano ' + wynik.dodane + ' wpisów' + (wynik.pominiete ? ', pominięto ' + wynik.pominiete + ' duplikatów' : ''));
+      komunikat('Wczytano ' + ile(wynik.dodane, 'wpis', 'wpisy', 'wpisów') + (wynik.pominiete ? ', pominięto ' + ile(wynik.pominiete, 'duplikat', 'duplikaty', 'duplikatów') : ''));
       rysujUstawienia();
     };
     czytnik.readAsText(plik);
@@ -1443,7 +1443,7 @@ function rysujOStronie() {
 
 function odswiezLicznik() {
   const n = Magazyn.wpisy().length;
-  $('#licznik-wpisow').textContent = n ? n + (n === 1 ? ' wpis' : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? ' wpisy' : ' wpisów')) : '';
+  $('#licznik-wpisow').textContent = n ? ile(n, 'wpis', 'wpisy', 'wpisów') : '';
 }
 
 /* przerysowuje bieżący widok bez przewijania — po Ctrl+Z / Ctrl+Y */

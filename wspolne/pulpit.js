@@ -23,7 +23,7 @@
     if (roznica < 7) return roznica + ' dni temu';
     return d.toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' });
   }
-  const odmiana = (n, a, b, c) => n === 1 ? a : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? b : c;
+  const odmiana = (n, a, b, c) => window.odm ? window.odm(n, a, b, c) : (n === 1 ? a : c);   // wspolne/odmiana.js
 
   /* ---------- Pasek zdrowia × SZOP ---------- */
   const SZOP_NAZWY = { stres: 'Stres', zmeczenie: 'Zmęczenie', oczekiwania: 'Oczekiwania', przebodzcowanie: 'Przebodźcowanie' };

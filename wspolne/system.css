@@ -15,10 +15,10 @@
 
 /* ================= 1. TOKENY ================= */
 :root{
-  /* baza: chłodna mgła, tekst drugoplanowy ma kontrast ≥ 4,5:1 */
-  --s-tlo:#F3F5F4; --s-pow:#FFFFFF; --s-pow-2:#E9EDEB; --s-pow-3:#DDE3E0;
+  /* baza: chłodna mgła; tekst ≥ 4,5:1, ramka przycisku ≥ 3:1, karta wyraźnie odcina się od tła */
+  --s-tlo:#ECEFED; --s-pow:#FFFFFF; --s-pow-2:#E7EBE9; --s-pow-3:#DDE3E0;
   --s-tusz:#1C2320; --s-tusz-2:#3C4742; --s-przygaszony:#57625D;
-  --s-linia:#D3DAD6; --s-linia-mocna:#B3BDB8;
+  --s-linia:#C2CBC6; --s-linia-mocna:#86928C;
   --s-ok:#2B7552; --s-ok-tlo:#DDEFE5; --s-uwaga:#8F5E10; --s-uwaga-tlo:#F6EAD3; --s-blad:#AE3F37; --s-blad-tlo:#F7E1DE;
   --s-cien:0 1px 2px rgb(20 30 25 / .06),0 4px 14px rgb(20 30 25 / .06);
   --s-cien-menu:0 2px 6px rgb(20 30 25 / .10),0 14px 34px rgb(20 30 25 / .14);
@@ -54,9 +54,9 @@
   --s-ruch:180ms;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --s-tlo:#121715; --s-pow:#1A201E; --s-pow-2:#232B28; --s-pow-3:#2C3532;
+  --s-tlo:#0F1312; --s-pow:#1E2523; --s-pow-2:#262F2C; --s-pow-3:#303A36;
   --s-tusz:#E4EAE7; --s-tusz-2:#C3CDC8; --s-przygaszony:#9AA6A0;
-  --s-linia:#2D3733; --s-linia-mocna:#45524D;
+  --s-linia:#3B4843; --s-linia-mocna:#66736D;
   --s-ok:#6CC59A; --s-ok-tlo:#183026; --s-uwaga:#E2B061; --s-uwaga-tlo:#33281A; --s-blad:#F08A80; --s-blad-tlo:#3A1F1C;
   --s-cien:0 1px 2px rgb(0 0 0 / .35),0 4px 14px rgb(0 0 0 / .25);
   --s-cien-menu:0 2px 6px rgb(0 0 0 / .4),0 14px 34px rgb(0 0 0 / .45);
@@ -71,9 +71,9 @@
   --s-akcent-tusz:#121715;
   color-scheme:dark}}
 :root[data-theme="dark"]{
-  --s-tlo:#121715; --s-pow:#1A201E; --s-pow-2:#232B28; --s-pow-3:#2C3532;
+  --s-tlo:#0F1312; --s-pow:#1E2523; --s-pow-2:#262F2C; --s-pow-3:#303A36;
   --s-tusz:#E4EAE7; --s-tusz-2:#C3CDC8; --s-przygaszony:#9AA6A0;
-  --s-linia:#2D3733; --s-linia-mocna:#45524D;
+  --s-linia:#3B4843; --s-linia-mocna:#66736D;
   --s-ok:#6CC59A; --s-ok-tlo:#183026; --s-uwaga:#E2B061; --s-uwaga-tlo:#33281A; --s-blad:#F08A80; --s-blad-tlo:#3A1F1C;
   --s-cien:0 1px 2px rgb(0 0 0 / .35),0 4px 14px rgb(0 0 0 / .25);
   --s-cien-menu:0 2px 6px rgb(0 0 0 / .4),0 14px 34px rgb(0 0 0 / .45);
@@ -169,6 +169,16 @@ html[data-kolor="lupek"]{--s-akcent:var(--k-lupek);--s-akcent-tlo:var(--k-lupek-
   font:700 15px var(--s-kroj);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .s-komunikat .akcja:hover{background:rgb(255 255 255 / .12)}
 .s-komunikat:not(:has(.akcja)){padding-right:var(--s-4)}
+
+/* ================= STOPKA ================= */
+/* linki w stopce: cel 44 px wysokości, odstępy, na telefonie dwie kolumny */
+.s-stopka{display:flex;flex-wrap:wrap;align-items:center;gap:0 var(--s-2);padding-top:var(--s-3);border-top:1px solid var(--s-linia);
+  font:14px/1.3 var(--s-kroj);color:var(--s-przygaszony)}
+.s-stopka a,.s-stopka span{display:inline-flex;align-items:center;min-height:var(--s-cel);padding:0 var(--s-2);border-radius:var(--s-zaokr)}
+.s-stopka a{color:var(--s-tusz-2);text-decoration:none}
+.s-stopka a:hover{background:var(--s-pow-2);color:var(--s-tusz)}
+.s-stopka a:focus-visible{outline:2px solid var(--s-akcent);outline-offset:1px}
+@media (max-width:520px){.s-stopka{display:grid;grid-template-columns:1fr 1fr}}
 
 /* ================= 4. ORGANIZM: WSPÓLNY PASEK GÓRNY ================= */
 /* header.pg: odporne na ogólne reguły „header{…}” w starych stylach narzędzi;

@@ -106,3 +106,7 @@ html[data-narzedzie="woop"] main{padding-top:var(--s-5)}
 
 /* ---------- WOOP: własny przełącznik CYBER zastępuje ten we wspólnym pasku ---------- */
 html[data-narzedzie="woop"] #skinBtn{display:none}
+
+/* ---------- stopki narzędzi: wspólny wygląd .s-stopka (cel 44 px) ---------- */
+html[data-narzedzie] footer.foot.s-stopka{justify-content:flex-start;gap:0 var(--s-2);font-size:14px;margin-top:var(--s-5)}
+html[data-narzedzie] footer.foot.s-stopka a{color:var(--s-tusz-2)}
