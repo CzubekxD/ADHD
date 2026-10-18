@@ -19,6 +19,19 @@
   };
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+  /* ikonka w karcie przeglądarki: ikona narzędzia na jego kolorze (strona startowa: domek, łupek) */
+  const HEX = { szalwia: '#2E6B5E', bursztyn: '#875810', granat: '#2F5591', sliwka: '#74407E',
+                morski: '#1D6A80', terakota: '#9A4730', oliwka: '#56631C', lupek: '#4A5868' };
+  function ikonaKarty(n) {
+    const rysunek = n && n.ikona ? n.ikona : '<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/>';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="${HEX[n ? n.kolor : 'lupek'] || HEX.lupek}"/>` +
+      `<g transform="translate(4 4)" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${rysunek}</g></svg>`;
+    let l = document.querySelector('link[rel="icon"]');
+    if (!l) { l = document.createElement('link'); l.rel = 'icon'; document.head.appendChild(l); }
+    l.type = 'image/svg+xml';
+    l.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
+  }
+
   function zbuduj(el) {
     const lista = window.NARZEDZIA || [];
     const korzen = el.dataset.korzen || '../';
@@ -90,6 +103,7 @@
     document.addEventListener('click', e => { if (!el.contains(e.target)) zamknij(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') zamknij(); });
 
+    ikonaKarty(ja);
     if (window.Cyber && window.Cyber.zamontuj) window.Cyber.zamontuj();
     if (window.Chmura && window.Chmura.zamontuj) window.Chmura.zamontuj();
     // włączenie CYBER: krótki „glitch” animowanego znaku (WOOP)
