@@ -38,24 +38,35 @@
     return false;
   };
 
-  /* --- komunikat --- */
+  /* --- komunikat ---
+     Jeden wygląd we wszystkich narzędziach (klasa s-komunikat z system.css).
+     Komunikat po usunięciu albo zmianie ma przycisk „Cofnij” — na telefonie nie ma Ctrl+Z.
+     Tekst kończący się na „· Ctrl+Z cofa” automatycznie dostaje ten przycisk. */
   let toastEl = null, toastT = 0;
-  function komunikat(tekst) {
-    if (cfg && cfg.toast) { try { cfg.toast(tekst); return; } catch (e) {} }
+  function komunikat(tekst, opcje) {
+    opcje = opcje || {};
+    tekst = String(tekst || '');
+    const OGON = /\s*·\s*Ctrl\+Z cofa\s*$/;
+    if (OGON.test(tekst)) { tekst = tekst.replace(OGON, ''); if (!opcje.akcja) opcje = { akcja: 'Cofnij', fn: cofnij }; }
+    tekst = tekst.replace(/\s*·\s*Ctrl\+Y ponawia\s*$/, '');
     if (!toastEl) {
       toastEl = document.createElement('div');
-      toastEl.className = 'toast skroty-toast';
+      toastEl.className = 's-komunikat skroty-toast';
       toastEl.setAttribute('role', 'status');
       toastEl.setAttribute('aria-live', 'polite');
-      toastEl.style.cssText = 'position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);' +
-        'background:#14171c;color:#fff;padding:9px 15px;border-radius:10px;font:14px/1.4 system-ui,sans-serif;z-index:500;' +
-        'box-shadow:0 6px 20px rgb(0 0 0 / .3);max-width:calc(100vw - 32px);text-align:center;opacity:0;pointer-events:none;transition:opacity .18s';
       document.body.appendChild(toastEl);
     }
-    toastEl.textContent = tekst;
-    toastEl.style.opacity = '1';
+    toastEl.textContent = '';
+    const span = document.createElement('span'); span.textContent = tekst; toastEl.appendChild(span);
+    if (opcje.akcja && typeof opcje.fn === 'function') {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'akcja'; b.textContent = opcje.akcja;
+      b.addEventListener('click', () => { toastEl.classList.remove('widoczny'); opcje.fn(); });
+      toastEl.appendChild(b);
+    }
+    toastEl.classList.add('widoczny');
     clearTimeout(toastT);
-    toastT = setTimeout(() => { toastEl.style.opacity = '0'; }, 2200);
+    toastT = setTimeout(() => toastEl.classList.remove('widoczny'), opcje.akcja ? 6000 : 2400);
   }
 
   /* --- historia zmian --- */
@@ -89,7 +100,7 @@
     const teraz = cfg.snapshot();
     naprzod.push(teraz);
     przywroc(wstecz.pop());
-    komunikat('Cofnięto · Ctrl+Y ponawia');
+    komunikat('Cofnięto', { akcja: 'Ponów', fn: ponow });
   }
 
   function ponow() {
@@ -150,7 +161,7 @@
     }
     if (e.key === 'Delete' && !ctrl && !e.shiftKey) {
       if (wPolu && el.value !== '') return;           // w polu z tekstem Delete kasuje znak
-      if (usun()) { e.preventDefault(); komunikat('Usunięto · Ctrl+Z cofa'); }
+      if (usun()) { e.preventDefault(); komunikat('Usunięto', { akcja: 'Cofnij', fn: cofnij }); }
     }
   });
 

@@ -304,7 +304,7 @@ function rysujWpis() {
   const prog = (KONF.oStronie && KONF.oStronie.pokazWskazowkeDoWpisow) || 0;
   const wskazowkaHtml = (prog && liczbaWpisow < prog) ? `
     <p class="wskazowka-nowy">Pierwszy raz? Zajrzyj do
-      <button type="button" class="link-tekst" data-idz-ostronie>„O stronie”</button>
+      <button type="button" class="link-tekst" data-idz-ostronie>„Pomoc”</button>
       — jak działają Twoje dane i dlaczego są bezpieczne. Ta wskazówka zniknie po pierwszym wpisie.</p>` : '';
 
   $('#widok').innerHTML = `
@@ -520,7 +520,7 @@ function rysujDashboard() {
   if (!wszystkie.length) {
     $('#widok').innerHTML = `<div class="pusty-stan">
       <strong>Brak wpisów</strong>
-      Dashboard policzy korelacje, gdy będzie z czego. Zacznij od zakładki „Nowy wpis”.
+      Przegląd policzy korelacje, gdy będzie z czego. Zacznij od zakładki „Nowy wpis”.
     </div>`;
     return;
   }
@@ -1173,7 +1173,7 @@ function rysujHistoria() {
   document.querySelectorAll('[data-usun]').forEach(b => {
     b.addEventListener('click', () => {
       Magazyn.usunWpis(b.dataset.usun);
-      rysujHistoria(); odswiezLicznik(); komunikat('Usunięto wpis · Ctrl+Z cofa');
+      rysujHistoria(); odswiezLicznik(); (window.Skroty ? Skroty.komunikat : komunikat)('Usunięto wpis · Ctrl+Z cofa');
     });
   });
   document.querySelectorAll('[data-wolny]').forEach(b => {
@@ -1373,7 +1373,7 @@ function rysujOStronie() {
 
   $('#widok').innerHTML = `
     <div class="karta jasna" style="max-width:640px">
-      <h2>O stronie</h2>
+      <h2>Pomoc</h2>
       <p style="margin-bottom:16px">To narzędzie do obserwowania własnego stanu — poziomu energii,
       czynników SZOP i czerwonych flag przeciążenia. Powstało po to, żeby pomagać, i
       <strong>jest oraz pozostanie darmowe</strong>.</p>

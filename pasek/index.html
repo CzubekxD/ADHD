@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" data-narzedzie="pasek" data-kolor="szalwia">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,9 +10,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="../wspolne/cyber.css">
+<link rel="stylesheet" href="../wspolne/system.css">
+<link rel="stylesheet" href="../wspolne/przejscie.css">
 <script src="../wspolne/cyber.js"></script>
 </head>
 <body>
+<header class="pg" data-pasek-gorny data-narzedzie="pasek" data-korzen="../"></header>
 
 <div class="osnowa">
 
@@ -20,15 +23,14 @@
     <div class="tytul">
       <h1>Pasek zdrowia × SZOP</h1>
       <span class="podtytul" id="licznik-wpisow"></span>
-      <span data-cyber style="margin-left:auto;align-self:center"></span>
     </div>
     <nav class="zakladki" role="tablist" aria-label="Sekcje aplikacji">
       <button role="tab" data-widok="wpis"       aria-selected="true">Nowy wpis</button>
-      <button role="tab" data-widok="dashboard"  aria-selected="false">Dashboard</button>
+      <button role="tab" data-widok="dashboard"  aria-selected="false">Przegląd</button>
       <button role="tab" data-widok="flagi"      aria-selected="false">Czerwone flagi</button>
       <button role="tab" data-widok="historia"   aria-selected="false">Historia</button>
       <button role="tab" data-widok="ustawienia" aria-selected="false">Ustawienia</button>
-      <button role="tab" data-widok="ostronie"   aria-selected="false">O stronie</button>
+      <button role="tab" data-widok="ostronie"   aria-selected="false">Pomoc</button>
     </nav>
   </header>
 
@@ -40,5 +42,7 @@
 <script src="config.js"></script>
 <script src="storage.js"></script>
 <script src="app.js"></script>
+<script src="../wspolne/narzedzia.js"></script>
+<script src="../wspolne/pasek-gorny.js"></script>
 </body>
 </html>

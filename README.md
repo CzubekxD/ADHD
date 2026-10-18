@@ -20,6 +20,18 @@ Nowe narzędzie dopisujesz w tablicy `TOOLS` na jej dole.
 Wszystkie narzędzia są pod tym samym adresem `czubekxd.github.io`, ale każde trzyma dane
 pod własnym kluczem, więc nie wchodzą sobie w drogę.
 
+## Wspólny wygląd
+
+Wszystkie narzędzia mają ten sam sznyt: krój **Host Grotesk**, spokojną bazę kolorów pod ADHD i **kolor przewodni**
+każdego narzędzia (Pasek — szałwia, Tablica — bursztyn, Plany — granat, WOOP — śliwka). U góry każdej strony jest
+wspólny pasek: kliknięcie nazwy narzędzia pokazuje listę wszystkich, obok jest CYBER i menu ⋯.
+
+- [`wspolne/system.css`](wspolne/system.css) — kolory, pismo, odstępy i komponenty (przycisk, pole, chip, zakładki, komunikat z „Cofnij”).
+- [`wspolne/narzedzia.js`](wspolne/narzedzia.js) — rejestr narzędzi. **Nowe narzędzie = jeden wpis** z kolejnym wolnym kolorem.
+- [`wspolne/pasek-gorny.js`](wspolne/pasek-gorny.js) — wspólny pasek górny.
+- [`wspolne/przejscie.css`](wspolne/przejscie.css) — podpina starsze style narzędzi pod wspólne kolory i krój.
+- Podgląd wszystkich elementów: [`wspolne/wzorce.html`](https://czubekxd.github.io/ADHD/wspolne/wzorce.html).
+
 ## Wspólne dla wszystkich narzędzi
 
 Folder [`wspolne/`](wspolne/) trzyma to, co działa tak samo w każdym narzędziu:

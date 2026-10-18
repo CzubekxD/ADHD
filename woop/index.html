@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" data-narzedzie="woop" data-kolor="sliwka">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -386,10 +386,15 @@ html.vt-skin::view-transition-old(root),html.vt-skin::view-transition-new(root){
   .done-mark circle,.done-mark path{stroke-dashoffset:0}
 }
 </style>
+<link rel="stylesheet" href="../wspolne/cyber.css">
+<link rel="stylesheet" href="../wspolne/system.css">
+<link rel="stylesheet" href="../wspolne/przejscie.css">
+<script src="../wspolne/cyber.js"></script>
 <script src="../wspolne/skroty.js"></script>
 <script src="../wspolne/kopia.js"></script>
 </head>
 <body>
+<header class="pg" data-pasek-gorny data-narzedzie="woop" data-korzen="../"></header>
 
 <div class="app">
   <header class="top">
@@ -504,7 +509,7 @@ const TI={
   dane:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
   o:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5h.01"/>'
 };
-const TABS=[['moje','Moje WOOP'],['nowy','Nowy'],['metoda','Metoda'],['dane','Dane'],['o','O stronie']];
+const TABS=[['moje','Moje WOOP'],['nowy','Nowy'],['metoda','Metoda'],['dane','Dane'],['o','Pomoc']];
 $('#tabs').innerHTML='<span class="pill" aria-hidden="true"></span>'+TABS.map(([k,l])=>`<button data-act="tab" data-k="${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${TI[k]}</svg><span>${l}</span></button>`).join('');
 
 /* ---------- render ---------- */
@@ -715,7 +720,7 @@ function vMethod(){
 
 const MAIL='mateusz.czubienko@gmail.com';
 function vAbout(){
-  return`<div class="stack" style="gap:6px"><h1>O stronie</h1><p class="lede">WOOP to narzędzie do układania życzeń i planów na trudne momenty. Powstało po to, żeby pomagać, i <b>jest oraz pozostanie darmowe</b>.</p></div>
+  return`<div class="stack" style="gap:6px"><h1>Pomoc</h1><p class="lede">WOOP to narzędzie do układania życzeń i planów na trudne momenty. Powstało po to, żeby pomagać, i <b>jest oraz pozostanie darmowe</b>.</p></div>
   <div class="grid2">
   <section class="sect prose">
     <h2>Twoje dane są tylko Twoje</h2>
@@ -874,5 +879,7 @@ if(window.Skroty)Skroty.init({
 });
 })();
 </script>
+<script src="../wspolne/narzedzia.js"></script>
+<script src="../wspolne/pasek-gorny.js"></script>
 </body>
 </html>
