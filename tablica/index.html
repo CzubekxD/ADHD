@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl" data-theme="auto">
+<html lang="pl" data-theme="auto" data-narzedzie="tablica" data-kolor="bursztyn">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -493,10 +493,13 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
 }
 </style>
 <link rel="stylesheet" href="../wspolne/cyber.css">
+<link rel="stylesheet" href="../wspolne/system.css">
+<link rel="stylesheet" href="../wspolne/przejscie.css">
 <script src="../wspolne/cyber.js"></script>
 <script src="../wspolne/skroty.js"></script>
 </head>
 <body>
+<header class="pg" data-pasek-gorny data-narzedzie="tablica" data-korzen="../"></header>
 <div class="wrap">
 
 <header>
@@ -504,7 +507,6 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
   <span class="sub" id="todayLabel"></span>
   <span class="sub" id="verTag" title="wersja tablicy"></span>
   <span class="spacer"></span>
-  <span data-cyber></span>
   <button class="iconbtn" id="btnExport" title="Kopia danych">Eksport</button>
   <button class="iconbtn" id="btnImport">Import</button>
   <button class="iconbtn" id="btnTheme" title="Motyw">Motyw</button>
@@ -517,7 +519,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
   <button data-tab="historia" aria-selected="false">Historia</button>
   <button data-tab="kategorie" aria-selected="false">Kategorie</button>
   <button data-tab="import" aria-selected="false">Import</button>
-  <button data-tab="info" aria-selected="false">Jak to działa</button>
+  <button data-tab="info" aria-selected="false">Pomoc</button>
 </nav>
 
 <!-- ============ DZIŚ ============ -->
@@ -2986,5 +2988,7 @@ if (window.Skroty) Skroty.init({
   toast
 });
 </script>
+<script src="../wspolne/narzedzia.js"></script>
+<script src="../wspolne/pasek-gorny.js"></script>
 </body>
 </html>

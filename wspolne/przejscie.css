@@ -1,0 +1,121 @@
+/* ---------------------------------------------------------------
+   PRZEJŚCIE NARZĘDZI NA WSPÓLNY SYSTEM
+   Każde narzędzie ma jeszcze własne nazwy kolorów i klasy. Ten plik
+   podpina je pod tokeny z system.css (--s-*), więc wszystkie strony
+   dostają ten sam krój, kolory bazy i kolor przewodni — bez przepisywania
+   ich kodu od zera. Ładowany PO stylach narzędzia i PO system.css.
+
+   html[data-narzedzie="…"]:root:not([data-skin="cyber"]) — silniejsze
+   od jasnego i ciemnego motywu narzędzia, ale nie rusza trybu CYBER,
+   który ma własne reguły (cyber.css, a w WOOP jego własny motyw).
+   --------------------------------------------------------------- */
+
+/* ---------- wspólne dla wszystkich narzędzi ---------- */
+html[data-narzedzie] body{font-family:var(--s-kroj)}
+html[data-narzedzie] .s-komunikat{font-family:var(--s-kroj)}
+
+/* zakładki narzędzia na komputerze siedzą tuż pod wspólnym paskiem */
+:root{--pg-h:57px}
+/* strony z bocznym marginesem na <body>: pasek górny „wylewa się” do krawędzi */
+html[data-narzedzie="start"],html[data-narzedzie="tablica"]{--pg-wylew:16px}
+html[data-narzedzie="woop"]{--pg-wylew:max(16px,env(safe-area-inset-left,0px))}
+
+/* ---------- Pasek zdrowia × SZOP ---------- */
+html[data-narzedzie="pasek"]:root:not([data-skin="cyber"]){
+  --tlo:var(--s-tlo); --powierzchnia:var(--s-pow); --powierzchnia-2:var(--s-pow-2);
+  --tusz:var(--s-tusz); --przygaszony:var(--s-przygaszony); --slaby:var(--s-przygaszony);
+  --linia:var(--s-linia); --linia-mocna:var(--s-linia-mocna);
+  --akcent:var(--s-akcent); --akcent-tlo:var(--s-akcent-tlo);
+  --alarm:var(--s-blad); --alarm-tlo:var(--s-blad-tlo);
+}
+html[data-narzedzie="pasek"]{--sans:var(--s-kroj);--mono:var(--s-kroj);--promien:var(--s-zaokr)}
+html[data-narzedzie="pasek"] header.gora{padding-top:var(--s-3)}
+html[data-narzedzie="pasek"] .tytul h1{display:none}
+html[data-narzedzie="pasek"] .tytul{min-height:0;margin-bottom:var(--s-2)}
+html[data-narzedzie="pasek"] nav.zakladki{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+html[data-narzedzie="pasek"] nav.zakladki::-webkit-scrollbar{display:none}
+html[data-narzedzie="pasek"] nav.zakladki button{min-height:var(--s-cel);flex:none;font-size:15px}
+html[data-narzedzie="pasek"] .przycisk{min-height:var(--s-cel)}
+html[data-narzedzie="pasek"] body{font-variant-numeric:tabular-nums}
+
+/* ---------- Tablica scoringowa ---------- */
+html[data-narzedzie="tablica"]:root:not([data-skin="cyber"]){
+  --page:var(--s-tlo); --card:var(--s-pow); --surface-1:var(--s-pow);
+  --ink:var(--s-tusz); --ink-2:var(--s-tusz-2); --muted:var(--s-przygaszony);
+  --grid:var(--s-linia); --axis:var(--s-linia-mocna); --ring:var(--s-linia); --rest:var(--s-pow-2);
+  --bar:var(--s-akcent); --bar-soft:var(--s-akcent-tlo);
+  --shadow:var(--s-cien); --r:var(--s-zaokr-duze);
+}
+html[data-narzedzie="tablica"] body{font-family:var(--s-kroj) !important}
+html[data-narzedzie="tablica"] .wrap > header h1{display:none}
+html[data-narzedzie="tablica"] .wrap > header{padding-top:var(--s-3)}
+html[data-narzedzie="tablica"] .iconbtn,
+html[data-narzedzie="tablica"] button.act,
+html[data-narzedzie="tablica"] nav#tabs button,
+html[data-narzedzie="tablica"] .seg button{min-height:var(--s-cel)}
+html[data-narzedzie="tablica"] .iconbtn{font-size:14px;padding:0 var(--s-3)}
+html[data-narzedzie="tablica"] nav#tabs button{font-size:15px}
+html[data-narzedzie="tablica"] .delbtn{min-width:var(--s-cel);min-height:var(--s-cel)}
+html[data-narzedzie="tablica"] input[type=checkbox]{width:22px;height:22px}
+html[data-narzedzie="tablica"] .sub{color:var(--muted)}
+
+/* ---------- Plany Jeżeli… to… ---------- */
+html[data-narzedzie="plany"]:root:not([data-skin="cyber"]){
+  --bg:var(--s-tlo); --surface:var(--s-pow); --sunk:var(--s-pow-2);
+  --ink:var(--s-tusz); --muted:var(--s-przygaszony); --line:var(--s-linia);
+  --accent:var(--s-akcent); --accent-ink:var(--s-akcent-tusz);
+  --ok:var(--s-ok); --ok-bg:var(--s-ok-tlo); --bad:var(--s-blad); --bad-bg:var(--s-blad-tlo);
+  --t-trigger:var(--s-akcent);
+}
+html[data-narzedzie="plany"]{--f-body:var(--s-kroj);--f-mono:var(--s-kroj)}
+/* własny nagłówek zostaje tylko jako miejsce na licznik („pigułkę”), gdy działa */
+html[data-narzedzie="plany"] header.top{position:static;border-bottom:0;padding-block:var(--s-3) 0}
+html[data-narzedzie="plany"] header.top .brand{display:none}
+html[data-narzedzie="plany"] header.top:has(.pill[hidden]){display:none}
+
+/* ---------- WOOP ---------- */
+html[data-narzedzie="woop"]:root:not([data-skin="cyber"]){
+  --bg:var(--s-tlo); --surface:var(--s-pow); --sunk:var(--s-pow-2);
+  --ink:var(--s-tusz); --muted:var(--s-przygaszony); --line:var(--s-linia);
+  --accent:var(--s-akcent); --accent-ink:var(--s-akcent-tusz);
+}
+html[data-narzedzie="woop"]:not([data-skin="cyber"]){--f-display:var(--s-kroj);--f-body:var(--s-kroj);--f-mono:var(--s-kroj)}
+html[data-narzedzie="woop"] header.top{display:none}
+html[data-narzedzie="woop"] main{padding-top:var(--s-5)}
+
+/* ---------- Plany i WOOP: zakładki pod kciukiem na telefonie, u góry na komputerze ---------- */
+@media (min-width:900px){
+  html[data-narzedzie="plany"] nav.tabs,
+  html[data-narzedzie="woop"] nav.tabs{top:calc(var(--pg-h) + env(safe-area-inset-top,0px));bottom:auto;border-top:0;border-bottom:1px solid var(--s-linia);
+    padding-top:0;padding-bottom:0;background:var(--s-tlo);box-shadow:none;z-index:90}
+  html[data-narzedzie="plany"] nav.tabs .in,
+  html[data-narzedzie="woop"] nav.tabs .in{display:flex;justify-content:flex-start;gap:var(--s-1);max-width:1180px;
+    padding-left:max(var(--s-4),env(safe-area-inset-left,0px));padding-right:max(var(--s-4),env(safe-area-inset-right,0px))}
+  html[data-narzedzie="plany"] nav.tabs button,
+  html[data-narzedzie="woop"] nav.tabs button{flex-direction:row;gap:var(--s-2);min-height:var(--s-cel);padding:0 var(--s-4);font-size:15px;border-radius:0;
+    background:none;border-bottom:2px solid transparent;margin-bottom:-1px}
+  html[data-narzedzie="plany"] nav.tabs button svg,
+  html[data-narzedzie="woop"] nav.tabs button svg{width:18px;height:18px}
+  html[data-narzedzie="plany"] nav.tabs button[aria-current="page"],
+  html[data-narzedzie="woop"] nav.tabs button[aria-current="page"]{background:none;color:var(--s-tusz);border-bottom-color:var(--s-akcent)}
+  html[data-narzedzie="woop"] nav.tabs .pill{display:none}
+  html[data-narzedzie="plany"] .app{padding-top:56px;padding-bottom:var(--s-7)}
+  html[data-narzedzie="woop"] body{padding-top:56px;padding-bottom:var(--s-7)}
+  html[data-narzedzie="plany"] html.wide .sheet,html[data-narzedzie="plany"].wide .sheet{top:calc(var(--pg-h) + 45px)}
+}
+
+/* ---------- WOOP: własny przełącznik CYBER zastępuje ten we wspólnym pasku ---------- */
+html[data-narzedzie="woop"] #skinBtn{display:none}
+
+/* ---------- Strona startowa ---------- */
+html[data-narzedzie="start"]:root:not([data-skin="cyber"]){
+  --page:var(--s-tlo); --card:var(--s-pow); --surface:var(--s-pow);
+  --ink:var(--s-tusz); --ink-2:var(--s-tusz-2); --muted:var(--s-przygaszony);
+  --grid:var(--s-linia); --axis:var(--s-linia-mocna); --ring:var(--s-linia);
+  --bar:var(--s-akcent); --shadow:var(--s-cien);
+}
+html[data-narzedzie="start"] .wrap > header{padding-top:var(--s-6)}
+html[data-narzedzie="start"] .tools{grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr))}
+html[data-narzedzie="start"] .tool{border-top:3px solid var(--k,var(--s-akcent))}
+html[data-narzedzie="start"] .tool .go{color:var(--k,var(--s-akcent))}
+html[data-narzedzie="start"] .tool .pg-znak{width:34px;height:34px}

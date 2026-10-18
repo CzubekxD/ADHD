@@ -171,6 +171,9 @@ html[data-kolor="lupek"]{--s-akcent:var(--k-lupek);--s-akcent-tlo:var(--k-lupek-
 .s-komunikat:not(:has(.akcja)){padding-right:var(--s-4)}
 
 /* ================= 4. ORGANIZM: WSPÓLNY PASEK GÓRNY ================= */
+/* header.pg: odporne na ogólne reguły „header{…}” w starych stylach narzędzi;
+   --pg-wylew = boczny margines strony narzędzia, żeby pasek sięgał krawędzi okna */
+header.pg{display:block;flex-wrap:nowrap;gap:0;padding:0;margin:0 calc(-1 * var(--pg-wylew,0px));max-width:none;text-align:left}
 .pg{position:sticky;top:env(safe-area-inset-top,0px);z-index:100;background:var(--s-tlo);border-bottom:1px solid var(--s-linia);font-family:var(--s-kroj)}
 .pg-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:var(--s-2);min-height:56px;
   padding-left:max(var(--s-4),env(safe-area-inset-left,0px));padding-right:max(var(--s-4),env(safe-area-inset-right,0px))}

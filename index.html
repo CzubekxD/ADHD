@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl" data-theme="auto">
+<html lang="pl" data-theme="auto" data-narzedzie="start" data-kolor="lupek">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -67,10 +67,8 @@ footer {
 footer a { color:var(--ink-2); text-decoration:none; }
 footer a:hover { color:var(--bar); text-decoration:underline; }
 @media (prefers-reduced-motion: reduce) { .tool { transition:none; } .tool:hover { transform:none; } }
-header { position:relative; }
-header [data-cyber] { position:absolute; top:18px; right:0; }
 .keys { display:flex; flex-wrap:wrap; gap:6px 16px; margin:0; padding:0; list-style:none; color:var(--ink-2); font-size:14px; }
-button.b { font:inherit; font-size:14px; font-weight:600; cursor:pointer; border-radius:9px; padding:9px 14px; border:1px solid var(--ring); background:var(--card); color:var(--ink); }
+button.b { font:inherit; font-size:14px; font-weight:600; cursor:pointer; border-radius:9px; padding:0 14px; min-height:44px; border:1px solid var(--ring); background:var(--card); color:var(--ink); }
 button.b:hover { border-color:var(--axis); }
 button.b.danger { color:var(--t3); border-color:var(--t3); }
 .brow { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
@@ -78,14 +76,16 @@ button.b.danger { color:var(--t3); border-color:var(--t3); }
 kbd { font:12px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace; border:1px solid var(--axis); border-bottom-width:2px; border-radius:5px; padding:3px 6px; background:var(--card); color:var(--ink); }
 </style>
 <link rel="stylesheet" href="./wspolne/cyber.css">
+<link rel="stylesheet" href="./wspolne/system.css">
+<link rel="stylesheet" href="./wspolne/przejscie.css">
 <script src="./wspolne/cyber.js"></script>
 <script src="./wspolne/kopia.js"></script>
 </head>
 <body>
+<header class="pg" data-pasek-gorny data-narzedzie="" data-korzen="./"></header>
 <div class="wrap">
 
   <header>
-    <span data-cyber></span>
     <h1>Narzędzia</h1>
     <p>Kilka małych rzeczy, które zbudowałem dla siebie, żeby ogarnąć dzień i własną głowę.
        Każda działa w całości w przeglądarce — bez konta, bez serwera, bez wysyłania czegokolwiek na zewnątrz.
@@ -114,7 +114,7 @@ kbd { font:12px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace; border:1px so
     <p style="margin-top:10px">Przełącznik <b>CYBER</b> w prawym górnym rogu włącza neonowy motyw — od razu we wszystkich narzędziach.</p>
   </div>
 
-  <div class="note">
+  <div class="note" id="kopia">
     <h3>Kopia wszystkiego</h3>
     <p>Jeden plik z danymi wszystkich narzędzi z tej przeglądarki — na backup albo przeprowadzkę na inny komputer czy telefon.
        Każde narzędzie ma też własny eksport i import, w swoich ustawieniach.</p>
@@ -135,6 +135,8 @@ kbd { font:12px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace; border:1px so
 
 </div>
 
+<script src="./wspolne/narzedzia.js"></script>
+<script src="./wspolne/pasek-gorny.js"></script>
 <script>
 /* ──────────────────────────────────────────────────────────────────────────
    DOPISYWANIE NARZĘDZI
@@ -173,9 +175,11 @@ const TOOLS = [
   }
 ];
 
+/* kolor i znak każdego narzędzia biorą się ze wspólnego rejestru (wspolne/narzedzia.js) */
+TOOLS.forEach(t => { const r = (window.NARZEDZIA || []).find(n => "./" + n.href === t.href); t.kolor = r ? r.kolor : "lupek"; t.znak = r ? r.znak : t.nazwa[0]; });
 document.getElementById("tools").innerHTML = TOOLS.map(t => `
-  <a class="tool${t.soon ? " soon" : ""}" href="${t.soon ? "#" : t.href}">
-    <div class="top"><span class="ico">${t.ico}</span><span class="nm">${t.nazwa}</span></div>
+  <a class="tool${t.soon ? " soon" : ""}" style="--k:var(--k-${t.kolor})" href="${t.soon ? "#" : t.href}">
+    <div class="top"><span class="pg-znak" style="background:var(--k-${t.kolor})">${t.znak}</span><span class="nm">${t.nazwa}</span></div>
     <p class="desc">${t.opis}</p>
     <div class="chips">${(t.chips || []).map(c => `<span class="chip">${c}</span>`).join("")}</div>
     <div class="go">${t.soon ? "w budowie" : "Otwórz →"}</div>
