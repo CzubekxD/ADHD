@@ -1,0 +1,231 @@
+/* ---------------------------------------------------------------
+   WSPÓLNY SYSTEM NARZĘDZI
+   Jedno źródło wyglądu dla wszystkich narzędzi (Atomic Design):
+     1. tokeny      — kolory, pismo, odstępy, zaokrąglenia
+     2. atomy       — przycisk, pole, chip, zaznaczenie, przełącznik
+     3. molekuły    — zakładki, komunikat z „Cofnij”, karta
+     4. organizmy   — wspólny pasek górny (wspolne/pasek-gorny.js)
+   Wszystkie klasy mają przedrostek s- (a pasek górny pg-), a tokeny --s-,
+   żeby nie gryzły się ze starymi stylami narzędzi w trakcie przenosin.
+
+   Klimat: spokojny pod ADHD — chłodna, stonowana baza, jeden kolor
+   przewodni na narzędzie, mało bodźców. Motyw CYBER podmienia tylko tokeny.
+   --------------------------------------------------------------- */
+@import url("https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
+
+/* ================= 1. TOKENY ================= */
+:root{
+  /* baza: chłodna mgła, tekst drugoplanowy ma kontrast ≥ 4,5:1 */
+  --s-tlo:#F3F5F4; --s-pow:#FFFFFF; --s-pow-2:#E9EDEB; --s-pow-3:#DDE3E0;
+  --s-tusz:#1C2320; --s-tusz-2:#3C4742; --s-przygaszony:#57625D;
+  --s-linia:#D3DAD6; --s-linia-mocna:#B3BDB8;
+  --s-ok:#2B7552; --s-ok-tlo:#DDEFE5; --s-uwaga:#8F5E10; --s-uwaga-tlo:#F6EAD3; --s-blad:#AE3F37; --s-blad-tlo:#F7E1DE;
+  --s-cien:0 1px 2px rgb(20 30 25 / .06),0 4px 14px rgb(20 30 25 / .06);
+  --s-cien-menu:0 2px 6px rgb(20 30 25 / .10),0 14px 34px rgb(20 30 25 / .14);
+
+  /* paleta kolorów przewodnich — kolejne narzędzia biorą następny wolny kolor */
+  --k-szalwia:#2E6B5E;  --k-szalwia-tlo:#DFEDE8;
+  --k-bursztyn:#875810; --k-bursztyn-tlo:#F6EAD5;
+  --k-granat:#2F5591;   --k-granat-tlo:#E1E9F6;
+  --k-sliwka:#74407E;   --k-sliwka-tlo:#F0E4F2;
+  --k-morski:#1D6A80;   --k-morski-tlo:#DCEEF3;
+  --k-terakota:#9A4730; --k-terakota-tlo:#F6E3DC;
+  --k-oliwka:#56631C;   --k-oliwka-tlo:#ECEFD8;
+  --k-lupek:#4A5868;    --k-lupek-tlo:#E5E9EE;
+
+  /* kolor przewodni bieżącego narzędzia — ustawia go html[data-kolor] */
+  --s-akcent:var(--k-lupek); --s-akcent-tlo:var(--k-lupek-tlo); --s-akcent-tusz:#FFFFFF;
+
+  /* pismo: jeden krój, sześć rozmiarów */
+  --s-kroj:"Host Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --s-kroj-cyfry:"Host Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --s-r-maly:13px;     /* etykiety, podpisy */
+  --s-r-drobny:14px;   /* tekst pomocniczy */
+  --s-r-tekst:16px;    /* tekst zasadniczy */
+  --s-r-sredni:19px;   /* nagłówek karty */
+  --s-r-duzy:24px;     /* nagłówek sekcji */
+  --s-r-tytul:32px;    /* tytuł strony */
+  --s-interlinia:1.45;
+
+  /* odstępy i kształt */
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:24px; --s-6:32px; --s-7:48px;
+  --s-zaokr:10px; --s-zaokr-duze:14px;
+  --s-cel:44px;        /* minimalny cel do kliknięcia / dotknięcia */
+  --s-ruch:180ms;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --s-tlo:#121715; --s-pow:#1A201E; --s-pow-2:#232B28; --s-pow-3:#2C3532;
+  --s-tusz:#E4EAE7; --s-tusz-2:#C3CDC8; --s-przygaszony:#9AA6A0;
+  --s-linia:#2D3733; --s-linia-mocna:#45524D;
+  --s-ok:#6CC59A; --s-ok-tlo:#183026; --s-uwaga:#E2B061; --s-uwaga-tlo:#33281A; --s-blad:#F08A80; --s-blad-tlo:#3A1F1C;
+  --s-cien:0 1px 2px rgb(0 0 0 / .35),0 4px 14px rgb(0 0 0 / .25);
+  --s-cien-menu:0 2px 6px rgb(0 0 0 / .4),0 14px 34px rgb(0 0 0 / .45);
+  --k-szalwia:#7FC4B2;  --k-szalwia-tlo:#1E302B;
+  --k-bursztyn:#E3B467; --k-bursztyn-tlo:#33291A;
+  --k-granat:#8FB2EB;   --k-granat-tlo:#1C2638;
+  --k-sliwka:#D2A2DC;   --k-sliwka-tlo:#2E2032;
+  --k-morski:#79C3D9;   --k-morski-tlo:#17303A;
+  --k-terakota:#EB9C83; --k-terakota-tlo:#3A231B;
+  --k-oliwka:#BCCB79;   --k-oliwka-tlo:#2A2E17;
+  --k-lupek:#AEBBCB;    --k-lupek-tlo:#252B33;
+  --s-akcent-tusz:#121715;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --s-tlo:#121715; --s-pow:#1A201E; --s-pow-2:#232B28; --s-pow-3:#2C3532;
+  --s-tusz:#E4EAE7; --s-tusz-2:#C3CDC8; --s-przygaszony:#9AA6A0;
+  --s-linia:#2D3733; --s-linia-mocna:#45524D;
+  --s-ok:#6CC59A; --s-ok-tlo:#183026; --s-uwaga:#E2B061; --s-uwaga-tlo:#33281A; --s-blad:#F08A80; --s-blad-tlo:#3A1F1C;
+  --s-cien:0 1px 2px rgb(0 0 0 / .35),0 4px 14px rgb(0 0 0 / .25);
+  --s-cien-menu:0 2px 6px rgb(0 0 0 / .4),0 14px 34px rgb(0 0 0 / .45);
+  --k-szalwia:#7FC4B2;  --k-szalwia-tlo:#1E302B;
+  --k-bursztyn:#E3B467; --k-bursztyn-tlo:#33291A;
+  --k-granat:#8FB2EB;   --k-granat-tlo:#1C2638;
+  --k-sliwka:#D2A2DC;   --k-sliwka-tlo:#2E2032;
+  --k-morski:#79C3D9;   --k-morski-tlo:#17303A;
+  --k-terakota:#EB9C83; --k-terakota-tlo:#3A231B;
+  --k-oliwka:#BCCB79;   --k-oliwka-tlo:#2A2E17;
+  --k-lupek:#AEBBCB;    --k-lupek-tlo:#252B33;
+  --s-akcent-tusz:#121715;
+  color-scheme:dark}
+
+/* kolor przewodni wg narzędzia (ustawia pasek-gorny.js z rejestru narzędzi) */
+html[data-kolor="szalwia"]{--s-akcent:var(--k-szalwia);--s-akcent-tlo:var(--k-szalwia-tlo)}
+html[data-kolor="bursztyn"]{--s-akcent:var(--k-bursztyn);--s-akcent-tlo:var(--k-bursztyn-tlo)}
+html[data-kolor="granat"]{--s-akcent:var(--k-granat);--s-akcent-tlo:var(--k-granat-tlo)}
+html[data-kolor="sliwka"]{--s-akcent:var(--k-sliwka);--s-akcent-tlo:var(--k-sliwka-tlo)}
+html[data-kolor="morski"]{--s-akcent:var(--k-morski);--s-akcent-tlo:var(--k-morski-tlo)}
+html[data-kolor="terakota"]{--s-akcent:var(--k-terakota);--s-akcent-tlo:var(--k-terakota-tlo)}
+html[data-kolor="oliwka"]{--s-akcent:var(--k-oliwka);--s-akcent-tlo:var(--k-oliwka-tlo)}
+html[data-kolor="lupek"]{--s-akcent:var(--k-lupek);--s-akcent-tlo:var(--k-lupek-tlo)}
+
+/* ================= 2. ATOMY ================= */
+.s-strona{background:var(--s-tlo);color:var(--s-tusz);font-family:var(--s-kroj);font-size:var(--s-r-tekst);line-height:var(--s-interlinia);
+  -webkit-text-size-adjust:100%;font-feature-settings:"kern" 1}
+.s-strona :focus-visible{outline:3px solid var(--s-akcent);outline-offset:2px}
+.s-tytul{font-size:var(--s-r-tytul);line-height:1.15;font-weight:700;letter-spacing:-.015em;margin:0;text-wrap:balance}
+.s-naglowek{font-size:var(--s-r-duzy);line-height:1.2;font-weight:700;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.s-podtytul{font-size:var(--s-r-sredni);line-height:1.3;font-weight:600;margin:0}
+.s-etykieta{font-size:var(--s-r-maly);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--s-przygaszony)}
+.s-pomoc{font-size:var(--s-r-drobny);color:var(--s-przygaszony);margin:0;max-width:68ch}
+.s-tekst{max-width:68ch;margin:0}
+.s-liczby{font-variant-numeric:tabular-nums}
+
+.s-przycisk{display:inline-flex;align-items:center;justify-content:center;gap:var(--s-2);min-height:var(--s-cel);padding:0 var(--s-4);
+  border-radius:var(--s-zaokr);border:1px solid var(--s-linia-mocna);background:var(--s-pow);color:var(--s-tusz);
+  font:600 15px/1.2 var(--s-kroj);cursor:pointer;text-decoration:none;transition:background-color var(--s-ruch),border-color var(--s-ruch)}
+.s-przycisk:hover{border-color:var(--s-przygaszony)}
+.s-przycisk.glowny{background:var(--s-akcent);border-color:var(--s-akcent);color:var(--s-akcent-tusz)}
+.s-przycisk.glowny:hover{filter:brightness(1.07)}
+.s-przycisk.cichy{background:transparent;border-color:transparent;color:var(--s-tusz-2)}
+.s-przycisk.cichy:hover{background:var(--s-pow-2)}
+.s-przycisk.grozny{color:var(--s-blad);border-color:var(--s-blad);background:transparent}
+.s-przycisk.grozny:hover{background:var(--s-blad-tlo)}
+.s-przycisk:disabled,.s-przycisk[aria-disabled="true"]{opacity:.45;cursor:not-allowed;filter:none}
+.s-przycisk.maly{min-height:36px;padding:0 var(--s-3);font-size:14px}
+
+.s-pole{display:flex;flex-direction:column;gap:6px}
+.s-pole label{font-size:var(--s-r-drobny);font-weight:600;color:var(--s-tusz-2)}
+.s-pole input,.s-pole select,.s-pole textarea{font:400 var(--s-r-tekst)/1.4 var(--s-kroj);color:var(--s-tusz);background:var(--s-pow);
+  border:1px solid var(--s-linia-mocna);border-radius:var(--s-zaokr);min-height:var(--s-cel);padding:10px 12px;width:100%}
+.s-pole textarea{min-height:88px;resize:vertical}
+.s-pole input:focus,.s-pole select:focus,.s-pole textarea:focus{outline:2px solid var(--s-akcent);outline-offset:0;border-color:transparent}
+.s-pole .s-pomoc{font-size:var(--s-r-maly)}
+
+.s-chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 var(--s-3);border-radius:999px;border:1px solid var(--s-linia);
+  background:var(--s-pow);color:var(--s-tusz-2);font:500 14px/1 var(--s-kroj);cursor:pointer}
+.s-chip[aria-pressed="true"]{background:var(--s-akcent-tlo);border-color:var(--s-akcent);color:var(--s-tusz)}
+.s-chip.tylko{cursor:default}
+
+/* zaznaczenie: kwadrat 22 px w polu 44 px */
+.s-zaznacz{display:inline-flex;align-items:center;gap:var(--s-2);min-height:var(--s-cel);cursor:pointer;font-size:var(--s-r-tekst)}
+.s-zaznacz input{width:22px;height:22px;margin:11px;accent-color:var(--s-akcent);cursor:pointer}
+
+/* przełącznik (w tym CYBER): pole 44 px, wizualnie mniejszy */
+.s-przelacznik{display:inline-flex;align-items:center;gap:var(--s-2);min-height:var(--s-cel);padding:0 var(--s-2);border:0;background:transparent;
+  color:var(--s-tusz-2);font:600 14px var(--s-kroj);cursor:pointer;border-radius:var(--s-zaokr)}
+.s-przelacznik .tor{width:36px;height:20px;border-radius:999px;background:var(--s-pow-3);position:relative;transition:background-color var(--s-ruch)}
+.s-przelacznik .tor::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--s-pow);
+  box-shadow:0 1px 2px rgb(0 0 0 / .25);transition:transform var(--s-ruch)}
+.s-przelacznik[aria-checked="true"] .tor{background:var(--s-akcent)}
+.s-przelacznik[aria-checked="true"] .tor::after{transform:translateX(16px)}
+
+/* ================= 3. MOLEKUŁY ================= */
+.s-karta{min-width:0;background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);padding:var(--s-5);box-shadow:var(--s-cien)}
+
+.s-zakladki{min-width:0;display:flex;gap:var(--s-1);border-bottom:1px solid var(--s-linia);overflow-x:auto;scrollbar-width:none}
+.s-zakladki::-webkit-scrollbar{display:none}
+.s-zakladki button,.s-zakladki a{flex:none;min-height:var(--s-cel);padding:0 var(--s-4);border:0;background:none;color:var(--s-przygaszony);
+  font:500 15px var(--s-kroj);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;text-decoration:none;display:inline-flex;align-items:center}
+.s-zakladki [aria-selected="true"],.s-zakladki [aria-current="page"]{color:var(--s-tusz);border-bottom-color:var(--s-akcent);font-weight:600}
+.s-zakladki button:hover{color:var(--s-tusz)}
+
+/* komunikat z przyciskiem „Cofnij” (działa też na telefonie, gdzie nie ma Ctrl+Z) */
+.s-komunikat{position:fixed;left:50%;bottom:calc(var(--s-5) + env(safe-area-inset-bottom,0px));transform:translate(-50%,8px);opacity:0;pointer-events:none;
+  display:flex;align-items:center;gap:var(--s-3);max-width:calc(100vw - 32px);padding:6px 6px 6px var(--s-4);border-radius:12px;
+  background:var(--s-tusz);color:var(--s-tlo);font:500 15px/1.3 var(--s-kroj);box-shadow:var(--s-cien-menu);z-index:500;
+  transition:opacity var(--s-ruch),transform var(--s-ruch)}
+.s-komunikat.widoczny{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.s-komunikat .akcja{min-height:36px;padding:0 var(--s-3);border-radius:8px;border:0;background:transparent;color:var(--s-tlo);
+  font:700 15px var(--s-kroj);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.s-komunikat .akcja:hover{background:rgb(255 255 255 / .12)}
+.s-komunikat:not(:has(.akcja)){padding-right:var(--s-4)}
+
+/* ================= 4. ORGANIZM: WSPÓLNY PASEK GÓRNY ================= */
+.pg{position:sticky;top:env(safe-area-inset-top,0px);z-index:100;background:var(--s-tlo);border-bottom:1px solid var(--s-linia);font-family:var(--s-kroj)}
+.pg-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:var(--s-2);min-height:56px;
+  padding-left:max(var(--s-4),env(safe-area-inset-left,0px));padding-right:max(var(--s-4),env(safe-area-inset-right,0px))}
+.pg-odstep{flex:1}
+.pg-menu{position:relative}
+.pg-in>.pg-menu:first-child{min-width:0;flex:0 1 auto}
+.pg-narzedzie{display:inline-flex;align-items:center;gap:10px;min-height:var(--s-cel);padding:0 10px 0 6px;border-radius:var(--s-zaokr);border:0;background:transparent;
+  color:var(--s-tusz);font:700 17px var(--s-kroj);letter-spacing:-.01em;cursor:pointer;max-width:100%;min-width:0}
+.pg-narzedzie:hover,.pg-narzedzie[aria-expanded="true"]{background:var(--s-pow-2)}
+.pg-narzedzie .pg-nazwa{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pg-narzedzie svg,.pg-wiecej svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:var(--s-przygaszony)}
+.pg-znak{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;flex:none;background:var(--s-akcent);color:var(--s-akcent-tusz);
+  font:700 12.5px var(--s-kroj);letter-spacing:.02em}
+.pg-lista{position:absolute;top:calc(100% + 6px);left:0;min-width:300px;max-width:min(380px,calc(100vw - 32px));max-height:min(70vh,560px);overflow:auto;
+  background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);box-shadow:var(--s-cien-menu);padding:6px;z-index:120}
+.pg-lista.prawa{left:auto;right:0}
+.pg-poz{display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 10px;border-radius:var(--s-zaokr);color:var(--s-tusz);text-decoration:none;
+  font:500 15px/1.25 var(--s-kroj);border:0;background:none;width:100%;text-align:left;cursor:pointer}
+.pg-poz:hover,.pg-poz:focus-visible{background:var(--s-pow-2);outline:none}
+.pg-poz[aria-current="page"]{background:var(--s-pow-2)}
+.pg-poz .pg-znak{width:32px;height:32px}
+.pg-poz b{display:block;font-weight:600}
+.pg-poz small{display:block;color:var(--s-przygaszony);font-size:13px;margin-top:1px}
+.pg-sep{height:1px;background:var(--s-linia);margin:6px 4px}
+.pg-wiecej{display:inline-grid;place-items:center;width:var(--s-cel);height:var(--s-cel);border-radius:var(--s-zaokr);border:0;background:transparent;cursor:pointer;color:var(--s-tusz-2)}
+.pg-wiecej:hover,.pg-wiecej[aria-expanded="true"]{background:var(--s-pow-2)}
+.pg .skin{min-height:36px}
+.pg-skroty{list-style:none;margin:0;padding:6px 10px 10px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--s-tusz-2)}
+.pg-skroty kbd{font:600 12px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace;border:1px solid var(--s-linia-mocna);border-bottom-width:2px;border-radius:5px;padding:3px 6px;
+  background:var(--s-pow-2);color:var(--s-tusz)}
+@media (max-width:520px){.pg-narzedzie{font-size:16px}.pg-lista{position:fixed;left:16px;right:16px;top:60px;min-width:0;max-width:none}}
+
+/* ================= CYBER: te same komponenty, neonowe tokeny ================= */
+html[data-skin="cyber"]:root{
+  --s-tlo:#07060D; --s-pow:#0E0C1A; --s-pow-2:#181433; --s-pow-3:#241E4A;
+  --s-tusz:#E9F7FF; --s-tusz-2:#C6D6EA; --s-przygaszony:#9490BD;
+  --s-linia:#2C2656; --s-linia-mocna:#3A3270;
+  --s-ok:#05FFA1; --s-ok-tlo:#03281D; --s-uwaga:#FCEE0A; --s-uwaga-tlo:#262404; --s-blad:#FF2A6D; --s-blad-tlo:#2E0A18;
+  --s-cien:0 0 0 1px rgb(0 240 255 / .12),0 0 22px rgb(0 240 255 / .07);
+  --s-cien-menu:0 0 0 1px rgb(0 240 255 / .25),0 0 30px rgb(0 240 255 / .15);
+  --k-szalwia:#05FFA1; --k-szalwia-tlo:#03281D;
+  --k-bursztyn:#FCEE0A; --k-bursztyn-tlo:#262404;
+  --k-granat:#00F0FF; --k-granat-tlo:#04252B;
+  --k-sliwka:#B967FF; --k-sliwka-tlo:#1B0C30;
+  --k-morski:#00C2FF; --k-morski-tlo:#04202E;
+  --k-terakota:#FF6B3D; --k-terakota-tlo:#2E1208;
+  --k-oliwka:#C6FF3D; --k-oliwka-tlo:#1E2A06;
+  --k-lupek:#A8B8FF; --k-lupek-tlo:#141A33;
+  --s-akcent-tusz:#07060D;
+  --s-zaokr:2px; --s-zaokr-duze:0px;
+  color-scheme:dark}
+html[data-skin="cyber"] .s-tytul,html[data-skin="cyber"] .s-naglowek,html[data-skin="cyber"] .pg-narzedzie{font-family:"Chakra Petch",var(--s-kroj);text-transform:uppercase;letter-spacing:.03em}
+html[data-skin="cyber"] .s-przycisk,html[data-skin="cyber"] .s-zakladki button,html[data-skin="cyber"] .s-chip{font-family:"Share Tech Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em}
+html[data-skin="cyber"] .s-przycisk.glowny,html[data-skin="cyber"] .pg-znak{box-shadow:0 0 14px color-mix(in srgb,var(--s-akcent) 60%,transparent)}
+html[data-skin="cyber"] .s-karta{clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}
+html[data-skin="cyber"] .pg{background:rgb(7 6 13 / .92);border-bottom-color:color-mix(in srgb,var(--s-akcent) 45%,transparent);box-shadow:0 1px 18px -6px var(--s-akcent)}
+
+@media (prefers-reduced-motion: reduce){.s-przycisk,.s-przelacznik .tor,.s-przelacznik .tor::after,.s-komunikat{transition:none}}

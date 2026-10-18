@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wzorce narzędzi</title>
+<link rel="stylesheet" href="system.css">
+<link rel="stylesheet" href="cyber.css">
+<script src="cyber.js"></script>
+<style>
+  body{margin:0}
+  .wzorce{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:var(--s-7);
+    padding:var(--s-6) max(var(--s-4),env(safe-area-inset-right,0px)) var(--s-7) max(var(--s-4),env(safe-area-inset-left,0px))}
+  section{display:flex;flex-direction:column;gap:var(--s-4)}
+  .wstep{display:flex;flex-direction:column;gap:var(--s-3)}
+  .rzad{display:flex;flex-wrap:wrap;gap:var(--s-2);align-items:center}
+  .siatka{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:var(--s-3)}
+  .probka{border:1px solid var(--s-linia);border-radius:var(--s-zaokr);overflow:hidden;background:var(--s-pow)}
+  .probka .kolor{height:64px;display:flex;align-items:flex-end;padding:var(--s-2) var(--s-3);color:var(--s-akcent-tusz);font-weight:700;font-size:14px}
+  .probka .opis{padding:var(--s-2) var(--s-3) var(--s-3);display:flex;flex-direction:column;gap:2px}
+  .probka .opis b{font-size:15px}
+  .probka .opis span{font-size:13px;color:var(--s-przygaszony)}
+  .probka .tlo{height:22px}
+  .baza{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--s-2)}
+  .baza div{border:1px solid var(--s-linia);border-radius:var(--s-zaokr);padding:var(--s-3);font-size:13px;color:var(--s-tusz-2);min-height:72px;display:flex;align-items:flex-end}
+  .skala{display:flex;flex-direction:column;gap:var(--s-3)}
+  .skala .r{display:grid;grid-template-columns:150px minmax(0,1fr);gap:var(--s-4);align-items:baseline;border-bottom:1px solid var(--s-linia);padding-bottom:var(--s-3)}
+  .skala .r code{font-size:13px;color:var(--s-przygaszony)}
+  @media (max-width:560px){.skala .r{grid-template-columns:1fr}}
+  .dwie{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:var(--s-4)}
+  .dwie>*{min-width:0}
+  .zadanie{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:var(--s-2);align-items:center;border:1px solid var(--s-linia);border-radius:var(--s-zaokr);
+    padding:0 var(--s-2) 0 0;background:var(--s-pow)}
+  .zadanie .pkt{font-variant-numeric:tabular-nums;font-weight:700;font-size:14px;padding:4px 10px;border-radius:8px;background:var(--s-akcent-tlo);color:var(--s-akcent)}
+  .zadanie .usun{width:var(--s-cel);height:var(--s-cel);border:0;background:none;border-radius:var(--s-zaokr);color:var(--s-przygaszony);font-size:18px;cursor:pointer}
+  .zadanie .usun:hover{color:var(--s-blad);background:var(--s-blad-tlo)}
+  .lista-zadan{display:flex;flex-direction:column;gap:var(--s-2)}
+  pre{margin:0;background:var(--s-pow-2);border-radius:var(--s-zaokr);padding:var(--s-4);overflow-x:auto;font:13px/1.55 ui-monospace,"SF Mono",Menlo,Consolas,monospace;color:var(--s-tusz)}
+  .uwaga{border-left:3px solid var(--s-akcent);background:var(--s-akcent-tlo);padding:var(--s-3) var(--s-4);border-radius:0 var(--s-zaokr) var(--s-zaokr) 0}
+</style>
+</head>
+<body class="s-strona">
+<header class="pg" data-pasek-gorny data-narzedzie="tablica" data-korzen="../"></header>
+
+<main class="wzorce">
+  <section class="wstep">
+    <span class="s-etykieta">Wspólny system narzędzi</span>
+    <h1 class="s-tytul">Wzorce: jeden sznyt dla wszystkich narzędzi</h1>
+    <p class="s-tekst">Tak będą wyglądać wszystkie narzędzia po przenosinach: ten sam krój, te same przyciski i ten sam pasek u góry. Różni je tylko kolor przewodni. Przełącz poniżej, którym narzędziem „jest” ta strona, i zobacz, jak zmienia się pasek i akcenty. CYBER działa jak wszędzie.</p>
+    <div class="rzad" role="group" aria-label="Podgląd jako narzędzie" id="jako"></div>
+  </section>
+
+  <section>
+    <h2 class="s-naglowek">Kolory przewodnie</h2>
+    <p class="s-pomoc">Osiem spokojnych kolorów, każdy w wersji jasnej, ciemnej i neonowej dla CYBER. Nowe narzędzie bierze następny wolny — wystarczy wpis w <code>wspolne/narzedzia.js</code>.</p>
+    <div class="siatka" id="paleta"></div>
+  </section>
+
+  <section>
+    <h2 class="s-naglowek">Baza</h2>
+    <p class="s-pomoc">Chłodna, stonowana mgła zamiast czystej bieli. Tekst drugoplanowy ma kontrast co najmniej 4,5:1.</p>
+    <div class="baza">
+      <div style="background:var(--s-tlo)">tło strony</div>
+      <div style="background:var(--s-pow)">powierzchnia</div>
+      <div style="background:var(--s-pow-2)">powierzchnia 2</div>
+      <div style="background:var(--s-ok-tlo);color:var(--s-ok)">udało się</div>
+      <div style="background:var(--s-uwaga-tlo);color:var(--s-uwaga)">uwaga</div>
+      <div style="background:var(--s-blad-tlo);color:var(--s-blad)">błąd / usuń</div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="s-naglowek">Pismo: Host Grotesk, sześć rozmiarów</h2>
+    <div class="skala">
+      <div class="r"><code>tytuł · 32 px</code><span class="s-tytul">Co dziś ruszam?</span></div>
+      <div class="r"><code>nagłówek · 24 px</code><span class="s-naglowek">Wykonanie dnia</span></div>
+      <div class="r"><code>podtytuł · 19 px</code><span class="s-podtytul">Zażółć gęślą jaźń</span></div>
+      <div class="r"><code>tekst · 16 px</code><span class="s-tekst">Skala rośnie wykładniczo, żeby jedna ciężka rzecz ważyła więcej niż dzień drobnicy. Zadania od 8 pkt płacą 30% już za samo ruszenie.</span></div>
+      <div class="r"><code>pomoc · 14 px</code><span class="s-pomoc">Enter w polu zadania dodaje kolejny wiersz.</span></div>
+      <div class="r"><code>etykieta · 13 px</code><span class="s-etykieta">Czerwone flagi</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="s-naglowek">Atomy</h2>
+    <div class="dwie">
+      <div class="s-karta" style="display:flex;flex-direction:column;gap:var(--s-4)">
+        <span class="s-etykieta">Przyciski · każdy ma co najmniej 44 px</span>
+        <div class="rzad">
+          <button class="s-przycisk glowny" type="button">Zapisz wpis</button>
+          <button class="s-przycisk" type="button">Dodaj zadanie</button>
+          <button class="s-przycisk cichy" type="button">Anuluj</button>
+          <button class="s-przycisk grozny" type="button">Usuń plan</button>
+          <button class="s-przycisk" type="button" disabled>Wyłączony</button>
+        </div>
+        <span class="s-etykieta">Chipy · wybór wielu</span>
+        <div class="rzad" id="chipy">
+          <button class="s-chip" type="button" aria-pressed="true">Stres</button>
+          <button class="s-chip" type="button" aria-pressed="false">Zmęczenie</button>
+          <button class="s-chip" type="button" aria-pressed="false">Oczekiwania</button>
+          <button class="s-chip" type="button" aria-pressed="true">Przebodźcowanie</button>
+        </div>
+        <span class="s-etykieta">Zaznaczenie i przełącznik</span>
+        <div class="rzad">
+          <label class="s-zaznacz"><input type="checkbox" id="w-zazn" checked> Zrobione</label>
+          <button class="s-przelacznik" type="button" role="switch" aria-checked="false" id="w-przel"><span class="tor" aria-hidden="true"></span>Dźwięk na koniec licznika</button>
+        </div>
+      </div>
+      <div class="s-karta" style="display:flex;flex-direction:column;gap:var(--s-4)">
+        <span class="s-etykieta">Pola</span>
+        <div class="s-pole"><label for="w-pole">Co robiłem?</label><input id="w-pole" value="Spacer z psem"><span class="s-pomoc">Podpowiedzi pojawią się przy kolejnych wpisach.</span></div>
+        <div class="s-pole"><label for="w-wybor">Kategoria</label><select id="w-wybor"><option>Check L2 telefon / przełożony</option><option>Praca administracyjna</option></select></div>
+        <div class="s-pole"><label for="w-dlugie">Dopisek</label><textarea id="w-dlugie">Zadzwonić przed 10, potem mam spotkania.</textarea></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="s-naglowek">Molekuły</h2>
+    <div class="dwie">
+      <div class="s-karta" style="display:flex;flex-direction:column;gap:var(--s-4)">
+        <span class="s-etykieta">Zakładki narzędzia</span>
+        <nav class="s-zakladki" aria-label="Zakładki" id="zakl">
+          <button type="button" aria-selected="true">Dziś</button><button type="button" aria-selected="false">Plan</button>
+          <button type="button" aria-selected="false">Historia</button><button type="button" aria-selected="false">Kategorie</button>
+          <button type="button" aria-selected="false">Pomoc</button><button type="button" aria-selected="false">Dane</button>
+        </nav>
+        <p class="s-pomoc">Propozycja wspólnych nazw: w każdym narzędziu ostatnie zakładki to zawsze <b>Pomoc</b> (zamiast „O stronie”, „Jak to działa”, „Metoda”) i <b>Dane</b> (kopia, import, czyszczenie). Rzeczy wspólne dla wszystkich — CYBER, kopia wszystkiego, skróty — siedzą w pasku u góry.</p>
+      </div>
+      <div class="s-karta" style="display:flex;flex-direction:column;gap:var(--s-4)">
+        <span class="s-etykieta">Komunikat z „Cofnij” · działa też na telefonie</span>
+        <div class="lista-zadan" id="zadania"></div>
+        <p class="s-pomoc">Usuń zadanie krzyżykiem albo zaznacz wiersz i wciśnij Delete. Komunikat na dole ma przycisk <b>Cofnij</b>, więc na telefonie nie trzeba Ctrl+Z.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="s-naglowek">Nowe narzędzie w trzech krokach</h2>
+    <div class="uwaga s-tekst">Kolor, znak i miejsce w przełączniku narzędzi biorą się z jednego wpisu w rejestrze. Strona startowa też będzie go czytać.</div>
+<pre>// 1. wspolne/narzedzia.js — dopisz na końcu listy
+{ id: 'dziennik', nazwa: 'Dziennik nastroju', znak: 'DN', kolor: 'morski',
+  href: 'dziennik/', opis: 'Krótki wpis rano i wieczorem.' }
+
+&lt;!-- 2. dziennik/index.html — w &lt;head&gt; --&gt;
+&lt;link rel="stylesheet" href="../wspolne/system.css"&gt;
+&lt;script src="../wspolne/cyber.js"&gt;&lt;/script&gt;
+
+&lt;!-- 3. na początku &lt;body class="s-strona"&gt; --&gt;
+&lt;header class="pg" data-pasek-gorny data-narzedzie="dziennik"&gt;&lt;/header&gt;
+&lt;script src="../wspolne/narzedzia.js"&gt;&lt;/script&gt;
+&lt;script src="../wspolne/pasek-gorny.js"&gt;&lt;/script&gt;</pre>
+  </section>
+</main>
+
+<div class="s-komunikat" id="komunikat" role="status" aria-live="polite"></div>
+
+<script src="narzedzia.js"></script>
+<script src="pasek-gorny.js"></script>
+<script>
+(function(){
+  const $=s=>document.querySelector(s);
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const NOWE={id:'nowe',nazwa:'Nowe narzędzie',znak:'N',kolor:(window.NARZEDZIA_WOLNE_KOLORY||['morski'])[0],href:'',opis:'Tak dołączy kolejne narzędzie.'};
+
+  /* podgląd jako narzędzie */
+  function jako(id){
+    const pg=$('[data-pasek-gorny]');
+    if(id==='nowe'){if(!NARZEDZIA.some(n=>n.id==='nowe'))NARZEDZIA.push(NOWE);}
+    else{const i=NARZEDZIA.findIndex(n=>n.id==='nowe');if(i>=0)NARZEDZIA.splice(i,1);}
+    pg.dataset.narzedzie=id;PasekGorny.odswiez();
+    document.querySelectorAll('#jako .s-chip').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));
+  }
+  $('#jako').innerHTML=NARZEDZIA.concat([NOWE]).map(n=>`<button class="s-chip" type="button" data-id="${n.id}" aria-pressed="${n.id==='tablica'}"><span class="pg-znak" style="width:22px;height:22px;font-size:10px;background:var(--k-${n.kolor})">${esc(n.znak)}</span>${esc(n.nazwa)}</button>`).join('');
+  $('#jako').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(b)jako(b.dataset.id);});
+
+  /* paleta */
+  const KOLORY=[['szalwia','szałwia'],['bursztyn','bursztyn'],['granat','granat'],['sliwka','śliwka'],['morski','morski'],['terakota','terakota'],['oliwka','oliwka'],['lupek','łupek']];
+  $('#paleta').innerHTML=KOLORY.map(([k,nazwa])=>{const n=NARZEDZIA.find(x=>x.kolor===k&&x.id!=='nowe');
+    return`<div class="probka"><div class="kolor" style="background:var(--k-${k})">${n?esc(n.znak):''}</div><div class="tlo" style="background:var(--k-${k}-tlo)"></div>
+      <div class="opis"><b>${nazwa}</b><span>${n?esc(n.nazwa):'wolny'}</span></div></div>`;}).join('');
+
+  /* atomy */
+  $('#chipy').addEventListener('click',e=>{const b=e.target.closest('.s-chip');if(b)b.setAttribute('aria-pressed',String(b.getAttribute('aria-pressed')!=='true'));});
+  $('#w-przel').addEventListener('click',e=>{const b=e.currentTarget;b.setAttribute('aria-checked',String(b.getAttribute('aria-checked')!=='true'));});
+  $('#zakl').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('#zakl').querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected',String(x===b)));});
+
+  /* lista zadań + komunikat z Cofnij */
+  let zad=[{t:'Zadzwonić do przełożonego w sprawie urlopu',p:21},{t:'Wypełnić tablicę',p:3},{t:'Odpisać na maila od księgowej',p:1}];
+  let cofnij=null,T=0;
+  function rysuj(){$('#zadania').innerHTML=zad.map((z,i)=>`<div class="zadanie" tabindex="0" data-i="${i}"><label class="s-zaznacz"><input type="checkbox" aria-label="Zrobione"></label>
+    <span>${esc(z.t)}</span><span class="pkt">${z.p} pkt</span><button class="usun" type="button" data-usun="${i}" aria-label="Usuń zadanie">×</button></div>`).join('')||'<p class="s-pomoc">Pusto — cofnij, żeby przywrócić.</p>';}
+  function komunikat(tekst,akcja){const k=$('#komunikat');k.innerHTML=`<span>${esc(tekst)}</span>${akcja?'<button class="akcja" type="button">Cofnij</button>':''}`;
+    k.classList.add('widoczny');clearTimeout(T);T=setTimeout(()=>k.classList.remove('widoczny'),5000);
+    const b=k.querySelector('.akcja');if(b)b.addEventListener('click',()=>{akcja();k.classList.remove('widoczny');});}
+  function usun(i){const [z]=zad.splice(i,1);rysuj();komunikat('Usunięto zadanie',()=>{zad.splice(i,0,z);rysuj();komunikat('Przywrócono');});}
+  $('#zadania').addEventListener('click',e=>{const b=e.target.closest('[data-usun]');if(b)usun(+b.dataset.usun);});
+  document.addEventListener('keydown',e=>{if(e.key!=='Delete')return;const w=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.zadanie');if(w){e.preventDefault();usun(+w.dataset.i);}});
+  rysuj();
+})();
+</script>
+</body>
+</html>
