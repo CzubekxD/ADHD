@@ -5,7 +5,7 @@
 
    Każde narzędzie ma tu jedną funkcję: SKROTY[id](dane) zwraca
      null              — brak danych: pokazujemy kafelek z miniaturą i przyciskiem „start”
-     { liczba, jednostka, podpis, srodek, akcja }
+     { liczba, jednostka, podpis, srodek, akcja }  albo  { naglowek, podpis, … } — zdanie zamiast liczby
                        — jedna liczba, jedno zdanie, jedna akcja (ADHD: nie zasypujemy liczbami)
    Gdy narzędzie zmieni format danych, poprawia się tylko jego funkcję tutaj.
    --------------------------------------------------------------- */
@@ -38,7 +38,7 @@
     const ost = wpisy[wpisy.length - 1];
     const akcja = { tekst: 'Dodaj wpis', href: 'pasek/' };
     if (!dzisiejsze.length) {
-      return { liczba: '—', jednostka: 'dziś bez wpisu', podpis: `Ostatni wpis ${kiedy(ost.ts)}: bateria ${etykieta(ost.bateria)}%`, akcja };
+      return { naglowek: 'Jak dziś bateria?', podpis: `Dziś jeszcze bez wpisu. Ostatni ${kiedy(ost.ts)}: ${etykieta(ost.bateria)}%`, akcja };
     }
     const flagi = dzisiejsze.filter(w => w.czerwonaFlaga).length;
     const czynniki = (ost.szop || []).slice().sort((a, b) => (b.n || 0) - (a.n || 0)).slice(0, 2)
@@ -75,7 +75,7 @@
     if (d.today.date !== dzis()) {
       const plan = ((d.plan || {})[dzis()] || []).filter(t => (t.name || '').trim()).length;
       if (!historia && !plan && !(d.today.tasks || []).some(t => (t.name || '').trim() && !t.pin)) return null;
-      return { liczba: '—', jednostka: 'tablica na dziś czeka', podpis: plan ? `${plan} ${odmiana(plan, 'zadanie', 'zadania', 'zadań')} czeka w planie na dziś` : 'Wczoraj zamknięte. Ułóż dzisiejszą tablicę', akcja };
+      return { naglowek: 'Tablica na dziś czeka', podpis: plan ? `${plan} ${odmiana(plan, 'zadanie', 'zadania', 'zadań')} czeka w planie na dziś` : 'Wczoraj zamknięte. Ułóż dzisiejszą tablicę', akcja };
     }
     const zadania = (d.today.tasks || []).filter(t => (t.name || '').trim() && wartosc(t) != null);
     if (!zadania.length) {
@@ -115,7 +115,7 @@
     }).join('');
     const akcja = { tekst: 'Otwórz „Teraz”', href: 'plany/' };
     if (!proby.length) return { liczba: String(lista.length), jednostka: odmiana(lista.length, 'plan gotowy', 'plany gotowe', 'planów gotowych'), podpis: 'W ostatnich 7 dniach bez uruchomień', srodek: `<ul class="pp-lista">${wiersze}</ul>`, akcja };
-    return { liczba: String(ok), jednostka: `z ${proby.length} ${odmiana(proby.length, 'zadziałał', 'zadziałały', 'zadziałało')}`, podpis: 'Uruchomienia planów w ostatnich 7 dniach', srodek: `<ul class="pp-lista">${wiersze}</ul>`, akcja };
+    return { liczba: String(ok), jednostka: `/ ${proby.length} zadziałało`, podpis: 'Uruchomienia planów w ostatnich 7 dniach', srodek: `<ul class="pp-lista">${wiersze}</ul>`, akcja };
   }
 
   /* ---------- WOOP ---------- */
@@ -157,8 +157,9 @@
   }
   function widzet(n, s, korzen) {
     const glowa = `<div class="pp-glowa">${znak(n)}<a class="pp-nazwa-n" href="${esc(korzen + n.href)}">${esc(n.nazwa)}</a></div>`;
-    const gora = s.zyczenie != null
-      ? `<p class="pp-zyczenie">${esc(s.zyczenie)}</p><div class="pp-wiersz"><p class="pp-podpis">${esc(s.podpis)}</p>${s.obok || ''}</div>`
+    const tekst = s.zyczenie != null ? s.zyczenie : s.naglowek;
+    const gora = tekst != null
+      ? `<p class="pp-zyczenie">${esc(tekst)}</p><div class="pp-wiersz"><p class="pp-podpis">${esc(s.podpis)}</p>${s.obok || ''}</div>`
       : `<div class="pp-wiersz"><div><div class="pp-liczba">${esc(s.liczba)}<small>${esc(s.jednostka || '')}</small></div><p class="pp-podpis">${esc(s.podpis)}</p></div>${s.obok || ''}</div>`;
     const glowna = s.akcja.glowna !== false;
     return `<section class="pp-w" style="${styl(n)}" aria-label="${esc(n.nazwa)}">${glowa}${gora}${s.srodek || ''}
