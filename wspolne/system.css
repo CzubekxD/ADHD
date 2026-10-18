@@ -195,6 +195,8 @@ header.pg{display:block;flex-wrap:nowrap;gap:0;padding:0;margin:0 calc(-1 * var(
 .pg-poz:hover,.pg-poz:focus-visible{background:var(--s-pow-2);outline:none}
 .pg-poz[aria-current="page"]{background:var(--s-pow-2)}
 .pg-poz .pg-znak{width:32px;height:32px}
+.pg-znak svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;color:inherit}
+.pg-poz .pg-znak svg{width:19px;height:19px}
 .pg-poz b{display:block;font-weight:600}
 .pg-poz small{display:block;color:var(--s-przygaszony);font-size:13px;margin-top:1px}
 .pg-sep{height:1px;background:var(--s-linia);margin:6px 4px}

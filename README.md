@@ -14,8 +14,10 @@ Strona startowa ze wszystkimi narzędziami: **https://czubekxd.github.io/ADHD/**
 
 Klucze danych w `localStorage` (te same nazwy mają pliki na Google Drive): `mcz.dane.v1` (Pasek), `tablica-scoringowa-v1` (Tablica), `plany-jezeli-v1` (Plany), `woop-v1` (WOOP).
 
-W korzeniu leży `index.html` — strona startowa z kafelkami wszystkich narzędzi.
-Nowe narzędzie dopisujesz w tablicy `TOOLS` na jej dole.
+W korzeniu leży `index.html` — **pulpit dnia**: dla każdego narzędzia jedna liczba z dzisiaj (bateria, punkty tablicy,
+plany, które zadziałały, dzisiejszy wpis WOOP), jedno zdanie i jeden przycisk. Pulpit tylko czyta dane, zapisuje zawsze
+samo narzędzie. Kto nie ma jeszcze danych, widzi kafelki z miniaturami i przyciskiem na start.
+Nowe narzędzie dopisujesz w [`wspolne/narzedzia.js`](wspolne/narzedzia.js), a jego liczbę dnia w [`wspolne/pulpit.js`](wspolne/pulpit.js).
 
 Wszystkie narzędzia są pod tym samym adresem `czubekxd.github.io`, ale każde trzyma dane
 pod własnym kluczem, więc nie wchodzą sobie w drogę.
@@ -27,7 +29,8 @@ każdego narzędzia (Pasek — szałwia, Tablica — bursztyn, Plany — granat,
 wspólny pasek: kliknięcie nazwy narzędzia pokazuje listę wszystkich, obok jest CYBER i menu ⋯.
 
 - [`wspolne/system.css`](wspolne/system.css) — kolory, pismo, odstępy i komponenty (przycisk, pole, chip, zakładki, komunikat z „Cofnij”).
-- [`wspolne/narzedzia.js`](wspolne/narzedzia.js) — rejestr narzędzi. **Nowe narzędzie = jeden wpis** z kolejnym wolnym kolorem.
+- [`wspolne/narzedzia.js`](wspolne/narzedzia.js) — rejestr narzędzi: nazwa, kolor, ikona i miniatura. **Nowe narzędzie = jeden wpis** z kolejnym wolnym kolorem.
+- [`wspolne/pulpit.js`](wspolne/pulpit.js) — liczby dnia na stronie startowej, po jednej funkcji na narzędzie.
 - [`wspolne/pasek-gorny.js`](wspolne/pasek-gorny.js) — wspólny pasek górny.
 - [`wspolne/przejscie.css`](wspolne/przejscie.css) — podpina starsze style narzędzi pod wspólne kolory i krój.
 - Podgląd wszystkich elementów: [`wspolne/wzorce.html`](https://czubekxd.github.io/ADHD/wspolne/wzorce.html).

@@ -1,130 +1,131 @@
 <!DOCTYPE html>
-<html lang="pl" data-theme="auto" data-narzedzie="start" data-kolor="lupek">
+<html lang="pl" data-kolor="lupek">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Narzędzia — czubekxd</title>
 <meta name="description" content="Zestaw małych narzędzi do samomonitorowania i ogarniania dnia. Wszystko działa w przeglądarce, bez konta i bez serwera.">
-<style>
-:root {
-  color-scheme: light;
-  --page:#f4f4f1; --card:#ffffff; --surface:#fcfcfb;
-  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
-  --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
-  --bar:#2a78d6; --gold:#b07800; --t3:#ec835a;
-  --shadow:0 1px 2px rgba(11,11,11,.05), 0 6px 20px rgba(11,11,11,.06);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --page:#0d0d0d; --card:#1a1a19; --surface:#1a1a19;
-    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
-    --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.12);
-    --bar:#3987e5; --gold:#c98500; --t3:#ec835a;
-    --shadow:0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
-  }
-}
-* { box-sizing:border-box; }
-html, body { margin:0; padding:0; }
-body {
-  background:var(--page); color:var(--ink); padding:0 16px 64px;
-  font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif; -webkit-text-size-adjust:100%;
-}
-.wrap { max-width:900px; margin:0 auto; }
-header { padding:56px 0 8px; }
-h1 { font-size:30px; margin:0 0 10px; letter-spacing:-.02em; }
-header p { margin:0; color:var(--ink-2); font-size:15.5px; max-width:62ch; }
-h2 { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:40px 0 14px; font-weight:600; }
-
-.tools { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
-.tool {
-  display:flex; flex-direction:column; gap:10px; text-decoration:none; color:inherit;
-  background:var(--card); border:1px solid var(--ring); border-radius:14px; padding:20px;
-  box-shadow:var(--shadow); transition:transform .18s cubic-bezier(.2,.9,.3,1), border-color .18s ease, box-shadow .18s ease;
-}
-.tool:hover { transform:translateY(-3px); border-color:var(--axis); box-shadow:0 2px 4px rgba(0,0,0,.06), 0 12px 28px rgba(0,0,0,.10); }
-.tool .top { display:flex; align-items:center; gap:10px; }
-.tool .ico { font-size:22px; line-height:1; }
-.tool .nm { font-size:17px; font-weight:650; letter-spacing:-.01em; }
-.tool .desc { color:var(--ink-2); font-size:14px; margin:0; }
-.tool .chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:2px; }
-.tool .chip { font-size:11px; color:var(--muted); border:1px solid var(--grid); border-radius:20px; padding:2px 9px; }
-.tool .go { margin-top:auto; padding-top:8px; font-size:13.5px; font-weight:600; color:var(--bar); }
-.tool.soon { opacity:.62; pointer-events:none; }
-.tool.soon .go { color:var(--muted); }
-
-.note { margin-top:34px; background:var(--surface); border:1px solid var(--ring); border-radius:14px; padding:18px 20px; }
-.note h3 { font-size:14px; margin:0 0 8px; }
-.note p { margin:0 0 8px; color:var(--ink-2); font-size:14px; }
-.note p:last-child { margin-bottom:0; }
-.note a, header a { color:var(--bar); }
-
-footer {
-  display:flex; gap:18px; flex-wrap:wrap; justify-content:center; align-items:center;
-  margin-top:40px; padding-top:18px; border-top:1px solid var(--grid);
-  font-size:12.5px; color:var(--muted);
-}
-footer a { color:var(--ink-2); text-decoration:none; }
-footer a:hover { color:var(--bar); text-decoration:underline; }
-@media (prefers-reduced-motion: reduce) { .tool { transition:none; } .tool:hover { transform:none; } }
-.keys { display:flex; flex-wrap:wrap; gap:6px 16px; margin:0; padding:0; list-style:none; color:var(--ink-2); font-size:14px; }
-button.b { font:inherit; font-size:14px; font-weight:600; cursor:pointer; border-radius:9px; padding:0 14px; min-height:44px; border:1px solid var(--ring); background:var(--card); color:var(--ink); }
-button.b:hover { border-color:var(--axis); }
-button.b.danger { color:var(--t3); border-color:var(--t3); }
-.brow { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
-.kmsg { margin-top:10px !important; color:var(--ink-2); font-size:14px; }
-kbd { font:12px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace; border:1px solid var(--axis); border-bottom-width:2px; border-radius:5px; padding:3px 6px; background:var(--card); color:var(--ink); }
-</style>
 <link rel="stylesheet" href="./wspolne/cyber.css">
 <link rel="stylesheet" href="./wspolne/system.css">
-<link rel="stylesheet" href="./wspolne/przejscie.css">
+<style>
+/* Pulpit dnia: nagłówek z datą, siatka 2 × 2 widżetów (jedna liczba, jedno zdanie, jedna akcja),
+   pod spodem informacje o danych i kopia. Kolory i krój z wspolne/system.css. */
+body{margin:0;background:var(--s-tlo);color:var(--s-tusz);font:16px/1.5 var(--s-kroj);-webkit-text-size-adjust:100%}
+main{max-width:1080px;margin:0 auto;padding-block:var(--s-6) var(--s-7);display:grid;gap:var(--s-5);
+  padding-left:max(var(--s-4),env(safe-area-inset-left,0px));padding-right:max(var(--s-4),env(safe-area-inset-right,0px))}
+.pp-naglowek .data{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--s-przygaszony)}
+.pp-naglowek h1{font-size:32px;line-height:1.15;letter-spacing:-.02em;margin:2px 0 0;text-wrap:balance}
+.pp-naglowek p{margin:var(--s-2) 0 0;color:var(--s-tusz-2);max-width:62ch}
+
+/* siatka widżetów */
+.pp-siatka{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:720px){.pp-siatka{grid-template-columns:minmax(0,1fr)}}
+.pp-w{background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);padding:16px 18px 18px;
+  display:flex;flex-direction:column;gap:14px;min-width:0;color:inherit;text-decoration:none}
+a.pp-w{transition:border-color .15s}
+a.pp-w:hover{border-color:var(--s-linia-mocna)}
+a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2px solid var(--k);outline-offset:2px}
+.pp-glowa{display:flex;align-items:center;gap:10px;min-width:0}
+.pp-znak{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:9px;flex:none;background:var(--k);color:var(--s-akcent-tusz);font-weight:700;font-size:12.5px}
+.pp-znak.tonal{background:var(--kt);color:var(--k)}
+.pp-znak svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pp-nazwa-n{font-size:15px;font-weight:600;color:var(--s-tusz-2);text-decoration:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pp-nazwa-n:hover{color:var(--k)}
+.pp-tytul{font-size:17px;font-weight:650;letter-spacing:-.01em}
+.pp-wiersz{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 16px;flex-wrap:wrap}
+.pp-liczba{font-size:40px;font-weight:650;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.pp-liczba small{font-size:17px;font-weight:550;color:var(--s-przygaszony);letter-spacing:0;margin-left:6px}
+.pp-podpis,.pp-opis{font-size:14px;color:var(--s-tusz-2);margin:6px 0 0}
+.pp-opis{margin:0}
+.pp-zyczenie{font-size:19px;font-weight:600;line-height:1.3;margin:0;text-wrap:balance;overflow-wrap:anywhere}
+.pp-chipy{display:flex;gap:6px;flex-wrap:wrap}
+.pp-chip{font-size:13px;border-radius:999px;padding:2px 10px;background:var(--s-pow-2);color:var(--s-tusz-2);white-space:nowrap}
+.pp-chip.flaga{background:var(--s-blad-tlo);color:var(--s-blad)}
+.pp-chip.ok{background:var(--s-ok-tlo);color:var(--s-ok)}
+.pp-spark{width:150px;height:44px;flex:none}
+.pp-spark .ks{stroke:var(--k)} .pp-spark .k{fill:var(--k)} .pp-spark .kt{fill:var(--kt)}
+.pp-postep{height:8px;border-radius:99px;background:var(--s-pow-2);overflow:hidden}
+.pp-postep i{display:block;height:100%;background:var(--k);border-radius:99px}
+.pp-lista{list-style:none;margin:0;padding:0;display:grid}
+.pp-lista li{display:flex;align-items:center;gap:10px;font-size:15px;padding:7px 0;border-top:1px solid var(--s-linia);min-width:0}
+.pp-lista li:first-child{border-top:0}
+.pp-lista .pp-nazwa{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pp-box{width:18px;height:18px;border:1.5px solid var(--s-linia-mocna);border-radius:5px;flex:none}
+.pp-pkt{font-size:12px;font-weight:700;border-radius:99px;padding:1px 9px;background:var(--kt);color:var(--k);font-variant-numeric:tabular-nums}
+.pp-dni{display:flex;gap:4px}
+.pp-dni i{width:14px;height:14px;border-radius:4px;background:var(--s-pow-3)}
+.pp-dni i.ok{background:var(--s-ok)} .pp-dni i.miss{background:var(--s-blad)} .pp-dni i.skip{background:var(--s-linia-mocna)}
+.pp-pytanie{background:var(--kt);border-radius:var(--s-zaokr);padding:12px 14px;font-weight:600}
+.pp-pytanie.gotowe{background:var(--s-pow-2);font-weight:500;color:var(--s-tusz-2)}
+.pp-akcja{align-self:flex-start;margin-top:auto;display:inline-flex;align-items:center;min-height:var(--s-cel);padding:0 16px;border-radius:var(--s-zaokr);
+  background:var(--k);color:var(--s-akcent-tusz);border:1px solid var(--k);font-weight:600;font-size:15px;text-decoration:none}
+.pp-akcja.cicha{background:var(--s-pow);color:var(--k);border-color:var(--s-linia-mocna)}
+.pp-mini{margin:-16px -18px 0;height:96px;background:var(--kt);border-radius:13px 13px 0 0;overflow:hidden}
+.pp-mini svg{width:100%;height:100%;display:block}
+.pp-mini .k{fill:var(--k)} .pp-mini .ks{stroke:var(--k)} .pp-mini .p{fill:var(--s-pow)} .pp-mini .ps{stroke:var(--s-linia-mocna)}
+.pp-mini .t{fill:var(--s-tusz)} .pp-mini .ts{stroke:var(--s-tusz)} .pp-mini .l{fill:var(--s-linia-mocna)} .pp-mini .na{fill:var(--s-akcent-tusz)}
+.pp-mini text{font-family:var(--s-kroj);font-weight:700}
+
+/* informacje i kopia */
+.pp-info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:var(--s-4)}
+@media (max-width:900px){.pp-info{grid-template-columns:minmax(0,1fr)}}
+.note{background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);padding:16px 18px;min-width:0}
+.note h2{font-size:15px;margin:0 0 8px}
+.note p{margin:0 0 8px;color:var(--s-tusz-2);font-size:14px}
+.note p:last-child{margin-bottom:0}
+.note a{color:var(--s-akcent)}
+.keys{display:grid;gap:6px;margin:0 0 8px;padding:0;list-style:none;color:var(--s-tusz-2);font-size:14px}
+kbd{font:600 12px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace;border:1px solid var(--s-linia-mocna);border-bottom-width:2px;border-radius:5px;padding:3px 6px;background:var(--s-pow-2);color:var(--s-tusz)}
+.brow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.kmsg{margin-top:10px !important;font-size:14px}
+footer{display:flex;gap:8px 20px;flex-wrap:wrap;align-items:center;padding-top:var(--s-4);border-top:1px solid var(--s-linia);font-size:14px;color:var(--s-przygaszony)}
+footer a{color:var(--s-tusz-2);text-decoration:none}
+footer a:hover{color:var(--s-akcent);text-decoration:underline}
+@media (max-width:520px){.pp-naglowek h1{font-size:26px}.pp-liczba{font-size:34px}}
+@media (prefers-reduced-motion:reduce){a.pp-w{transition:none}}
+</style>
 <script src="./wspolne/cyber.js"></script>
 <script src="./wspolne/chmura.js"></script>
 <script src="./wspolne/kopia.js"></script>
 </head>
 <body>
 <header class="pg" data-pasek-gorny data-narzedzie="" data-korzen="./"></header>
-<div class="wrap">
-
-  <header>
-    <h1>Narzędzia</h1>
-    <p>Kilka małych rzeczy, które zbudowałem dla siebie, żeby ogarnąć dzień i własną głowę.
-       Każda działa w całości w przeglądarce — bez konta, bez serwera, bez wysyłania czegokolwiek na zewnątrz.
-       Chcesz użyć u siebie? Bierz, kod jest otwarty — za darmo, do użytku niekomercyjnego.</p>
+<main>
+  <header class="pp-naglowek">
+    <div class="data" id="pp-data"></div>
+    <h1 id="pp-tytul">Narzędzia</h1>
+    <p id="pp-wstep">Kilka małych rzeczy, które zbudowałem dla siebie, żeby ogarnąć dzień i własną głowę.
+       Każda działa w całości w przeglądarce, bez konta i bez serwera. Chcesz użyć u siebie? Bierz, kod jest otwarty:
+       za darmo, do użytku niekomercyjnego.</p>
   </header>
 
-  <h2>Do użycia</h2>
-  <div class="tools" id="tools"></div>
+  <div class="pp-siatka" id="pulpit"></div>
 
-  <div class="note">
-    <h3>Jak to działa z danymi</h3>
-    <p>Wszystko, co wpiszesz, zostaje w pamięci Twojej przeglądarki, na tym jednym urządzeniu.
-       Nic nie leci na serwer, bo serwera nie ma — to są zwykłe pliki HTML.</p>
-    <p>Minus tego rozwiązania: dane nie przechodzą same między komputerem a telefonem, a wyczyszczenie danych
-       witryny je kasuje. Dlatego każde narzędzie ma eksport i import kopii w formacie JSON — to jedyny sposób
-       na backup i na przeniesienie się na inny sprzęt.</p>
-  </div>
-
-  <div class="note">
-    <h3>Wspólne we wszystkich narzędziach</h3>
-    <ul class="keys">
-      <li><kbd>Ctrl</kbd> + <kbd>Z</kbd> cofa ostatnią zmianę</li>
-      <li><kbd>Ctrl</kbd> + <kbd>Y</kbd> ponawia</li>
-      <li><kbd>Delete</kbd> usuwa zaznaczony wiersz, węzeł albo kartę</li>
-    </ul>
-    <p style="margin-top:10px">Przełącznik <b>CYBER</b> w prawym górnym rogu włącza neonowy motyw — od razu we wszystkich narzędziach.</p>
-  </div>
-
-  <div class="note" id="kopia">
-    <h3>Kopia wszystkiego</h3>
-    <p>Jeden plik z danymi wszystkich narzędzi z tej przeglądarki — na backup albo przeprowadzkę na inny komputer czy telefon.
-       Każde narzędzie ma też własny eksport i import, w swoich ustawieniach.</p>
-    <div class="brow"><button class="b" id="kopia-pobierz" type="button">Pobierz kopię wszystkiego</button><button class="b" id="kopia-wczytaj" type="button">Wczytaj kopię</button></div>
-    <div id="kopia-potw" hidden>
-      <p class="kmsg" id="kopia-opis"></p>
-      <div class="brow"><button class="b danger" id="kopia-tak" type="button">Zastąp dane</button><button class="b" id="kopia-nie" type="button">Anuluj</button></div>
-    </div>
-    <p class="kmsg" id="kopia-msg" role="status"></p>
+  <div class="pp-info">
+    <section class="note">
+      <h2>Gdzie leżą dane</h2>
+      <p>Wszystko, co wpiszesz, zostaje w tej przeglądarce. Nic nie leci na żaden serwer, bo serwera nie ma.</p>
+      <p>Te same dane na telefonie i komputerze: menu ⋯ → <b>Zapisuj na Google Drive</b>. Więcej w <a href="./prywatnosc.html">prywatności</a>.</p>
+    </section>
+    <section class="note">
+      <h2>Wspólne skróty</h2>
+      <ul class="keys">
+        <li><span><kbd>Ctrl</kbd> + <kbd>Z</kbd></span> cofa ostatnią zmianę</li>
+        <li><span><kbd>Ctrl</kbd> + <kbd>Y</kbd></span> ponawia</li>
+        <li><span><kbd>Delete</kbd></span> usuwa zaznaczony wiersz, węzeł albo kartę</li>
+      </ul>
+      <p><b>CYBER</b> w pasku u góry włącza neonowy motyw we wszystkich narzędziach naraz.</p>
+    </section>
+    <section class="note" id="kopia">
+      <h2>Kopia wszystkiego</h2>
+      <p>Jeden plik z danymi wszystkich narzędzi z tej przeglądarki, na backup albo przeprowadzkę.</p>
+      <div class="brow"><button class="s-przycisk maly" id="kopia-pobierz" type="button">Pobierz kopię</button><button class="s-przycisk maly" id="kopia-wczytaj" type="button">Wczytaj kopię</button></div>
+      <div id="kopia-potw" hidden>
+        <p class="kmsg" id="kopia-opis"></p>
+        <div class="brow"><button class="s-przycisk maly grozny" id="kopia-tak" type="button">Zastąp dane</button><button class="s-przycisk maly" id="kopia-nie" type="button">Anuluj</button></div>
+      </div>
+      <p class="kmsg" id="kopia-msg" role="status"></p>
+    </section>
   </div>
 
   <footer>
@@ -134,70 +135,41 @@ kbd { font:12px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace; border:1px so
     <a href="./prywatnosc.html">prywatność</a>
     <a href="https://buycoffee.to/czubekxd" target="_blank" rel="noopener">postaw kawę ☕</a>
   </footer>
-
-</div>
+</main>
 
 <script src="./wspolne/narzedzia.js"></script>
 <script src="./wspolne/pasek-gorny.js"></script>
+<script src="./wspolne/pulpit.js"></script>
 <script>
-/* ──────────────────────────────────────────────────────────────────────────
-   DOPISYWANIE NARZĘDZI
-   Jedna pozycja = jeden obiekt poniżej. Kolejność na liście = kolejność tutaj.
-   Pola: ikona (emoji), nazwa, opis, chips (słowa kluczowe), href (ścieżka do katalogu).
-   Dodaj   soon: true   żeby pokazać coś jako "w budowie" — kafelek będzie wyszarzony i nieklikalny.
-   ────────────────────────────────────────────────────────────────────────── */
-const TOOLS = [
-  {
-    ico: "🔋",
-    nazwa: "Pasek zdrowia × SZOP",
-    opis: "Monitor obciążenia według SZOP: stres, zmęczenie, oczekiwania, przebodźcowanie. Poziom baterii, czerwone flagi, strategie regeneracji i analiza tego, co naprawdę Cię zjada.",
-    chips: ["samomonitorowanie", "SZOP", "czerwone flagi"],
-    href: "./pasek/"
-  },
-  {
-    ico: "🎯",
-    nazwa: "Tablica scoringowa",
-    opis: "Dzienna tablica zadań z punktacją ustawioną tak, żeby ciężkie rzeczy opłacały się bardziej niż pięć łatwych. Plan tygodnia, import z Asany i statystyka tego, o której realnie domykasz.",
-    chips: ["zadania", "punktacja", "plan tygodnia"],
-    href: "./tablica/"
-  },
-  {
-    ico: "⚡",
-    nazwa: "Plany Jeżeli… to…",
-    opis: "Gotowe scenariusze na trudne momenty, zbudowane jako drzewa kroków. W chwili kryzysu przechodzisz plan krok po kroku, z licznikiem, przerwą albo oddechem, a karty ćwiczeń pomagają zapamiętać plany na zapas.",
-    chips: ["plany wdrożeniowe", "kryzys", "telefon"],
-    href: "./plany/"
-  },
-  {
-    ico: "🧭",
-    nazwa: "WOOP",
-    opis: "Życzenie, efekt, przeszkoda, plan. Kreator prowadzi przez metodę krok po kroku, a codzienny wpis pokazuje, czy Twój plan „Jeżeli…, to…” działa.",
-    chips: ["cele", "kontrast myślowy", "plany jeżeli-to"],
-    href: "./woop/"
-  }
-];
-
-/* kolor i znak każdego narzędzia biorą się ze wspólnego rejestru (wspolne/narzedzia.js) */
-TOOLS.forEach(t => { const r = (window.NARZEDZIA || []).find(n => "./" + n.href === t.href); t.kolor = r ? r.kolor : "lupek"; t.znak = r ? r.znak : t.nazwa[0]; });
-document.getElementById("tools").innerHTML = TOOLS.map(t => `
-  <a class="tool${t.soon ? " soon" : ""}" style="--k:var(--k-${t.kolor})" href="${t.soon ? "#" : t.href}">
-    <div class="top"><span class="pg-znak" style="background:var(--k-${t.kolor})">${t.znak}</span><span class="nm">${t.nazwa}</span></div>
-    <p class="desc">${t.opis}</p>
-    <div class="chips">${(t.chips || []).map(c => `<span class="chip">${c}</span>`).join("")}</div>
-    <div class="go">${t.soon ? "w budowie" : "Otwórz →"}</div>
-  </a>`).join("");
+/* ── PULPIT DNIA ──────────────────────────────────────────────────────────
+   Narzędzia dopisujesz w wspolne/narzedzia.js, ich liczbę dnia w wspolne/pulpit.js. */
+const $k = id => document.getElementById(id);
+function odswiezPulpit() {
+  const teraz = new Date();
+  const zDanymi = Pulpit.rysuj($k("pulpit"), { korzen: "./" });
+  const data = teraz.toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long" });
+  $k("pp-data").textContent = zDanymi ? data.charAt(0).toUpperCase() + data.slice(1) : "";
+  $k("pp-tytul").textContent = zDanymi ? "Dzisiaj" : "Narzędzia";
+  $k("pp-wstep").hidden = !!zDanymi;
+}
+odswiezPulpit();
+// wracasz z narzędzia, dane przyszły z Google Drive albo z innej karty — liczby się odświeżają
+addEventListener("pageshow", e => { if (e.persisted) odswiezPulpit(); });
+addEventListener("storage", odswiezPulpit);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") odswiezPulpit(); });
 
 /* ── KOPIA WSZYSTKICH NARZĘDZI ─────────────────────────────────────────────
-   Jeden plik JSON z danymi każdego narzędzia (klucze localStorage poniżej).
+   Jeden plik JSON z danymi każdego narzędzia (klucze z rejestru narzędzi).
    Wczytanie zastępuje tylko te narzędzia, których dane są w pliku. */
-const DANE = [
-  { klucz: "mcz.dane.v1",           nazwa: "Pasek zdrowia × SZOP", ile: d => (d.wpisy || []).length + " wpisów" },
-  { klucz: "tablica-scoringowa-v1", nazwa: "Tablica scoringowa",   ile: d => (d.history || []).length + " zapisanych dni" },
-  { klucz: "plany-jezeli-v1",       nazwa: "Plany Jeżeli… to…",    ile: d => (d.plans || []).length + " planów" },
-  { klucz: "woop-v1",               nazwa: "WOOP",                 ile: d => (d.items || []).length + " WOOP" },
-  { klucz: "adhd.skin",             nazwa: null }
-];
-const $k = id => document.getElementById(id);
+const ILE = {
+  pasek: d => (d.wpisy || []).length + " wpisów",
+  tablica: d => (d.history || []).length + " zapisanych dni",
+  plany: d => (d.plans || []).length + " planów",
+  woop: d => (d.items || []).length + " WOOP"
+};
+const DANE = (window.NARZEDZIA || []).filter(n => n.klucz)
+  .map(n => ({ klucz: n.klucz, nazwa: n.nazwa, ile: ILE[n.id] || (() => "") }))
+  .concat([{ klucz: "adhd.skin", nazwa: null }]);
 const msg = t => { $k("kopia-msg").textContent = t; };
 let doWczytania = null;
 
@@ -221,8 +193,8 @@ $k("kopia-wczytaj").addEventListener("click", () => {
       msg("To nie jest kopia wszystkich narzędzi. Kopię jednego narzędzia wczytasz w jego ustawieniach."); return;
     }
     const lista = DANE.filter(x => x.nazwa && p.dane[x.klucz]).map(x => {
-      let opis = ""; try { opis = " (" + x.ile(p.dane[x.klucz]) + ")"; } catch (e) {}
-      return x.nazwa + opis;
+      let opis = ""; try { opis = x.ile(p.dane[x.klucz]); } catch (e) {}
+      return x.nazwa + (opis ? " (" + opis + ")" : "");
     });
     if (!lista.length) { msg("Plik nie zawiera danych żadnego narzędzia."); return; }
     doWczytania = p.dane;
@@ -240,7 +212,8 @@ $k("kopia-tak").addEventListener("click", () => {
     try { localStorage.setItem(klucz, typeof v === "string" ? v : JSON.stringify(v)); if (nazwa) n++; } catch (e) {}
   });
   doWczytania = null; $k("kopia-potw").hidden = true;
-  msg("Wczytano dane " + n + (n === 1 ? " narzędzia." : " narzędzi.") + " Otwórz narzędzie, żeby je zobaczyć.");
+  msg("Wczytano dane " + n + (n === 1 ? " narzędzia." : " narzędzi."));
+  odswiezPulpit();
 });
 </script>
 </body>
