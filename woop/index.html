@@ -527,7 +527,7 @@ function render(){
   else if(TAB==='metoda')m.innerHTML=vMethod();
   else if(TAB==='o')m.innerHTML=vAbout();
   else m.innerHTML=vData();
-  m.insertAdjacentHTML('beforeend',`<footer class="foot"><a href="https://czubekxd.github.io/ADHD/" target="_blank" rel="noopener">wszystkie narzędzia ↗</a><a href="https://czubekxd.github.io/ADHD/plany/" target="_blank" rel="noopener">Plany Jeżeli… to… ↗</a><a href="https://buycoffee.to/czubekxd" target="_blank" rel="noopener">postaw kawę ☕</a><span>czubekxd · MIT</span></footer>`);
+  m.insertAdjacentHTML('beforeend',`<footer class="foot"><a href="https://czubekxd.github.io/ADHD/" target="_blank" rel="noopener">wszystkie narzędzia ↗</a><a href="https://czubekxd.github.io/ADHD/plany/" target="_blank" rel="noopener">Plany Jeżeli… to… ↗</a><a href="https://buycoffee.to/czubekxd" target="_blank" rel="noopener">postaw kawę ☕</a><span>czubekxd · licencja niekomercyjna</span></footer>`);
   if(fsel){const n=m.querySelector(fsel);if(n)try{n.focus({preventScroll:true});}catch(e){}}
   /* pasek postępu: start od poprzedniej wartości, żeby było widać przejście */
   const pr=m.querySelector('.prog i');
@@ -733,7 +733,7 @@ function vAbout(){
   </section>
   <section class="sect prose">
     <h2>Kod</h2>
-    <p>Kod leży otwarty na <a href="https://github.com/czubekxd/ADHD" target="_blank" rel="noopener">GitHubie</a> na licencji MIT — możesz go pobrać, zmienić i używać u siebie. Pozostałe narzędzia: <a href="https://czubekxd.github.io/ADHD/" target="_blank" rel="noopener">czubekxd.github.io/ADHD</a>.</p>
+    <p>Kod leży otwarty na <a href="https://github.com/czubekxd/ADHD" target="_blank" rel="noopener">GitHubie</a> na licencji niekomercyjnej (PolyForm Noncommercial) — możesz go pobrać, zmienić i używać u siebie za darmo, ale nie wolno go sprzedawać ani robić z niego płatnej aplikacji czy usługi. Pozostałe narzędzia: <a href="https://czubekxd.github.io/ADHD/" target="_blank" rel="noopener">czubekxd.github.io/ADHD</a>.</p>
     <p class="muted" style="font-size:13.5px">To narzędzie do pracy nad sobą, nie do diagnozowania ani leczenia. Jeśli coś Cię niepokoi, porozmawiaj o tym z człowiekiem.</p>
   </section>
   </div>`;
