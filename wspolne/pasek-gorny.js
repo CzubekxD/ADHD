@@ -29,13 +29,13 @@
     if (ja) de.dataset.narzedzie = ja.id;
 
     const pozycja = n => `<a class="pg-poz" role="menuitem" href="${esc(korzen + n.href)}" data-kolor="${esc(n.kolor)}" ${n.id === id ? 'aria-current="page"' : ''}>
-        <span class="pg-znak" style="background:var(--k-${esc(n.kolor)})">${esc(n.znak)}</span>
+        <span class="pg-znak" style="background:var(--k-${esc(n.kolor)})">${window.znakNarzedzia ? znakNarzedzia(n) : esc(n.znak)}</span>
         <span><b>${esc(n.nazwa)}</b><small>${esc(n.opis)}</small></span></a>`;
 
     el.innerHTML = `<div class="pg-in">
       <div class="pg-menu">
         <button class="pg-narzedzie" type="button" aria-haspopup="menu" aria-expanded="false" data-pg="narzedzia">
-          ${ja ? `<span class="pg-znak">${esc(ja.znak)}</span><span class="pg-nazwa">${esc(ja.nazwa)}</span>`
+          ${ja ? `<span class="pg-znak">${window.znakNarzedzia ? znakNarzedzia(ja) : esc(ja.znak)}</span><span class="pg-nazwa">${esc(ja.nazwa)}</span>`
                : `<span class="pg-znak">${IKONA.dom}</span><span class="pg-nazwa">Narzędzia</span>`}
           ${IKONA.w_dol}
         </button>

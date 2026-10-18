@@ -17,7 +17,7 @@ html[data-narzedzie] .s-komunikat{font-family:var(--s-kroj)}
 /* zakładki narzędzia na komputerze siedzą tuż pod wspólnym paskiem */
 :root{--pg-h:57px}
 /* strony z bocznym marginesem na <body>: pasek górny „wylewa się” do krawędzi */
-html[data-narzedzie="start"],html[data-narzedzie="tablica"]{--pg-wylew:16px}
+html[data-narzedzie="tablica"]{--pg-wylew:16px}
 html[data-narzedzie="woop"]{--pg-wylew:max(16px,env(safe-area-inset-left,0px))}
 
 /* ---------- Pasek zdrowia × SZOP ---------- */
@@ -106,16 +106,3 @@ html[data-narzedzie="woop"] main{padding-top:var(--s-5)}
 
 /* ---------- WOOP: własny przełącznik CYBER zastępuje ten we wspólnym pasku ---------- */
 html[data-narzedzie="woop"] #skinBtn{display:none}
-
-/* ---------- Strona startowa ---------- */
-html[data-narzedzie="start"]:root:not([data-skin="cyber"]){
-  --page:var(--s-tlo); --card:var(--s-pow); --surface:var(--s-pow);
-  --ink:var(--s-tusz); --ink-2:var(--s-tusz-2); --muted:var(--s-przygaszony);
-  --grid:var(--s-linia); --axis:var(--s-linia-mocna); --ring:var(--s-linia);
-  --bar:var(--s-akcent); --shadow:var(--s-cien);
-}
-html[data-narzedzie="start"] .wrap > header{padding-top:var(--s-6)}
-html[data-narzedzie="start"] .tools{grid-template-columns:repeat(auto-fill,minmax(min(340px,100%),1fr))}
-html[data-narzedzie="start"] .tool{border-top:3px solid var(--k,var(--s-akcent))}
-html[data-narzedzie="start"] .tool .go{color:var(--k,var(--s-akcent))}
-html[data-narzedzie="start"] .tool .pg-znak{width:34px;height:34px}
