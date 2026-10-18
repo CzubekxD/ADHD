@@ -12,7 +12,7 @@ Strona startowa ze wszystkimi narzędziami: **https://czubekxd.github.io/ADHD/**
 | **Plany Jeżeli… to…** — drzewa kroków na trudne momenty, tryb „Teraz”, ćwiczenia z kart | **https://czubekxd.github.io/ADHD/plany/** | [`plany/`](plany/) |
 | **WOOP** — życzenie, efekt, przeszkoda, plan; kreator krok po kroku i codzienny wpis, czy plan działa | **https://czubekxd.github.io/ADHD/woop/** | [`woop/`](woop/) |
 
-Klucze danych w `localStorage`: `mcz.dane.v1` (Pasek), `tablica-scoringowa-v1` (Tablica), `plany-jezeli-v1` (Plany), `woop-v1` (WOOP).
+Klucze danych w `localStorage` (te same nazwy mają pliki na Google Drive): `mcz.dane.v1` (Pasek), `tablica-scoringowa-v1` (Tablica), `plany-jezeli-v1` (Plany), `woop-v1` (WOOP).
 
 W korzeniu leży `index.html` — strona startowa z kafelkami wszystkich narzędzi.
 Nowe narzędzie dopisujesz w tablicy `TOOLS` na jej dole.
@@ -40,6 +40,12 @@ Folder [`wspolne/`](wspolne/) trzyma to, co działa tak samo w każdym narzędzi
   <kbd>Ctrl</kbd>+<kbd>Y</kbd> (albo <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd>) ponawia, <kbd>Delete</kbd> usuwa zaznaczony
   element — wiersz zadania lub wpisu, węzeł planu, kartę WOOP. W polu z tekstem oba klawisze działają zwyczajnie, na tekście.
   Historia cofania żyje do odświeżenia strony.
+- **Synchronizacja z Google Drive** ([`chmura.js`](wspolne/chmura.js)): menu ⋯ → „Zapisuj na Google Drive”. Po zalogowaniu
+  dane każdego narzędzia trafiają do ukrytego folderu aplikacji na Drive tej osoby (zakres `drive.appdata` — aplikacja nie widzi
+  innych plików), więc telefon i komputer mają te same dane. Zmiany z dwóch urządzeń są scalane: wpisy dodane tu i tam zostają oba,
+  usunięte na jednym znikają na drugim. Chmurka w pasku pokazuje stan; „Połącz” pojawia się, gdy Google prosi o ponowne
+  potwierdzenie (dostęp od Google wygasa po godzinie; wtedy jedno kliknięcie). Nowe narzędzie synchronizuje się samo, jeśli ma `klucz` w rejestrze.
+  Szczegóły: [prywatność](https://czubekxd.github.io/ADHD/prywatnosc.html).
 - **Motyw CYBER** ([`cyber.js`](wspolne/cyber.js), [`cyber.css`](wspolne/cyber.css)): przełącznik w nagłówku każdego narzędzia.
   Ustawienie leży pod kluczem `adhd.skin`, więc włączone w jednym miejscu działa wszędzie. WOOP ma pełną wersję motywu u siebie. Licencja: [PolyForm Noncommercial 1.0.0](LICENSE).
 

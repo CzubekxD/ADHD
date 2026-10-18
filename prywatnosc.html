@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pl" data-kolor="lupek">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prywatność — Narzędzia ADHD</title>
+<meta name="description" content="Gdzie leżą dane z narzędzi ADHD i co aplikacja robi z dostępem do Google Drive.">
+<link rel="stylesheet" href="./wspolne/cyber.css">
+<link rel="stylesheet" href="./wspolne/system.css">
+<style>
+body{margin:0;background:var(--s-tlo);color:var(--s-tusz);font:16px/1.6 var(--s-kroj)}
+main{max-width:68ch;margin:0 auto;padding-block:var(--s-6) var(--s-7);
+  padding-left:max(var(--s-4),env(safe-area-inset-left,0px));padding-right:max(var(--s-4),env(safe-area-inset-right,0px))}
+h1{font-size:32px;line-height:1.2;letter-spacing:-.02em;margin:0 0 var(--s-2)}
+h2{font-size:19px;margin:var(--s-6) 0 var(--s-2)}
+p,li{color:var(--s-tusz-2)}
+ul{padding-left:1.2em}
+a{color:var(--s-akcent)}
+.data{font-size:14px;color:var(--s-przygaszony)}
+.ramka{background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);padding:var(--s-3) var(--s-4)}
+</style>
+<script src="./wspolne/cyber.js"></script>
+</head>
+<body>
+<header class="pg" data-pasek-gorny data-narzedzie="" data-korzen="./"></header>
+<main>
+  <h1>Prywatność</h1>
+  <p class="data">Obowiązuje od 18 października 2026. Dotyczy narzędzi pod adresem czubekxd.github.io/ADHD.</p>
+
+  <div class="ramka">
+    <p><b>W skrócie:</b> nie mam serwera i nie widzę Twoich danych. Wszystko, co wpisujesz, zostaje w Twojej przeglądarce,
+       a jeśli włączysz synchronizację — także w ukrytym folderze tej aplikacji na <b>Twoim</b> Google Drive.</p>
+  </div>
+
+  <h2>Gdzie leżą dane</h2>
+  <ul>
+    <li><b>W przeglądarce</b> (pamięć localStorage), na urządzeniu, na którym ich używasz. Strony są zwykłymi plikami na GitHub Pages — nie wysyłają tych danych nigdzie.</li>
+    <li><b>Na Twoim Google Drive</b>, tylko jeśli sam klikniesz „Zapisuj na Google Drive”. Dane trafiają wtedy do ukrytego folderu aplikacji na koncie, którym się zalogujesz. Ten folder widzi tylko ta aplikacja i tylko z Twoich urządzeń.</li>
+  </ul>
+
+  <h2>Do czego aplikacja ma dostęp w Google</h2>
+  <p>Aplikacja prosi wyłącznie o zakres <code>drive.appdata</code>: „wyświetlanie i zarządzanie własnymi danymi konfiguracyjnymi aplikacji na Dysku Google”.
+     Nie widzi Twoich plików, dokumentów, zdjęć ani poczty. Nie dostaje też hasła — logowanie odbywa się w okienku Google.</p>
+  <p>Klucz dostępu od Google jest ważny około godziny i zostaje w Twojej przeglądarce. Nie trafia do autora ani na żaden serwer poza Google.</p>
+  <p>Wykorzystanie informacji otrzymanych z interfejsów API Google jest zgodne z
+     <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Zasadami dotyczącymi danych użytkownika w usługach API Google</a>,
+     w tym z wymaganiami dotyczącymi ograniczonego użytkowania (Limited Use). Dane nie są sprzedawane, udostępniane innym ani używane do reklam czy trenowania modeli.</p>
+
+  <h2>Jak usunąć dane</h2>
+  <ul>
+    <li><b>Z przeglądarki:</b> wyczyść dane witryny czubekxd.github.io w ustawieniach przeglądarki.</li>
+    <li><b>Z Google Drive:</b> w menu ⋯ kliknij „Synchronizacja włączona → Rozłącz”, a potem na
+        <a href="https://drive.google.com/drive/settings" target="_blank" rel="noopener">drive.google.com → Ustawienia → Zarządzaj aplikacjami</a>
+        przy „Narzędzia ADHD” wybierz <b>Opcje → Usuń ukryte dane aplikacji</b>.</li>
+    <li><b>Dostęp aplikacji do konta</b> odbierzesz na <a href="https://myaccount.google.com/connections" target="_blank" rel="noopener">myaccount.google.com/connections</a>.</li>
+  </ul>
+
+  <h2>Pliki cookie i statystyki</h2>
+  <p>Strony nie używają plików cookie, analityki ani reklam. Czcionki są ładowane z Google Fonts.</p>
+
+  <h2>Kontakt</h2>
+  <p>Pytania i zgłoszenia: <a href="https://github.com/CzubekxD/ADHD/issues" target="_blank" rel="noopener">github.com/CzubekxD/ADHD/issues</a>
+     albo adres e-mail widoczny na ekranie logowania Google.</p>
+</main>
+<script src="./wspolne/narzedzia.js"></script>
+<script src="./wspolne/pasek-gorny.js"></script>
+</body>
+</html>
