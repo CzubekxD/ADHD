@@ -18,9 +18,13 @@ main{max-width:1080px;margin:0 auto;padding-block:var(--s-6) var(--s-7);display:
 .pp-naglowek h1{font-size:32px;line-height:1.15;letter-spacing:-.02em;margin:2px 0 0;text-wrap:balance}
 .pp-naglowek p{margin:var(--s-2) 0 0;color:var(--s-tusz-2);max-width:62ch}
 
-/* siatka widżetów */
+/* siatka widżetów: u góry duże karty bieżącej pory, niżej mniejsze „Później dziś” / „Wcześniej dziś” */
+.pp-pulpit{display:grid;gap:var(--s-5)}
 .pp-siatka{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-@media (max-width:720px){.pp-siatka{grid-template-columns:minmax(0,1fr)}}
+.pp-siatka.maly{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+@media (max-width:720px){.pp-siatka,.pp-siatka.maly{grid-template-columns:minmax(0,1fr)}}
+.pp-grupa{display:grid;gap:10px}
+.pp-grupa-tytul{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--s-przygaszony);margin:0}
 .pp-w{background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);padding:16px 18px 18px;
   display:flex;flex-direction:column;gap:14px;min-width:0;color:inherit;text-decoration:none}
 a.pp-w{transition:border-color .15s}
@@ -66,6 +70,18 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 .pp-mini .k{fill:var(--k)} .pp-mini .ks{stroke:var(--k)} .pp-mini .p{fill:var(--s-pow)} .pp-mini .ps{stroke:var(--s-linia-mocna)}
 .pp-mini .t{fill:var(--s-tusz)} .pp-mini .ts{stroke:var(--s-tusz)} .pp-mini .l{fill:var(--s-linia-mocna)} .pp-mini .na{fill:var(--s-akcent-tusz)}
 .pp-mini text{font-family:var(--s-kroj);font-weight:700}
+/* mniejsza karta: ten sam układ, ciaśniej i drobniej */
+.pp-w.maly{padding:12px 14px 14px;gap:10px}
+.pp-w.maly .pp-mini{margin:-12px -14px 0;height:64px}
+.pp-w.maly .pp-tytul{font-size:15px}
+.pp-w.maly .pp-znak{width:28px;height:28px}
+.pp-w.maly .pp-zyczenie{font-size:16px}
+.pp-w.maly .pp-liczba{font-size:28px}
+.pp-w.maly .pp-liczba small{font-size:14px}
+.pp-w.maly .pp-podpis,.pp-w.maly .pp-opis,.pp-w.maly .pp-lista li{font-size:13.5px}
+.pp-w.maly .pp-lista li{flex-wrap:wrap;gap:4px 10px}
+.pp-w.maly .pp-lista .pp-nazwa{min-width:12ch}
+.pp-w.maly .pp-spark{width:110px;height:32px}
 
 /* informacje i kopia */
 .pp-info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:var(--s-4)}
@@ -104,7 +120,7 @@ html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
        za darmo, do użytku niekomercyjnego.</p>
   </header>
 
-  <div class="pp-siatka" id="pulpit"></div>
+  <div class="pp-pulpit" id="pulpit"></div>
 
   <div class="pp-info">
     <section class="note">
@@ -168,15 +184,16 @@ function stanKopii(zDanymi) {
 }
 function odswiezPulpit() {
   const teraz = new Date();
-  const zDanymi = Pulpit.rysuj($k("pulpit"), { korzen: "./" });
+  // kolejność i wielkość kart wg pory dnia z godziny urządzenia (wspolne/pulpit.js)
+  const zDanymi = Pulpit.rysuj($k("pulpit"), { korzen: "./", teraz });
   stanKopii(zDanymi);
   const data = teraz.toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long" });
-  $k("pp-data").textContent = zDanymi ? data.charAt(0).toUpperCase() + data.slice(1) : "";
-  $k("pp-tytul").textContent = zDanymi ? "Dzisiaj" : "Narzędzia";
+  $k("pp-data").textContent = data.charAt(0).toUpperCase() + data.slice(1);
+  $k("pp-tytul").textContent = Pulpit.pora(teraz).tytul;
   $k("pp-wstep").hidden = !!zDanymi;
 }
 odswiezPulpit();
-// wracasz z narzędzia, dane przyszły z Google Drive albo z innej karty — liczby się odświeżają
+// wracasz z narzędzia albo na kartę, dane przyszły z Google Drive albo z innej karty — liczby i pora się odświeżają
 addEventListener("pageshow", e => { if (e.persisted) odswiezPulpit(); });
 addEventListener("storage", odswiezPulpit);
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") odswiezPulpit(); });
