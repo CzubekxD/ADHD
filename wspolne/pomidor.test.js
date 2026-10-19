@@ -60,6 +60,11 @@ sprawdz('reduced-motion: skokowo co pełną minutę', P.ulamek(s, T0 + 30000, tr
 sprawdz('pełny pomidor to koło, pusty to nic', /^<circle/.test(P.wycinek(1)) && P.wycinek(0) === '');
 sprawdz('ćwiartka: łuk od godziny 12 do 3', /M50 55L50 22A33 33 0 0 1 83\.00 55\.00Z/.test(P.wycinek(0.25)), P.wycinek(0.25));
 
+P.rysuj(T0);
+sprawdz('na starcie pomidor czerwony (--pm-f:1)', /--pm-f:1\.000/.test($('.pm-tarcza .pm-ikona').getAttribute('style')));
+P.rysuj(T0 + 12.5 * MIN);
+sprawdz('w połowie w pół drogi do zieleni (--pm-f:0.5)', /--pm-f:0\.500/.test($('.pm-tarcza .pm-ikona').getAttribute('style')));
+
 /* --- 5. pauza i wznowienie --- */
 s = P.pauza(T0 + 10 * MIN);
 sprawdz('pauza zatrzymuje czas', s.koniec === null && s.pauza === 15 * MIN && P.pozostalo(s, T0 + 99 * MIN) === 15 * MIN);
