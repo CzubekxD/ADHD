@@ -500,6 +500,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
 <script src="../wspolne/chmura.js"></script>
 <script src="../wspolne/odmiana.js"></script>
 <script src="../wspolne/skroty.js"></script>
+<script src="../wspolne/skrzynka.js"></script>
 </head>
 <body>
 <header class="pg" data-pasek-gorny data-narzedzie="tablica" data-korzen="../"></header>
@@ -2982,6 +2983,21 @@ addEventListener("resize", () => {
 });
 renderAll();
 showTab("dzis");
+/* karteczka ze skrzynki na myśli (pulpit → „→ Tablica”): zadanie na dziś, bez kategorii.
+   Tablica jeszcze z wczoraj → zadanie czeka w planie na dziś i wejdzie na tablicę przy przerzuceniu dnia.
+   Przed Skroty.init, żeby Ctrl+Z nie zdjęło zadania, którego nie ma już w skrzynce. */
+(function () {
+  const k = window.Skrzynka && Skrzynka.odbierz();
+  if (k === null) { toast("Tej karteczki nie ma już w skrzynce"); return; }
+  if (!k) return;
+  const t = { id:uid(), name:k.tekst, catId:null, points:null, done:false, carry:0 };
+  const naDzis = S.today.date === todayISO();
+  if (naDzis) S.today.tasks.push(t); else planFor(todayISO()).push(t);
+  save();
+  Skrzynka.przeniesiono(k.id);
+  renderAll();
+  toast(naDzis ? `„${k.tekst}" jest na dzisiejszej tablicy — wybierz kategorię` : `„${k.tekst}" czeka w planie na dziś`);
+})();
 /* Ctrl+Z / Ctrl+Y cofają i ponawiają zmiany; Delete usuwa wiersz, na którym jest kursor albo myszka (w pustym polu nazwy też) */
 if (window.Skroty) Skroty.init({
   snapshot: () => JSON.stringify(S),
