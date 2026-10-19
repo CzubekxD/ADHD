@@ -175,7 +175,8 @@
     return `<path class="pm-miazsz" d="M${cx} ${cy}L${cx} ${cy - r}A${r} ${r} 0 ${f > 0.5 ? 1 : 0} 1 ${x.toFixed(2)} ${y.toFixed(2)}Z"/>`;
   }
   const LISC = '<path class="pm-lisc" d="M50 22c-3-6-9-8-15-6 5 1 8 3 10 7-6-1-11 1-14 5 6-1 11 0 15 2-2 3-2 7 0 10 2-3 2-7 4-10 4-2 9-3 15-2-3-4-8-6-14-5 2-4 5-6 10-7-6-2-12 0-15 6z"/>';
-  const ikona = (f) => `<svg class="pm-ikona" viewBox="0 0 100 100" aria-hidden="true"><circle class="pm-skorka" cx="50" cy="55" r="38"/>${wycinek(f)}${LISC}</svg>`;
+  // --pm-f: ile bloku zostało; w miarę upływu czasu pomidor przechodzi z czerwieni w zieleń (system.css)
+  const ikona = (f) => `<svg class="pm-ikona" viewBox="0 0 100 100" aria-hidden="true" style="--pm-f:${f.toFixed(3)}"><circle class="pm-skorka" cx="50" cy="55" r="38"/>${wycinek(f)}${LISC}</svg>`;
 
   function opisCzasu(s, teraz) {
     const min = Math.ceil(pozostalo(s, teraz) / MIN);
@@ -227,6 +228,7 @@
     const f = ulamek(s, null, spokojnie()), czas = mmss(pozostalo(s)), opis = opisCzasu(s);
     document.querySelectorAll('.pm-czas, .pm-mini-czas, [data-pomidor-otworz] [data-pomidor-czas]').forEach(el => { if (el.textContent !== czas) el.textContent = czas; });
     document.querySelectorAll('.pm-ikona').forEach(svg => {
+      svg.style.setProperty('--pm-f', f.toFixed(3));
       const m = svg.querySelector('.pm-miazsz'), nowy = wycinek(f);
       if (m) m.remove();
       if (nowy) svg.querySelector('.pm-skorka').insertAdjacentHTML('afterend', nowy);
