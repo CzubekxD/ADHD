@@ -20,6 +20,8 @@
   --s-tusz:#1C2320; --s-tusz-2:#3C4742; --s-przygaszony:#57625D;
   --s-linia:#C2CBC6; --s-linia-mocna:#86928C;
   --s-ok:#2B7552; --s-ok-tlo:#DDEFE5; --s-uwaga:#8F5E10; --s-uwaga-tlo:#F6EAD3; --s-blad:#AE3F37; --s-blad-tlo:#F7E1DE;
+  /* karteczka w skrzynce na myśli: żółknie od bladej do nasyconej (wspolne/skrzynka.js) */
+  --s-kartka-blada:#FFFBE6; --s-kartka:#F6D96B; --s-kartka-tusz:#2B2610;
   --s-cien:0 1px 2px rgb(20 30 25 / .06),0 4px 14px rgb(20 30 25 / .06);
   --s-cien-menu:0 2px 6px rgb(20 30 25 / .10),0 14px 34px rgb(20 30 25 / .14);
 
@@ -58,6 +60,7 @@
   --s-tusz:#E4EAE7; --s-tusz-2:#C3CDC8; --s-przygaszony:#9AA6A0;
   --s-linia:#3B4843; --s-linia-mocna:#66736D;
   --s-ok:#6CC59A; --s-ok-tlo:#183026; --s-uwaga:#E2B061; --s-uwaga-tlo:#33281A; --s-blad:#F08A80; --s-blad-tlo:#3A1F1C;
+  --s-kartka-blada:#2C2A1E; --s-kartka:#5E5016; --s-kartka-tusz:#F4EDCF;
   --s-cien:0 1px 2px rgb(0 0 0 / .35),0 4px 14px rgb(0 0 0 / .25);
   --s-cien-menu:0 2px 6px rgb(0 0 0 / .4),0 14px 34px rgb(0 0 0 / .45);
   --k-szalwia:#7FC4B2;  --k-szalwia-tlo:#1E302B;
@@ -75,6 +78,7 @@
   --s-tusz:#E4EAE7; --s-tusz-2:#C3CDC8; --s-przygaszony:#9AA6A0;
   --s-linia:#3B4843; --s-linia-mocna:#66736D;
   --s-ok:#6CC59A; --s-ok-tlo:#183026; --s-uwaga:#E2B061; --s-uwaga-tlo:#33281A; --s-blad:#F08A80; --s-blad-tlo:#3A1F1C;
+  --s-kartka-blada:#2C2A1E; --s-kartka:#5E5016; --s-kartka-tusz:#F4EDCF;
   --s-cien:0 1px 2px rgb(0 0 0 / .35),0 4px 14px rgb(0 0 0 / .25);
   --s-cien-menu:0 2px 6px rgb(0 0 0 / .4),0 14px 34px rgb(0 0 0 / .45);
   --k-szalwia:#7FC4B2;  --k-szalwia-tlo:#1E302B;
@@ -241,6 +245,7 @@ html[data-skin="cyber"]:root{
   --s-tusz:#E9F7FF; --s-tusz-2:#C6D6EA; --s-przygaszony:#9490BD;
   --s-linia:#2C2656; --s-linia-mocna:#3A3270;
   --s-ok:#05FFA1; --s-ok-tlo:#03281D; --s-uwaga:#FCEE0A; --s-uwaga-tlo:#262404; --s-blad:#FF2A6D; --s-blad-tlo:#2E0A18;
+  --s-kartka-blada:#16150A; --s-kartka:#3D3A04; --s-kartka-tusz:#FCF6A8;
   --s-cien:0 0 0 1px rgb(0 240 255 / .12),0 0 22px rgb(0 240 255 / .07);
   --s-cien-menu:0 0 0 1px rgb(0 240 255 / .25),0 0 30px rgb(0 240 255 / .15);
   --k-szalwia:#05FFA1; --k-szalwia-tlo:#03281D;
