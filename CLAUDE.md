@@ -40,4 +40,4 @@ Linki do `.css` i `.js` piszemy bez numerów wersji; workflow publikacji dopisuj
 
 Sprawdź zmienione strony w przeglądarce przy szerokości 1100 i 390 px, w motywie jasnym, ciemnym i CYBER:
 zero błędów w konsoli, brak poziomego przewijania, Ctrl+Z cofa nową zmianę. Do PR-a dołącz zrzuty ekranu.
-`pasek/test.js` (jsdom) ma przechodzić.
+`pasek/test.js` i `wspolne/pulpit.test.js` (jsdom) mają przechodzić.
