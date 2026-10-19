@@ -78,7 +78,30 @@ sprawdz('komunikat z „Cofnij”', /Wyrzucono/.test($('.skroty-toast').textCont
 $('.skroty-toast .akcja').dispatchEvent(new window.Event('click', { bubbles: true }));
 sprawdz('„Cofnij” przywraca wyrzuconą', dane().kartki.length === 2 && $$('.sk-kartka').length === 2);
 
-/* --- 6. synchronizacja i kopia --- */
+/* --- 6. przenoszenie i „✓ zrobione” --- */
+const k0 = $$('.sk-kartka')[0], id0 = k0.dataset.id;
+const cele = Array.from(k0.querySelectorAll('.sk-cel')).map(a => a.getAttribute('href'));
+sprawdz('→ Tablica / → Plany / → WOOP prowadzą do narzędzi z id karteczki',
+  cele.join(' ') === ['tablica', 'plany', 'woop'].map(n => './' + n + '/?skrzynka=' + id0).join(' '), cele.join(' '));
+sprawdz('przyciski przenoszenia mają opis dla czytnika', Array.from(k0.querySelectorAll('.sk-cel')).every(a => /: /.test(a.getAttribute('aria-label'))));
+k0.querySelector('.sk-zrobione').dispatchEvent(new window.Event('click', { bubbles: true }));
+sprawdz('✓ zdejmuje karteczkę ze stosu', dane().kartki.length === 1 && !dane().kartki.some(k => k.id === id0));
+sprawdz('✓ ma „Cofnij” w komunikacie', /Zrobione/.test($('.skroty-toast').textContent) && $('.skroty-toast .akcja').textContent === 'Cofnij');
+$('.skroty-toast .akcja').dispatchEvent(new window.Event('click', { bubbles: true }));
+sprawdz('„Cofnij” po ✓ przywraca karteczkę', dane().kartki.some(k => k.id === id0));
+
+sprawdz('odbierz(): adres bez karteczki', Skrzynka.odbierz() === undefined);
+window.history.replaceState(null, '', '/tablica/?skrzynka=' + encodeURIComponent(id0) + '#dzis');
+const odebrana = Skrzynka.odbierz();
+sprawdz('odbierz(): karteczka z ?skrzynka=', odebrana && odebrana.id === id0);
+sprawdz('odbierz(): parametr znika z adresu (odświeżenie nie przeniesie drugi raz)', window.location.search === '' && window.location.hash === '#dzis', window.location.href);
+sprawdz('karteczka zostaje w skrzynce do zapisu w narzędziu', dane().kartki.some(k => k.id === id0));
+Skrzynka.przeniesiono(id0);
+sprawdz('przeniesiono(): karteczka znika ze skrzynki', !dane().kartki.some(k => k.id === id0) && dane().kartki.length === 1);
+window.history.replaceState(null, '', '/?skrzynka=' + encodeURIComponent(id0));
+sprawdz('odbierz(): karteczki już nie ma → null', Skrzynka.odbierz() === null);
+
+/* --- 7. synchronizacja i kopia --- */
 const chmura = fs.readFileSync(path.join(__dirname, 'chmura.js'), 'utf8');
 sprawdz('klucz skrzynki w synchronizacji (chmura.js)', /DOMYSLNE = \[[^\]]*'skrzynka-v1'/.test(chmura));
 const pulpit = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
