@@ -110,10 +110,14 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 .sk-pytanie{margin:0 0 4px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
 .sk-tekst{margin:0;font-size:15px;line-height:1.35;overflow-wrap:anywhere;white-space:pre-wrap}
 .sk-dol{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px}
-.sk-usun{display:grid;place-items:center;width:var(--s-cel);height:var(--s-cel);margin-right:-10px;border:0;border-radius:8px;background:none;color:inherit;cursor:pointer}
-.sk-usun svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.sk-usun:hover{background:rgb(0 0 0 / .08)}
-.sk-kartka:focus-visible,.sk-usun:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
+.sk-przyciski{display:flex;margin-right:-10px}
+.sk-usun,.sk-zrobione{display:grid;place-items:center;width:var(--s-cel);height:var(--s-cel);border:0;border-radius:8px;background:none;color:inherit;cursor:pointer}
+.sk-usun svg,.sk-zrobione svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sk-usun:hover,.sk-zrobione:hover,.sk-cel:hover{background:rgb(0 0 0 / .08)}
+/* przenoszenie: → Tablica / → Plany / → WOOP (cel 44 px, tekst zrozumiały bez instrukcji) */
+.sk-przenies{display:flex;flex-wrap:wrap;gap:2px 4px;margin:6px 0 0 -8px}
+.sk-cel{display:inline-flex;align-items:center;min-height:var(--s-cel);padding:0 8px;border-radius:8px;color:inherit;font-size:13.5px;font-weight:600;text-decoration:none}
+.sk-kartka:focus-visible,.sk-usun:focus-visible,.sk-zrobione:focus-visible,.sk-cel:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
 .sk-pasek{display:none;gap:8px;align-items:center}
 .sk-otworz{display:inline-flex;align-items:center;gap:6px;min-height:var(--s-cel);padding:0 12px;border:1px solid var(--s-linia-mocna);border-radius:var(--s-zaokr);
   background:var(--s-pow);color:var(--s-tusz);font:600 15px var(--s-kroj);cursor:pointer;flex:none}
@@ -265,7 +269,7 @@ function odswiezPulpit() {
 odswiezPulpit();
 // wracasz z narzędzia albo na kartę, dane przyszły z Google Drive albo z innej karty — liczby i pora się odświeżają
 addEventListener("pageshow", e => { if (e.persisted) { odswiezPulpit(); Skrzynka.rysuj(); } });
-Skrzynka.zamontuj();
+Skrzynka.zamontuj({ korzen: "./" });
 addEventListener("storage", odswiezPulpit);
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") odswiezPulpit(); });
 
