@@ -1,0 +1,50 @@
+name: Pomysł
+description: Coś, co by Ci pomogło — nowa funkcja, zmiana albo całe narzędzie.
+title: "Pomysł: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Dzięki, że piszesz. Zgłoszenie jest **publiczne** — nie wklejaj tu swoich danych z narzędzi.
+  - type: dropdown
+    id: typ
+    attributes:
+      label: Typ
+      options:
+        - Błąd
+        - Pomysł
+        - Inne
+      default: 1
+    validations:
+      required: true
+  - type: dropdown
+    id: narzedzie
+    attributes:
+      label: Którego narzędzia dotyczy?
+      options:
+        - Pulpit (strona startowa)
+        - Pasek zdrowia × SZOP
+        - Tablica scoringowa
+        - Plany Jeżeli… to…
+        - WOOP
+        - Synchronizacja z Google Drive
+        - Kilku narzędzi albo całości
+        - Nowego narzędzia
+    validations:
+      required: true
+  - type: textarea
+    id: opis
+    attributes:
+      label: Opis
+      description: Co chcesz móc zrobić i w jakiej sytuacji by to pomogło?
+      placeholder: "Rano chciałbym…"
+    validations:
+      required: true
+  - type: input
+    id: email
+    attributes:
+      label: E-mail (opcjonalnie)
+      description: Tylko gdy wolisz odpowiedź mailem. Uwaga, zobaczy go każdy, kto otworzy to zgłoszenie.
+    validations:
+      required: false
