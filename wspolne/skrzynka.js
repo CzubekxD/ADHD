@@ -11,6 +11,11 @@
    do nasyconej żółci, od 3. dnia coraz bardziej się gniecie (obrót, zagięty róg, cień),
    a starsza niż 14 dni wraca na wierzch stosu z pytaniem „Co z tym robimy?”.
 
+   Akcje na karteczce: → Tablica, → Plany, → WOOP, ✓ zrobione, kosz. „✓” i kosz mają „Cofnij”.
+   Przenoszenie: pulpit otwiera narzędzie z ?skrzynka=<id>. Narzędzie bierze karteczkę przez
+   Skrzynka.odbierz(), zapisuje ją u siebie w swoim formacie i dopiero wtedy woła
+   Skrzynka.przeniesiono(id) — karteczka znika ze skrzynki po zapisie w narzędziu docelowym.
+
    Strona podaje miejsca atrybutami:
      form[data-skrzynka-pole]       pole „wrzuć myśl” (może być kilka: kolumna i pasek na telefonie)
      [data-skrzynka-stos]           lista <ol>, w którą rysujemy stos
@@ -25,6 +30,14 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const ile = (n, a, b, c) => window.ile ? window.ile(n, a, b, c) : n + ' ' + (n === 1 ? a : c);   // wspolne/odmiana.js
   const KOSZ = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+  const PTASZEK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+  // dokąd można przenieść karteczkę: narzędzie (folder) i opis dla czytnika ekranu
+  const CELE = [
+    { id: 'tablica', nazwa: 'Tablica', opis: 'Zadanie na dziś w Tablicy' },
+    { id: 'plany', nazwa: 'Plany', opis: 'Nowy plan Jeżeli… to… z tym wyzwalaczem' },
+    { id: 'woop', nazwa: 'WOOP', opis: 'Życzenie w kreatorze WOOP' }
+  ];
+  let korzen = './';
 
   /* ---------- dane ---------- */
   function czytaj() {
@@ -57,6 +70,24 @@
     return true;
   }
 
+  /* ---------- przenoszenie do narzędzi ----------
+     odbierz(): karteczka z ?skrzynka=<id> w adresie; undefined — adres bez karteczki,
+     null — karteczki już nie ma (np. przeniesiona w innej karcie). Parametr znika z adresu,
+     żeby odświeżenie strony nie przeniosło jej drugi raz. */
+  function odbierz() {
+    let id = null;
+    try { id = new URLSearchParams(location.search).get('skrzynka'); } catch (e) {}
+    if (!id) return undefined;
+    try { const u = new URL(location.href); u.searchParams.delete('skrzynka'); history.replaceState(history.state, '', u.pathname + u.search + u.hash); } catch (e) {}
+    return czytaj().kartki.find(k => k.id === id) || null;
+  }
+  // po zapisie w narzędziu docelowym; bez Skroty — Ctrl+Z narzędzia dotyczy jego własnych danych
+  function przeniesiono(id) {
+    const d = czytaj();
+    d.kartki = d.kartki.filter(k => k.id !== id);
+    try { localStorage.setItem(KLUCZ, JSON.stringify(d)); } catch (e) {}
+  }
+
   /* ---------- starzenie ---------- */
   function wyglad(k, teraz) {
     const dni = Math.max(0, ((teraz == null ? Date.now() : +teraz) - new Date(k.dodano).getTime()) / DZIEN);
@@ -85,8 +116,11 @@
       style="--i:${i};--zolc:${w.zolc.toFixed(3)};--zgn:${w.zgniecenie.toFixed(3)};--obrot:${obrot}deg">
       ${w.stara ? '<p class="sk-pytanie">Co z tym robimy?</p>' : ''}
       <p class="sk-tekst">${esc(k.tekst)}</p>
+      <div class="sk-przenies">${CELE.map(c => `<a class="sk-cel" href="${esc(korzen + c.id + '/?skrzynka=' + encodeURIComponent(k.id))}"
+        title="${esc(c.opis)}" aria-label="${esc(c.opis)}: ${esc(k.tekst)}">→ ${esc(c.nazwa)}</a>`).join('')}</div>
       <div class="sk-dol"><time datetime="${esc(k.dodano)}">${esc(kiedy(w.dni))}</time>
-        <button class="sk-usun" type="button" aria-label="Wyrzuć: ${esc(k.tekst)}" title="Wyrzuć">${KOSZ}</button></div></li>`;
+        <span class="sk-przyciski"><button class="sk-zrobione" type="button" aria-label="Zrobione: ${esc(k.tekst)}" title="Zrobione">${PTASZEK}</button>
+        <button class="sk-usun" type="button" aria-label="Wyrzuć: ${esc(k.tekst)}" title="Wyrzuć">${KOSZ}</button></span></div></li>`;
   }
   function rysuj(teraz) {
     const lista = kolejnosc(czytaj().kartki, teraz);
@@ -109,7 +143,9 @@
   }
 
   /* ---------- montowanie na stronie ---------- */
-  function zamontuj() {
+  // opcje.korzen — ścieżka do strony startowej (linki „→ narzędzie”), na pulpicie './'
+  function zamontuj(opcje) {
+    korzen = (opcje && opcje.korzen) || './';
     document.querySelectorAll('form[data-skrzynka-pole]').forEach(f => {
       f.addEventListener('submit', e => {
         e.preventDefault();
@@ -122,9 +158,11 @@
       });
     });
 
+    // ✓ zrobione i kosz: karteczka znika ze stosu, „Cofnij” w komunikacie ją przywraca
     document.addEventListener('click', e => {
-      const b = e.target.closest && e.target.closest('.sk-usun');
+      const b = e.target.closest && e.target.closest('.sk-usun, .sk-zrobione');
       if (!b) return;
+      const zrobione = b.classList.contains('sk-zrobione');
       const li = b.closest('.sk-kartka');
       const nastepna = li.nextElementSibling || li.previousElementSibling;
       const idNast = nastepna && nastepna.dataset.id;
@@ -134,7 +172,7 @@
       // fokus zostaje w stosie (na sąsiedniej karteczce), żeby klawiaturą dało się dalej porządkować
       const cel = idNast && stos && Array.from(stos.querySelectorAll('.sk-kartka')).find(x => x.dataset.id === idNast);
       if (cel) cel.focus(); else { const p = document.querySelector('form[data-skrzynka-pole] input'); if (p && p.offsetParent) p.focus(); }
-      komunikat('Wyrzucono karteczkę · Ctrl+Z cofa');
+      komunikat((zrobione ? 'Zrobione' : 'Wyrzucono karteczkę') + ' · Ctrl+Z cofa');
     });
 
     // panel od dołu (telefon)
@@ -164,5 +202,5 @@
     rysuj();
   }
 
-  window.Skrzynka = { KLUCZ, czytaj, dodaj, usun, wyglad, kolejnosc, rysuj, zamontuj };
+  window.Skrzynka = { KLUCZ, czytaj, dodaj, usun, wyglad, kolejnosc, rysuj, zamontuj, odbierz, przeniesiono };
 })();
