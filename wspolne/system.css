@@ -236,9 +236,12 @@ header.pg{display:block;flex-wrap:nowrap;gap:0;padding:0;margin:0 calc(-1 * var(
 @keyframes pg-puls{50%{opacity:.35}}
 /* pomidor (wspolne/pomidor.js): skórka, miąższ ubywający jak tarcza zegara, listki; mały pomidor z czasem w pasku */
 .pm-ikona{display:block}
-.pm-skorka{fill:var(--s-pow-2);stroke:var(--s-blad);stroke-width:5}
-.pm-miazsz{fill:var(--s-blad)}
-[data-faza="przerwa"] .pm-miazsz{fill:var(--s-ok)}
+/* w trakcie bloku pomidor zielenieje: --pm-f = ile zostało (1 czerwony → 0 zielony);
+   mieszanie w oklch prowadzi kolor przez pomarańcz i żółć, a nie przez brąz */
+.pm-ikona{--pm-kolor:color-mix(in oklch,var(--s-blad) calc(var(--pm-f,1) * 100%),var(--s-ok))}
+.pm-skorka{fill:var(--s-pow-2);stroke:var(--pm-kolor);stroke-width:5}
+.pm-miazsz{fill:var(--pm-kolor)}
+[data-faza="przerwa"] .pm-ikona{--pm-kolor:var(--s-ok)}   /* przerwa: dojrzały do odpoczynku, cały zielony */
 .pm-lisc{fill:var(--s-ok)}
 .pg-pomidor{display:inline-flex;align-items:center;gap:6px;min-height:var(--s-cel);padding:0 8px;border-radius:var(--s-zaokr);
   color:var(--s-tusz);text-decoration:none;font:600 14px var(--s-kroj);font-variant-numeric:tabular-nums}
