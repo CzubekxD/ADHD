@@ -1,0 +1,49 @@
+name: Błąd
+description: Coś nie działa albo działa inaczej, niż powinno.
+title: "Błąd: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Dzięki, że piszesz. Zgłoszenie jest **publiczne** — nie wklejaj tu swoich danych z narzędzi.
+  - type: dropdown
+    id: typ
+    attributes:
+      label: Typ
+      options:
+        - Błąd
+        - Pomysł
+        - Inne
+      default: 0
+    validations:
+      required: true
+  - type: dropdown
+    id: narzedzie
+    attributes:
+      label: Którego narzędzia dotyczy?
+      options:
+        - Pulpit (strona startowa)
+        - Pasek zdrowia × SZOP
+        - Tablica scoringowa
+        - Plany Jeżeli… to…
+        - WOOP
+        - Synchronizacja z Google Drive
+        - Kilku narzędzi albo całości
+    validations:
+      required: true
+  - type: textarea
+    id: opis
+    attributes:
+      label: Opis
+      description: Co robisz, co się dzieje, a co powinno się dziać? Telefon czy komputer, jaka przeglądarka?
+      placeholder: "Na telefonie (Chrome) dodaję zadanie na Tablicy i…"
+    validations:
+      required: true
+  - type: input
+    id: email
+    attributes:
+      label: E-mail (opcjonalnie)
+      description: Tylko gdy wolisz odpowiedź mailem. Uwaga, zobaczy go każdy, kto otworzy to zgłoszenie.
+    validations:
+      required: false
