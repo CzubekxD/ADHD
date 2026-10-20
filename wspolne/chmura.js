@@ -20,8 +20,9 @@
   const API = 'https://www.googleapis.com/drive/v3';
   const UPLOAD = 'https://www.googleapis.com/upload/drive/v3';
   const K_STAN = 'adhd.chmura', K_TOKEN = 'adhd.chmura.token', K_BAZA = 'adhd.chmura.baza:';
-  // klucze danych narzędzi; nowe narzędzie dopisuje swój `klucz` w rejestrze (narzedzia.js)
-  const DOMYSLNE = ['mcz.dane.v1', 'tablica-scoringowa-v1', 'plany-jezeli-v1', 'woop-v1'];
+  // klucze danych narzędzi; nowe narzędzie dopisuje swój `klucz` w rejestrze (narzedzia.js).
+  // skrzynka-v1: skrzynka na myśli z pulpitu (wspolne/skrzynka.js) — nie jest narzędziem z rejestru
+  const DOMYSLNE = ['mcz.dane.v1', 'tablica-scoringowa-v1', 'plany-jezeli-v1', 'woop-v1', 'skrzynka-v1'];
   const OPOZNIENIE = 2500;   // tyle ms po ostatniej zmianie wysyłamy na Drive
 
   const ls = window.localStorage;

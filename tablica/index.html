@@ -110,6 +110,16 @@ td.rep { width:62px; text-align:center; }
 td.rep input[type=checkbox] { accent-color:var(--t3); width:17px; height:17px; }
 tr.done td.rep input { opacity:.6; }
 td.del { width:34px; }
+/* pomidor przy zadaniu: licznik ukończonych bloków i „▶ 25 min” (wspolne/pomidor.js) */
+.taskwrap { display:flex; align-items:center; gap:6px; min-width:0; }
+.taskwrap input { flex:1; min-width:0; }
+.pmlicz { flex:none; font-size:13px; white-space:nowrap; color:var(--s-tusz-2); font-variant-numeric:tabular-nums; }
+.pmstart { flex:none; min-height:var(--s-cel); padding:0 10px; border:1px solid var(--s-linia-mocna); border-radius:var(--s-zaokr);
+  background:var(--s-pow); color:var(--s-tusz); font:600 13px var(--s-kroj); white-space:nowrap; cursor:pointer; }
+.pmstart:hover { border-color:var(--s-blad); }
+.pmstart:focus-visible { outline:2px solid var(--s-akcent); outline-offset:2px; }
+/* telefon: nazwa zadania na całą szerokość, pomidor pod nią */
+@media (max-width:640px) { .taskwrap { flex-wrap:wrap; } .taskwrap input { flex-basis:100%; } }
 tr.done td.task input { text-decoration:line-through; }
 .delbtn { background:none; border:none; color:var(--muted); cursor:pointer; font-size:16px; line-height:1; padding:4px 6px; border-radius:6px; }
 .delbtn:hover { color:var(--t4); background:var(--t4-bg); }
@@ -500,6 +510,8 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
 <script src="../wspolne/chmura.js"></script>
 <script src="../wspolne/odmiana.js"></script>
 <script src="../wspolne/skroty.js"></script>
+<script src="../wspolne/skrzynka.js"></script>
+<script src="../wspolne/pomidor.js"></script>
 </head>
 <body>
 <header class="pg" data-pasek-gorny data-narzedzie="tablica" data-korzen="../"></header>
@@ -1296,7 +1308,27 @@ function renderToday() {
     inp.addEventListener("keydown", e => {
       if (e.key === "Enter") { e.preventDefault(); addTask(i+1); }
     });
-    tdT.appendChild(inp);
+    // pomidor (wspolne/pomidor.js): ukończone bloki przy zadaniu i „▶ 25 min”, który rusza pomidora z tym zadaniem
+    const wrap = document.createElement("div"); wrap.className = "taskwrap";
+    wrap.appendChild(inp);
+    if ((t.name || "").trim()) {
+      if (t.pomidory) {
+        const pm = document.createElement("span"); pm.className = "pmlicz";
+        pm.textContent = "🍅 " + t.pomidory;
+        pm.title = ile(t.pomidory, "ukończony blok pomidora", "ukończone bloki pomidora", "ukończonych bloków pomidora");
+        wrap.appendChild(pm);
+      }
+      if (!t.done && window.Pomidor) {
+        const min = Pomidor.czytaj().ustawienia.praca;
+        const pb = document.createElement("button"); pb.type = "button"; pb.className = "pmstart";
+        pb.textContent = "▶ " + min + " min";
+        pb.title = `Pomidor ${min} min z tym zadaniem`;
+        pb.setAttribute("aria-label", `Pomidor ${min} min: ${t.name}`);
+        pb.addEventListener("click", () => { Pomidor.startZadania({ id: t.id, nazwa: t.name }); toast(`Pomidor ${min} min: „${t.name}" — czas w pasku u góry`); });
+        wrap.appendChild(pb);
+      }
+    }
+    tdT.appendChild(wrap);
 
     const tdC = document.createElement("td"); tdC.className = "cat";
     tdC.appendChild(combo(t.catId, id => { t.catId = id; t.points = null; save(); renderToday(); }));
@@ -2982,6 +3014,30 @@ addEventListener("resize", () => {
 });
 renderAll();
 showTab("dzis");
+/* karteczka ze skrzynki na myśli (pulpit → „→ Tablica”): zadanie na dziś, bez kategorii.
+   Tablica jeszcze z wczoraj → zadanie czeka w planie na dziś i wejdzie na tablicę przy przerzuceniu dnia.
+   Przed Skroty.init, żeby Ctrl+Z nie zdjęło zadania, którego nie ma już w skrzynce. */
+(function () {
+  const k = window.Skrzynka && Skrzynka.odbierz();
+  if (k === null) { toast("Tej karteczki nie ma już w skrzynce"); return; }
+  if (!k) return;
+  const t = { id:uid(), name:k.tekst, catId:null, points:null, done:false, carry:0 };
+  const naDzis = S.today.date === todayISO();
+  if (naDzis) S.today.tasks.push(t); else planFor(todayISO()).push(t);
+  save();
+  Skrzynka.przeniesiono(k.id);
+  renderAll();
+  toast(naDzis ? `„${k.tekst}" jest na dzisiejszej tablicy — wybierz kategorię` : `„${k.tekst}" czeka w planie na dziś`);
+})();
+/* dane tablicy zmienione z zewnątrz: pomidor dopisał ukończony blok do zadania
+   (ta karta — zdarzenie 'adhd:zapis', inna karta — 'storage'); wczytujemy je, zamiast nadpisać przy następnym zapisie */
+function zZewnatrz(klucz) {
+  if (klucz !== KEY) return;
+  S = bindS(load()); renderAll();
+  if (window.Skroty) Skroty.zapisano();
+}
+addEventListener("adhd:zapis", e => zZewnatrz(e.detail && e.detail.klucz));
+addEventListener("storage", e => zZewnatrz(e.key));
 /* Ctrl+Z / Ctrl+Y cofają i ponawiają zmiany; Delete usuwa wiersz, na którym jest kursor albo myszka (w pustym polu nazwy też) */
 if (window.Skroty) Skroty.init({
   snapshot: () => JSON.stringify(S),
