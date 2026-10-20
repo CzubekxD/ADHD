@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pl" data-kolor="lupek">
+<head>
+<meta name="adhd-wersja" content="dev"><script src="./wspolne/wersja.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Przypomnienia — Narzędzia ADHD</title>
+<meta name="description" content="Trzy codzienne przypomnienia w Twoim kalendarzu: rano Tablica, po południu Pasek, wieczorem WOOP.">
+<link rel="stylesheet" href="./wspolne/cyber.css">
+<link rel="stylesheet" href="./wspolne/system.css">
+<style>
+body{margin:0;background:var(--s-tlo);color:var(--s-tusz);font:16px/1.6 var(--s-kroj)}
+main{max-width:72ch;margin:0 auto;padding-block:var(--s-6) var(--s-7);display:grid;gap:var(--s-4);
+  padding-left:max(var(--s-4),env(safe-area-inset-left,0px));padding-right:max(var(--s-4),env(safe-area-inset-right,0px))}
+h1{font-size:32px;line-height:1.2;letter-spacing:-.02em;margin:0}
+main > p{margin:0;color:var(--s-tusz-2)}
+a{color:var(--s-akcent)}
+.pz-lista{display:grid;gap:var(--s-3)}
+.pz{background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);padding:var(--s-4);display:grid;gap:var(--s-3);min-width:0}
+.pz-glowa{display:flex;gap:var(--s-4);align-items:flex-start;min-width:0}
+.pz-godz{display:grid;gap:2px;flex:none}
+.pz-etykieta{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--s-przygaszony)}
+.pz-godz input{box-sizing:border-box;min-height:var(--s-cel);padding:0 10px;border:1px solid var(--s-linia-mocna);border-radius:var(--s-zaokr);
+  background:var(--s-pow);color:var(--s-tusz);font:600 18px var(--s-kroj);font-variant-numeric:tabular-nums}
+.pz-godz input:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
+.pz-tytul{font-size:18px;line-height:1.3;margin:18px 0 0;overflow-wrap:anywhere}
+.pz-cel{margin:2px 0 0;font-size:14px;color:var(--s-przygaszony)}
+.pz-akcje{display:flex;flex-wrap:wrap;gap:var(--s-2)}
+.ramka{background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);padding:var(--s-3) var(--s-4);font-size:14px;color:var(--s-tusz-2)}
+.ramka p{margin:0 0 6px}.ramka p:last-child{margin:0}
+@media (max-width:520px){.pz-glowa{flex-direction:column;gap:var(--s-2)}.pz-tytul{margin-top:0}.pz-akcje .s-przycisk{flex:1 1 100%}}
+</style>
+<script src="./wspolne/cyber.js"></script>
+<script src="./wspolne/skroty.js"></script>
+</head>
+<body>
+<header class="pg" data-pasek-gorny data-narzedzie="" data-korzen="./"></header>
+<main>
+  <h1>Przypomnienia</h1>
+  <p>Trzy stałe pory dnia. Dodaj je do swojego kalendarza, a telefon sam przypomni, kiedy zajrzeć do narzędzia.
+     Nic nie trafia do kalendarza, dopóki sam nie klikniesz.</p>
+
+  <div class="pz-lista" data-przypomnienia></div>
+
+  <div class="ramka">
+    <p><b>Google Calendar:</b> link otwiera gotowe wydarzenie powtarzane codziennie. Sprawdź je i kliknij „Zapisz”.</p>
+    <p><b>Inny kalendarz</b> (Apple, Outlook): pobierz plik .ics i otwórz go. Wydarzenie powtarza się codziennie i ma powiadomienie w chwili startu.</p>
+    <p><b>Zmieniasz godzinę?</b> Dodaj przypomnienie jeszcze raz, a stare usuń w kalendarzu.</p>
+    <p>Ta strona niczego nie wysyła i działa bez logowania.</p>
+  </div>
+</main>
+<script src="./wspolne/narzedzia.js"></script>
+<script src="./wspolne/pasek-gorny.js"></script>
+<script src="./wspolne/przypomnienia.js"></script>
+</body>
+</html>

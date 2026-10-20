@@ -66,6 +66,7 @@
         <button class="pg-wiecej" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Więcej" data-pg="wiecej">${IKONA.wiecej}</button>
         <div class="pg-lista prawa" role="menu" aria-label="Więcej" hidden>
           ${window.Chmura ? '<button class="pg-poz" role="menuitem" type="button" data-chmura-menu></button>' : ''}
+          <a class="pg-poz" role="menuitem" href="${esc(korzen)}przypomnienia.html"><span><b>Przypomnienia</b><small>Codziennie w Twoim kalendarzu</small></span></a>
           <a class="pg-poz" role="menuitem" href="${esc(korzen)}#kopia"><span><b>Kopia wszystkich danych</b><small>Pobierz albo wczytaj jeden plik dla wszystkich narzędzi</small></span></a>
           <a class="pg-poz" role="menuitem" href="https://github.com/CzubekxD/ADHD" target="_blank" rel="noopener"><span><b>Kod na GitHubie ↗</b><small>Licencja niekomercyjna</small></span></a>
           <a class="pg-poz" role="menuitem" href="${esc(korzen)}prywatnosc.html"><span><b>Prywatność</b><small>Gdzie leżą Twoje dane</small></span></a>
