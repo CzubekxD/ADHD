@@ -181,9 +181,15 @@ html[data-kolor="lupek"]{--s-akcent:var(--k-lupek);--s-akcent-tlo:var(--k-lupek-
 .s-stopka a:hover{border-color:var(--s-linia-mocna);background:var(--s-pow-2);color:var(--s-tusz)}
 .s-stopka a:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
 .s-stopka span{display:inline-flex;align-items:center;min-height:var(--s-cel);padding-right:var(--s-2)}
-@media (max-width:520px){.s-stopka{display:grid;grid-template-columns:1fr 1fr}.s-stopka a{padding:0 var(--s-2);font-size:13.5px;white-space:nowrap;text-align:center}.s-stopka span{grid-column:1 / -1;min-height:0;padding-bottom:var(--s-1)}}
+/* zastrzeżenie: zwykłe zdanie nad linkami; numery czytelne jako tekst, tel: tylko jako dodatek */
+.s-stopka .s-stopka-uwaga{flex:0 0 100%;margin:0 0 var(--s-2);text-wrap:pretty;font-size:var(--s-r-drobny);line-height:var(--s-interlinia);color:var(--s-tusz-2)}
+.s-stopka .s-stopka-uwaga a{display:inline;min-height:0;padding:0;border:0;border-radius:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;
+  font-weight:600;white-space:nowrap;text-decoration:underline;text-decoration-color:var(--s-linia-mocna);text-underline-offset:2px}
+.s-stopka .s-stopka-uwaga a:hover{background:none;color:var(--s-tusz);text-decoration-color:currentColor}
+@media (max-width:520px){.s-stopka{display:grid;grid-template-columns:1fr 1fr}.s-stopka a{padding:0 var(--s-2);font-size:13.5px;white-space:nowrap;text-align:center}.s-stopka span,.s-stopka .s-stopka-uwaga{grid-column:1 / -1;min-height:0;padding-bottom:var(--s-1)}}
 @media (prefers-reduced-motion:reduce){.s-stopka a{transition:none}}
 html[data-skin="cyber"] .s-stopka a{border-radius:2px;border-color:rgb(0 240 255 / .28);font-family:"Share Tech Mono",ui-monospace,monospace;letter-spacing:.04em}
+html[data-skin="cyber"] .s-stopka .s-stopka-uwaga a{border-radius:0;font-family:inherit;letter-spacing:inherit}
 
 /* ================= 4. ORGANIZM: WSPÓLNY PASEK GÓRNY ================= */
 /* header.pg: odporne na ogólne reguły „header{…}” w starych stylach narzędzi;
