@@ -7,7 +7,8 @@
    data-korzen    — ścieżka do strony startowej ('../' w narzędziu, './' w korzeniu)
 
    Pasek pokazuje: kolorowy znak i nazwę narzędzia (klik = lista wszystkich
-   narzędzi), przełącznik CYBER i menu ⋯ (kopia danych, skróty, kod).
+   narzędzi), małego pomidora z czasem (gdy timer biegnie), przełącznik CYBER
+   i menu ⋯ (kopia danych, skróty, kod).
    Inne narzędzia są pod ręką, ale schowane — żeby nie kusiły w trakcie pracy.
    --------------------------------------------------------------- */
 (function () {
@@ -30,6 +31,16 @@
     if (!l) { l = document.createElement('link'); l.rel = 'icon'; document.head.appendChild(l); }
     l.type = 'image/svg+xml';
     l.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
+  }
+
+  /* pomidor (wspolne/pomidor.js) ma działać na każdej stronie: mały pomidor z czasem w pasku i koniec
+     bloku. Strona, która go sama nie ładuje, dostaje go stąd — z tym samym ?v= co ten plik. */
+  const SKRYPT = document.currentScript && document.currentScript.src;
+  function dociagnijPomidora() {
+    if (window.Pomidor || !SKRYPT || document.querySelector('script[src*="pomidor.js"]')) return;
+    const s = document.createElement('script');
+    s.src = SKRYPT.replace('pasek-gorny.js', 'pomidor.js');
+    document.head.appendChild(s);
   }
 
   function zbuduj(el) {
@@ -60,6 +71,7 @@
         </div>
       </div>
       <span class="pg-odstep"></span>
+      <span data-pomidor-mini></span>
       <span data-chmura></span>
       <span data-cyber></span>
       <div class="pg-menu">
@@ -104,6 +116,7 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape') zamknij(); });
 
     ikonaKarty(ja);
+    if (window.Pomidor) window.Pomidor.odswiez(); else dociagnijPomidora();
     if (window.Cyber && window.Cyber.zamontuj) window.Cyber.zamontuj();
     if (window.Chmura && window.Chmura.zamontuj) window.Chmura.zamontuj();
     // włączenie CYBER: krótki „glitch” animowanego znaku (WOOP)
