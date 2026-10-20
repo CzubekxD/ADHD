@@ -116,7 +116,54 @@ klik($('[data-pm="stop"]'));
 s = P.czytaj();
 sprawdz('Stop: z powrotem praca, timer stoi', s.faza === 'praca' && s.koniec === null && s.pauza === null);
 
-/* --- 9. pasek górny ma miejsce na pomidora i dociąga go na każdej stronie --- */
+/* --- 9. zadania z dzisiejszej Tablicy --- */
+const TABLICA = 'tablica-scoringowa-v1';
+const d0 = new Date(), dzis = d0.getFullYear() + '-' + String(d0.getMonth() + 1).padStart(2, '0') + '-' + String(d0.getDate()).padStart(2, '0');
+const tablica = date => JSON.stringify({ version: 3, today: { date, tasks: [
+  { id: 'a', name: 'Raport kwartalny', catId: null, points: 8, done: false, carry: 0 },
+  { id: 'b', name: 'Zrobione wcześniej', done: true },
+  { id: 'c', name: '   ', done: false }] }, plan: {}, history: [] });
+const zTablicy = id => JSON.parse(w.localStorage.getItem(TABLICA)).today.tasks.find(t => t.id === id);
+w.localStorage.setItem(TABLICA, tablica('2020-01-01'));
+sprawdz('tablica z innego dnia: brak zadań do wyboru', P.zadaniaNaDzis().length === 0);
+P.rysuj();
+sprawdz('bez zadań na dziś nie ma pola wyboru', !$('[data-pm-zadanie]'));
+w.localStorage.setItem(TABLICA, tablica(dzis));
+sprawdz('na dziś: tylko niezrobione zadania z nazwą', P.zadaniaNaDzis().map(z => z.id).join(',') === 'a');
+P.rysuj();
+const sel = $('[data-pm-zadanie]');
+sprawdz('przed startem: wybór „bez zadania” albo zadanie z Tablicy', sel && Array.from(sel.options).map(o => o.textContent.trim()).join(' | ') === 'bez zadania | Raport kwartalny');
+sel.value = 'a'; sel.dispatchEvent(new w.Event('change', { bubbles: true }));
+sprawdz('wybrane zadanie zapisuje się w stanie', P.czytaj().zadanie && P.czytaj().zadanie.id === 'a');
+let zapisy = 0;
+w.addEventListener('adhd:zapis', e => { if (e.detail && e.detail.klucz === TABLICA) zapisy++; });
+P.start(T0);
+P.rysuj(T0 + MIN);
+sprawdz('w trakcie widać nazwę zadania', /Raport kwartalny/.test($('.pm-zad-nazwa') && $('.pm-zad-nazwa').textContent));
+let kz = P.sprawdzKoniec(T0 + 25 * MIN);
+sprawdz('ukończony blok dopisuje się do zadania (pomidory: 1)', zTablicy('a').pomidory === 1 && kz.zadanie.id === 'a' && kz.pomidory === 1, JSON.stringify(kz));
+sprawdz('Tablica w tej karcie dostaje zdarzenie adhd:zapis', zapisy === 1);
+sprawdz('reszta zadania nietknięta', zTablicy('a').points === 8 && zTablicy('a').name === 'Raport kwartalny');
+P.start(T0 + 30 * MIN);
+kz = P.sprawdzKoniec(T0 + 35 * MIN);
+sprawdz('koniec przerwy niczego nie dopisuje', zTablicy('a').pomidory === 1 && !kz.zadanie);
+P.start(T0 + 40 * MIN);
+P.sprawdzKoniec(T0 + 65 * MIN);
+sprawdz('drugi blok pracy: pomidory 2', zTablicy('a').pomidory === 2);
+
+P.stop();
+s = P.startZadania({ id: 'a', nazwa: 'Raport kwartalny' }, T0);
+sprawdz('„▶ 25 min” z Tablicy: blok pracy z tym zadaniem', s.faza === 'praca' && s.zadanie.id === 'a' && s.koniec === T0 + 25 * MIN);
+const t2 = JSON.parse(w.localStorage.getItem(TABLICA)); t2.today.tasks = t2.today.tasks.filter(t => t.id !== 'a'); w.localStorage.setItem(TABLICA, JSON.stringify(t2));
+kz = P.sprawdzKoniec(T0 + 25 * MIN);
+sprawdz('zadanie usunięte w międzyczasie: koniec bez dopisywania', kz && !kz.zadanie && kz.pomidory === 0);
+w.localStorage.setItem(TABLICA, tablica(dzis));
+P.stop(); P.ustawZadanie({ id: 'b', nazwa: 'Zrobione wcześniej' }); P.rysuj();
+klik($('[data-pm="start"]'));
+sprawdz('start z zadaniem już zrobionym → blok bez zadania', P.czytaj().zadanie === null && P.czytaj().koniec !== null);
+P.stop();
+
+/* --- 10. pasek górny ma miejsce na pomidora i dociąga go na każdej stronie --- */
 const pasek = fs.readFileSync(path.join(__dirname, 'pasek-gorny.js'), 'utf8');
 sprawdz('pasek górny: miejsce [data-pomidor-mini] i dociąganie pomidor.js', /data-pomidor-mini/.test(pasek) && /pomidor\.js/.test(pasek));
 sprawdz('stan tylko na tym urządzeniu (poza synchronizacją)', !/pomidor-v1/.test(fs.readFileSync(path.join(__dirname, 'chmura.js'), 'utf8')));

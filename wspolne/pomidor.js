@@ -9,13 +9,19 @@
        faza: 'praca' | 'przerwa',
        koniec: ts | null,                // biegnie do tej chwili
        pauza: ms | null,                 // zatrzymany, tyle zostało
-       dlugosc: ms }                     // długość bieżącego bloku (do tarczy)
+       dlugosc: ms,                      // długość bieżącego bloku (do tarczy)
+       zadanie: { id, nazwa } | null }   // zadanie z dzisiejszej Tablicy, nad którym pracujesz
    Czas liczymy od końca bloku, a nie co sekundę, więc timer przeżywa przejście do innego
    narzędzia, odświeżenie strony i uśpioną kartę.
 
    Koniec bloku: krótki dźwięk, powiadomienie z otwartej karty (zgoda pytana przy pierwszym
    starcie) i komunikat na stronie z przyciskiem na następny blok. Kilka otwartych kart:
    koniec obsługuje pierwsza, która go zauważy (pozostałe widzą już nowy stan).
+
+   Zadania z Tablicy: przed startem można wybrać zadanie z dzisiejszej tablicy (albo „bez zadania”);
+   „▶ 25 min” przy zadaniu w Tablicy rusza pomidora z tym zadaniem (startZadania). Ukończony blok
+   pracy dopisuje się do zadania jako pole `pomidory` (liczba) pod kluczem Tablicy, a strona dostaje
+   zdarzenie 'adhd:zapis' — Tablica otwarta w tej samej karcie od razu je pokazuje.
 
    Strona podaje miejsca atrybutami:
      [data-pomidor]          pełny timer (pulpit: kolumna i panel na telefonie)
@@ -32,6 +38,28 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const ile = (n, a, b, c) => window.ile ? window.ile(n, a, b, c) : n + ' ' + (n === 1 ? a : c);   // wspolne/odmiana.js
   const spokojnie = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+
+  /* ---------- zadania z Tablicy ---------- */
+  const TABLICA = 'tablica-scoringowa-v1';
+  const pad = n => String(n).padStart(2, '0');
+  const dzis = () => { const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+  function czytajTablice() { try { return JSON.parse(localStorage.getItem(TABLICA) || 'null'); } catch (e) { return null; } }
+  // niezrobione zadania z nazwą z dzisiejszej tablicy (tablica z wczoraj jeszcze nie przerzucona → brak)
+  function zadaniaNaDzis() {
+    const t = czytajTablice();
+    if (!t || !t.today || t.today.date !== dzis()) return [];
+    return (t.today.tasks || []).filter(z => z && z.id && (z.name || '').trim() && !z.done).map(z => ({ id: z.id, nazwa: z.name.trim() }));
+  }
+  // ukończony blok pracy → +1 w polu `pomidory` zadania; zwraca nową liczbę albo 0, gdy zadania już nie ma
+  function dopiszPomidora(id) {
+    const t = czytajTablice();
+    const z = t && t.today && (t.today.tasks || []).find(x => x && x.id === id);
+    if (!z) return 0;
+    z.pomidory = (z.pomidory || 0) + 1;
+    try { localStorage.setItem(TABLICA, JSON.stringify(t)); } catch (e) { return 0; }
+    try { dispatchEvent(new CustomEvent('adhd:zapis', { detail: { klucz: TABLICA } })); } catch (e) {}
+    return z.pomidory;
+  }
 
   /* ---------- stan ---------- */
   const NOWY = () => ({ ustawienia: { praca: 25, przerwa: 5 }, faza: 'praca', koniec: null, pauza: null, dlugosc: 25 * MIN });
@@ -87,6 +115,22 @@
     s.koniec = null; s.pauza = null; s.faza = 'praca'; s.dlugosc = dlugoscFazy(s);
     zapisz(s); return s;
   }
+  function ustawZadanie(zad) {
+    const s = czytaj();
+    s.zadanie = zad && zad.id ? { id: zad.id, nazwa: String(zad.nazwa || '') } : null;
+    zapisz(s); return s;
+  }
+  // „▶ 25 min” w Tablicy (z kliknięcia): nowy blok pracy z tym zadaniem; bieżący blok, jeśli był, kończy się bez zapisu
+  function startZadania(zad, teraz) {
+    odblokujDzwiek(); popros(); schowajKoniec();
+    const s = czytaj();
+    s.zadanie = zad && zad.id ? { id: zad.id, nazwa: String(zad.nazwa || '') } : null;
+    s.faza = 'praca'; s.koniec = null; s.pauza = null;
+    zapisz(s);
+    const nowy = start(teraz);
+    rysuj(teraz);
+    return nowy;
+  }
   function ustawPrace(min) {
     const s = czytaj();
     if (biegnie(s) || zatrzymany(s) || !(min > 0)) return s;
@@ -104,7 +148,10 @@
     s.faza = byla === 'praca' ? 'przerwa' : 'praca';
     s.koniec = null; s.pauza = null; s.dlugosc = dlugoscFazy(s);
     zapisz(s);
-    return { byla, minut, kiedy, nastepna: s.faza, nastepnaMinut: Math.round(s.dlugosc / MIN) };
+    // najpierw nowy stan (żeby druga karta nie dopisała drugi raz), potem pomidor przy zadaniu
+    const zadanie = byla === 'praca' && s.zadanie ? s.zadanie : null;
+    const pomidory = zadanie ? dopiszPomidora(zadanie.id) : 0;
+    return { byla, minut, kiedy, nastepna: s.faza, nastepnaMinut: Math.round(s.dlugosc / MIN), zadanie: pomidory ? zadanie : null, pomidory };
   }
 
   /* ---------- dźwięk i powiadomienie ---------- */
@@ -133,8 +180,9 @@
     try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {}
   }
   function tekstKonca(k) {
+    const zad = k.zadanie ? `„${k.zadanie.nazwa}”: ${ile(k.pomidory, 'pomidor', 'pomidory', 'pomidorów')}. ` : '';
     return k.byla === 'praca'
-      ? { tytul: 'Koniec pracy', opis: `Czas na ${k.nastepnaMinut} min przerwy.`, przycisk: 'Start przerwy' }
+      ? { tytul: 'Koniec pracy', opis: `${zad}Czas na ${k.nastepnaMinut} min przerwy.`, przycisk: 'Start przerwy' }
       : { tytul: 'Koniec przerwy', opis: `Gotowe na ${k.nastepnaMinut} min pracy?`, przycisk: 'Start pracy' };
   }
   function powiadom(k) {
@@ -188,6 +236,15 @@
     return `<button class="s-przycisk glowny" type="button" data-pm="start">Start ${s.faza === 'praca' ? 'pracy' : 'przerwy'}</button>` +
       (s.faza === 'przerwa' ? `<button class="s-przycisk cichy" type="button" data-pm="stop">Pomiń</button>` : '');
   }
+  // przed startem pracy: zadanie z dzisiejszej Tablicy albo „bez zadania” (bez zadań na dziś — nic nie pokazujemy)
+  function wyborZadania(s) {
+    const lista = zadaniaNaDzis();
+    if (!lista.length) return '';
+    const wybrane = s.zadanie && lista.some(z => z.id === s.zadanie.id) ? s.zadanie.id : '';
+    return `<label class="pm-zadanie"><span>Zadanie z Tablicy</span><select data-pm-zadanie>
+      <option value="">bez zadania</option>${lista.map(z => `<option value="${esc(z.id)}"${z.id === wybrane ? ' selected' : ''}>${esc(z.nazwa)}</option>`).join('')}
+      </select></label>`;
+  }
   function pelny(s, teraz) {
     const wolny = !biegnie(s) && !zatrzymany(s);
     return `<div class="pm" data-faza="${s.faza}">
@@ -195,6 +252,8 @@
       <div class="pm-tarcza" role="img" aria-label="${esc(opisCzasu(s, teraz))}">${ikona(ulamek(s, teraz, spokojnie()))}</div>
       <p class="pm-czas" role="timer" aria-hidden="true">${mmss(pozostalo(s, teraz))}</p>
       <p class="pm-faza">${s.faza === 'praca' ? 'Praca' : 'Przerwa'}${zatrzymany(s) ? ' · pauza' : ''}</p>
+      ${!wolny && s.faza === 'praca' && s.zadanie ? `<p class="pm-zad-nazwa">${esc(s.zadanie.nazwa)}</p>` : ''}
+      ${wolny && s.faza === 'praca' ? wyborZadania(s) : ''}
       <div class="pm-przyciski">${przyciski(s)}</div>
       ${wolny && s.faza === 'praca' ? `<div class="pm-dlugosci" role="group" aria-label="Długość bloku pracy">${DLUGOSCI.map(m =>
         `<button class="s-chip" type="button" data-pm="dlugosc" data-min="${m}" aria-pressed="${s.ustawienia.praca === m}">${m} min</button>`).join('')}</div>
@@ -247,7 +306,13 @@
       const b = e.target.closest && e.target.closest('[data-pm]');
       if (!b) return;
       const co = b.dataset.pm;
-      if (co === 'start') { odblokujDzwiek(); popros(); schowajKoniec(); start(); }
+      if (co === 'start') {
+        odblokujDzwiek(); popros(); schowajKoniec();
+        // zadanie zrobione albo usunięte w międzyczasie → blok bez zadania
+        const s = czytaj();
+        if (s.faza === 'praca' && s.zadanie && !zadaniaNaDzis().some(z => z.id === s.zadanie.id)) ustawZadanie(null);
+        start();
+      }
       else if (co === 'pauza') pauza();
       else if (co === 'wznow') { odblokujDzwiek(); wznow(); }
       else if (co === 'stop') { schowajKoniec(); stop(); }
@@ -260,6 +325,15 @@
       if (nast && co !== 'dlugosc') nast.focus();
       else if (cel && co === 'dlugosc') { const c = cel.querySelector(`[data-pm="dlugosc"][data-min="${b.dataset.min}"]`); if (c) c.focus(); }
     });
+    document.addEventListener('change', e => {
+      const sel = e.target.closest && e.target.closest('[data-pm-zadanie]');
+      if (!sel) return;
+      ustawZadanie(zadaniaNaDzis().find(z => z.id === sel.value) || null);
+      const cel = sel.closest('[data-pomidor]');
+      rysuj();
+      const nowy = cel && cel.querySelector('[data-pm-zadanie]');
+      if (nowy) nowy.focus();
+    });
     // panel od dołu (telefon)
     document.querySelectorAll('[data-pomidor-otworz]').forEach(b => {
       const d = document.getElementById(b.getAttribute('aria-controls'));
@@ -269,12 +343,12 @@
       d.addEventListener('click', e => { if (e.target === d) d.close(); });
       d.querySelectorAll('[data-pomidor-zamknij]').forEach(z => z.addEventListener('click', () => d.close()));
     });
-    addEventListener('storage', e => { if (!e.key || e.key === KLUCZ) rysuj(); });
+    addEventListener('storage', e => { if (!e.key || e.key === KLUCZ || e.key === TABLICA) rysuj(); });
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { tik(); rysuj(); } });
     setInterval(tik, 1000);
     tik();
   }
 
-  window.Pomidor = { KLUCZ, czytaj, start, pauza, wznow, stop, ustawPrace, pozostalo, ulamek, sprawdzKoniec, mmss, wycinek, rysuj, tik, zamontuj, odswiez: rysuj };
+  window.Pomidor = { KLUCZ, czytaj, start, pauza, wznow, stop, ustawPrace, ustawZadanie, startZadania, zadaniaNaDzis, pozostalo, ulamek, sprawdzKoniec, mmss, wycinek, rysuj, tik, zamontuj, odswiez: rysuj };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', zamontuj); else zamontuj();
 })();

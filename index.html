@@ -100,6 +100,11 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 .pm-pomoc{font-size:13px}
 .pm-przyciski,.pm-dlugosci{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .pm-dlugosci .s-chip{min-height:var(--s-cel)}
+.pm-zadanie{display:grid;gap:4px;width:100%;text-align:left;font-size:13px;color:var(--s-przygaszony)}
+.pm-zadanie select{box-sizing:border-box;width:100%;min-height:var(--s-cel);padding:0 8px;border:1px solid var(--s-linia-mocna);border-radius:var(--s-zaokr);
+  background:var(--s-pow);color:var(--s-tusz);font:400 15px var(--s-kroj)}
+.pm-zadanie select:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
+.pm-zad-nazwa{margin:0;font-size:15px;font-weight:600;overflow-wrap:anywhere}
 .pm-otworz{display:inline-flex;align-items:center;gap:6px;min-height:var(--s-cel);min-width:var(--s-cel);justify-content:center;padding:0 10px;border:1px solid var(--s-linia-mocna);
   border-radius:var(--s-zaokr);background:var(--s-pow);color:var(--s-tusz);font:600 15px var(--s-kroj);font-variant-numeric:tabular-nums;cursor:pointer;flex:none}
 .pm-otworz .pm-ikona{width:22px;height:22px}
