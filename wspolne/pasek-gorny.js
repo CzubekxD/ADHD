@@ -17,8 +17,9 @@
     wiecej: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>',
     dom: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/></svg>'
   };
-  // zgłoszenia: wybór formularza („Błąd” / „Pomysł”) z .github/ISSUE_TEMPLATE/
-  const ZGLOS = 'https://github.com/CzubekxD/ADHD/issues/new/choose';
+  // zgłoszenia: najpierw formularz Google (bez konta), drugi — formularze na GitHubie (.github/ISSUE_TEMPLATE/)
+  const ZGLOS = 'https://docs.google.com/forms/d/e/1FAIpQLSeQVIT0qeoqhDVWh-2e2coDO_bPXv_J8vzHmdQOavl0V9lwvg/viewform';
+  const ZGLOS_GITHUB = 'https://github.com/CzubekxD/ADHD/issues/new/choose';
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   /* ikonka w karcie przeglądarki: ikona narzędzia na jego kolorze (strona startowa: domek, łupek) */
@@ -72,7 +73,8 @@
           <a class="pg-poz" role="menuitem" href="${esc(korzen)}#kopia"><span><b>Kopia wszystkich danych</b><small>Pobierz albo wczytaj jeden plik dla wszystkich narzędzi</small></span></a>
           <a class="pg-poz" role="menuitem" href="https://github.com/CzubekxD/ADHD" target="_blank" rel="noopener"><span><b>Kod na GitHubie ↗</b><small>Licencja niekomercyjna</small></span></a>
           <a class="pg-poz" role="menuitem" href="${esc(korzen)}prywatnosc.html"><span><b>Prywatność</b><small>Gdzie leżą Twoje dane</small></span></a>
-          <a class="pg-poz" role="menuitem" href="${ZGLOS}" target="_blank" rel="noopener"><span><b>Zgłoś błąd / pomysł ↗</b><small>Formularz na GitHubie</small></span></a>
+          <a class="pg-poz" role="menuitem" href="${ZGLOS}" target="_blank" rel="noopener"><span><b>Zgłoś błąd / pomysł ↗</b><small>Krótki formularz, bez zakładania konta</small></span></a>
+          <a class="pg-poz" role="menuitem" href="${ZGLOS_GITHUB}" target="_blank" rel="noopener"><span><b>Zgłoszenie na GitHubie ↗</b><small>Dla osób z kontem GitHub</small></span></a>
           <div class="pg-sep" role="separator"></div>
           <ul class="pg-skroty" aria-label="Skróty klawiszowe">
             <li><kbd>Ctrl</kbd> + <kbd>Z</kbd> cofa ostatnią zmianę</li>

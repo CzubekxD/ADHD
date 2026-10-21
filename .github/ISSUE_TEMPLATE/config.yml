@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Formularz bez konta GitHub
+    url: https://docs.google.com/forms/d/e/1FAIpQLSeQVIT0qeoqhDVWh-2e2coDO_bPXv_J8vzHmdQOavl0V9lwvg/viewform
+    about: Te same pola co tutaj, bez logowania.
   - name: Narzędzia
     url: https://czubekxd.github.io/ADHD/
     about: Strona z narzędziami.
