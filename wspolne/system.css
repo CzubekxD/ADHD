@@ -20,6 +20,8 @@
   --s-tusz:#1C2320; --s-tusz-2:#3C4742; --s-przygaszony:#57625D;
   --s-linia:#C2CBC6; --s-linia-mocna:#86928C;
   --s-ok:#2B7552; --s-ok-tlo:#DDEFE5; --s-uwaga:#8F5E10; --s-uwaga-tlo:#F6EAD3; --s-blad:#AE3F37; --s-blad-tlo:#F7E1DE;
+  /* karteczka w skrzynce na myśli: żółknie od bladej do nasyconej (wspolne/skrzynka.js) */
+  --s-kartka-blada:#FFFBE6; --s-kartka:#F6D96B; --s-kartka-tusz:#2B2610;
   --s-cien:0 1px 2px rgb(20 30 25 / .06),0 4px 14px rgb(20 30 25 / .06);
   --s-cien-menu:0 2px 6px rgb(20 30 25 / .10),0 14px 34px rgb(20 30 25 / .14);
 
@@ -58,6 +60,7 @@
   --s-tusz:#E4EAE7; --s-tusz-2:#C3CDC8; --s-przygaszony:#9AA6A0;
   --s-linia:#3B4843; --s-linia-mocna:#66736D;
   --s-ok:#6CC59A; --s-ok-tlo:#183026; --s-uwaga:#E2B061; --s-uwaga-tlo:#33281A; --s-blad:#F08A80; --s-blad-tlo:#3A1F1C;
+  --s-kartka-blada:#2C2A1E; --s-kartka:#5E5016; --s-kartka-tusz:#F4EDCF;
   --s-cien:0 1px 2px rgb(0 0 0 / .35),0 4px 14px rgb(0 0 0 / .25);
   --s-cien-menu:0 2px 6px rgb(0 0 0 / .4),0 14px 34px rgb(0 0 0 / .45);
   --k-szalwia:#7FC4B2;  --k-szalwia-tlo:#1E302B;
@@ -75,6 +78,7 @@
   --s-tusz:#E4EAE7; --s-tusz-2:#C3CDC8; --s-przygaszony:#9AA6A0;
   --s-linia:#3B4843; --s-linia-mocna:#66736D;
   --s-ok:#6CC59A; --s-ok-tlo:#183026; --s-uwaga:#E2B061; --s-uwaga-tlo:#33281A; --s-blad:#F08A80; --s-blad-tlo:#3A1F1C;
+  --s-kartka-blada:#2C2A1E; --s-kartka:#5E5016; --s-kartka-tusz:#F4EDCF;
   --s-cien:0 1px 2px rgb(0 0 0 / .35),0 4px 14px rgb(0 0 0 / .25);
   --s-cien-menu:0 2px 6px rgb(0 0 0 / .4),0 14px 34px rgb(0 0 0 / .45);
   --k-szalwia:#7FC4B2;  --k-szalwia-tlo:#1E302B;
@@ -236,6 +240,23 @@ header.pg{display:block;flex-wrap:nowrap;gap:0;padding:0;margin:0 calc(-1 * var(
 .pg-chmura[data-stan="offline"]{color:var(--s-uwaga)}
 @media (prefers-reduced-motion:no-preference){.pg-chmura[data-stan="pracuje"] svg{animation:pg-puls 1.2s ease-in-out infinite}}
 @keyframes pg-puls{50%{opacity:.35}}
+/* pomidor (wspolne/pomidor.js): skórka, miąższ ubywający jak tarcza zegara, listki; mały pomidor z czasem w pasku */
+.pm-ikona{display:block}
+/* w trakcie bloku pomidor zielenieje: --pm-f = ile zostało (1 czerwony → 0 zielony);
+   mieszanie w oklch prowadzi kolor przez pomarańcz i żółć, a nie przez brąz */
+.pm-ikona{--pm-kolor:color-mix(in oklch,var(--s-blad) calc(var(--pm-f,1) * 100%),var(--s-ok))}
+.pm-skorka{fill:var(--s-pow-2);stroke:var(--pm-kolor);stroke-width:5}
+.pm-miazsz{fill:var(--pm-kolor)}
+[data-faza="przerwa"] .pm-ikona{--pm-kolor:var(--s-ok)}   /* przerwa: dojrzały do odpoczynku, cały zielony */
+.pm-lisc{fill:var(--s-ok)}
+.pg-pomidor{display:inline-flex;align-items:center;gap:6px;min-height:var(--s-cel);padding:0 8px;border-radius:var(--s-zaokr);
+  color:var(--s-tusz);text-decoration:none;font:600 14px var(--s-kroj);font-variant-numeric:tabular-nums}
+.pg-pomidor:hover{background:var(--s-pow-2)}
+.pg-pomidor:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
+.pg-pomidor .pm-ikona{width:22px;height:22px}
+@media (max-width:520px){.pg-pomidor{padding:0 4px;gap:4px}.pg-pomidor .pm-ikona{width:18px;height:18px}}
+/* koniec bloku: komunikat zostaje, aż ktoś go zamknie albo ruszy następny blok */
+.pm-koniec{z-index:600}
 .pg-skroty{list-style:none;margin:0;padding:6px 10px 10px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--s-tusz-2)}
 .pg-skroty kbd{font:600 12px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace;border:1px solid var(--s-linia-mocna);border-bottom-width:2px;border-radius:5px;padding:3px 6px;
   background:var(--s-pow-2);color:var(--s-tusz)}
@@ -247,6 +268,7 @@ html[data-skin="cyber"]:root{
   --s-tusz:#E9F7FF; --s-tusz-2:#C6D6EA; --s-przygaszony:#9490BD;
   --s-linia:#2C2656; --s-linia-mocna:#3A3270;
   --s-ok:#05FFA1; --s-ok-tlo:#03281D; --s-uwaga:#FCEE0A; --s-uwaga-tlo:#262404; --s-blad:#FF2A6D; --s-blad-tlo:#2E0A18;
+  --s-kartka-blada:#16150A; --s-kartka:#3D3A04; --s-kartka-tusz:#FCF6A8;
   --s-cien:0 0 0 1px rgb(0 240 255 / .12),0 0 22px rgb(0 240 255 / .07);
   --s-cien-menu:0 0 0 1px rgb(0 240 255 / .25),0 0 30px rgb(0 240 255 / .15);
   --k-szalwia:#05FFA1; --k-szalwia-tlo:#03281D;

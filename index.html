@@ -12,15 +12,19 @@
 /* Pulpit dnia: nagłówek z datą, siatka 2 × 2 widżetów (jedna liczba, jedno zdanie, jedna akcja),
    pod spodem informacje o danych i kopia. Kolory i krój z wspolne/system.css. */
 body{margin:0;background:var(--s-tlo);color:var(--s-tusz);font:16px/1.5 var(--s-kroj);-webkit-text-size-adjust:100%}
-main{max-width:1080px;margin:0 auto;padding-block:var(--s-6) var(--s-7);display:grid;gap:var(--s-5);
+main{max-width:1240px;margin:0 auto;padding-block:var(--s-6) var(--s-7);display:grid;gap:var(--s-5);
   padding-left:max(var(--s-4),env(safe-area-inset-left,0px));padding-right:max(var(--s-4),env(safe-area-inset-right,0px))}
 .pp-naglowek .data{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--s-przygaszony)}
 .pp-naglowek h1{font-size:32px;line-height:1.15;letter-spacing:-.02em;margin:2px 0 0;text-wrap:balance}
 .pp-naglowek p{margin:var(--s-2) 0 0;color:var(--s-tusz-2);max-width:62ch}
 
-/* siatka widżetów */
+/* siatka widżetów: u góry duże karty bieżącej pory, niżej mniejsze „Później dziś” / „Wcześniej dziś” */
+.pp-pulpit{display:grid;gap:var(--s-5)}
 .pp-siatka{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-@media (max-width:720px){.pp-siatka{grid-template-columns:minmax(0,1fr)}}
+.pp-siatka.maly{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+@media (max-width:720px){.pp-siatka,.pp-siatka.maly{grid-template-columns:minmax(0,1fr)}}
+.pp-grupa{display:grid;gap:10px}
+.pp-grupa-tytul{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--s-przygaszony);margin:0}
 .pp-w{background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);padding:16px 18px 18px;
   display:flex;flex-direction:column;gap:14px;min-width:0;color:inherit;text-decoration:none}
 a.pp-w{transition:border-color .15s}
@@ -66,6 +70,94 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 .pp-mini .k{fill:var(--k)} .pp-mini .ks{stroke:var(--k)} .pp-mini .p{fill:var(--s-pow)} .pp-mini .ps{stroke:var(--s-linia-mocna)}
 .pp-mini .t{fill:var(--s-tusz)} .pp-mini .ts{stroke:var(--s-tusz)} .pp-mini .l{fill:var(--s-linia-mocna)} .pp-mini .na{fill:var(--s-akcent-tusz)}
 .pp-mini text{font-family:var(--s-kroj);font-weight:700}
+/* mniejsza karta: ten sam układ, ciaśniej i drobniej */
+.pp-w.maly{padding:12px 14px 14px;gap:10px}
+.pp-w.maly .pp-mini{margin:-12px -14px 0;height:64px}
+.pp-w.maly .pp-tytul{font-size:15px}
+.pp-w.maly .pp-znak{width:28px;height:28px}
+.pp-w.maly .pp-zyczenie{font-size:16px}
+.pp-w.maly .pp-liczba{font-size:28px}
+.pp-w.maly .pp-liczba small{font-size:14px}
+.pp-w.maly .pp-podpis,.pp-w.maly .pp-opis,.pp-w.maly .pp-lista li{font-size:13.5px}
+.pp-w.maly .pp-lista li{flex-wrap:wrap;gap:4px 10px}
+.pp-w.maly .pp-lista .pp-nazwa{min-width:12ch}
+.pp-w.maly .pp-spark{width:110px;height:32px}
+
+/* skrzynka na myśli (wspolne/skrzynka.js): na komputerze prawa kolumna, na telefonie pasek nad kartami
+   i panel od dołu. Karteczka żółknie (--zolc 0…1) i gniecie się (--zgn 0…1) z wiekiem. */
+.pp-uklad{display:grid;grid-template-columns:190px minmax(0,1fr) 270px;gap:var(--s-5);align-items:start}
+/* karty pulpitu w jednej kolumnie, gdy między pomidorem a skrzynką robi się ciasno */
+.pp-pulpit{container-type:inline-size}
+@container (max-width:540px){.pp-siatka{grid-template-columns:minmax(0,1fr)}}
+/* pomidor (wspolne/pomidor.js): lewa kolumna na komputerze, panel od dołu na telefonie */
+.pm-kolumna{position:sticky;top:calc(56px + var(--s-4));min-width:0}
+.pm{display:grid;justify-items:center;gap:10px;text-align:center}
+.pm-naglowek{justify-self:start;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--s-przygaszony);margin:0}
+.pm-tarcza{width:150px;max-width:100%}
+.pm-tarcza .pm-ikona{width:100%;height:auto}
+.pm-czas{margin:0;font-size:34px;font-weight:650;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.pm-faza,.pm-pomoc{margin:0;font-size:14px;color:var(--s-przygaszony)}
+.pm-pomoc{font-size:13px}
+.pm-przyciski,.pm-dlugosci{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.pm-dlugosci .s-chip{min-height:var(--s-cel)}
+.pm-zadanie{display:grid;gap:4px;width:100%;text-align:left;font-size:13px;color:var(--s-przygaszony)}
+.pm-zadanie select{box-sizing:border-box;width:100%;min-height:var(--s-cel);padding:0 8px;border:1px solid var(--s-linia-mocna);border-radius:var(--s-zaokr);
+  background:var(--s-pow);color:var(--s-tusz);font:400 15px var(--s-kroj)}
+.pm-zadanie select:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
+.pm-zad-nazwa{margin:0;font-size:15px;font-weight:600;overflow-wrap:anywhere}
+.pm-otworz{display:inline-flex;align-items:center;gap:6px;min-height:var(--s-cel);min-width:var(--s-cel);justify-content:center;padding:0 10px;border:1px solid var(--s-linia-mocna);
+  border-radius:var(--s-zaokr);background:var(--s-pow);color:var(--s-tusz);font:600 15px var(--s-kroj);font-variant-numeric:tabular-nums;cursor:pointer;flex:none}
+.pm-otworz .pm-ikona{width:22px;height:22px}
+.pm-otworz [data-pomidor-czas]:empty{display:none}
+.pm-otworz[data-biegnie="1"]{border-color:var(--s-blad)}
+.pm-otworz:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
+dialog.pm-panel .pm-tarcza{width:180px}
+.sk{position:sticky;top:calc(56px + var(--s-4));display:grid;gap:12px;min-width:0}
+.sk-naglowek{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--s-przygaszony);margin:0}
+.sk-pole{display:flex;gap:8px;min-width:0;flex:1}
+.sk-pole input{box-sizing:border-box;flex:1;min-width:0;min-height:var(--s-cel);padding:10px 12px;border:1px solid var(--s-linia-mocna);border-radius:var(--s-zaokr);
+  background:var(--s-pow);color:var(--s-tusz);font:400 16px/1.3 var(--s-kroj)}
+.sk-pole input::placeholder{color:var(--s-przygaszony)}
+.sk-pole input:focus{outline:2px solid var(--s-akcent);outline-offset:0;border-color:transparent}
+.sk-pusto{margin:0;font-size:14px;color:var(--s-przygaszony)}
+.sk-stos{list-style:none;margin:0;padding:0 12px 14px 0;display:grid;gap:12px}   /* zapas na przesunięcie i obrót karteczek */
+.sk-kartka{grid-area:1 / 1;position:relative;z-index:calc(50 - var(--i));min-width:0;padding:12px 14px 4px;border-radius:3px;
+  background:color-mix(in srgb,var(--s-kartka) calc(var(--zolc) * 100%),var(--s-kartka-blada));color:var(--s-kartka-tusz);
+  box-shadow:0 1px 2px rgb(0 0 0 / .1),0 calc(2px + var(--zgn) * 8px) calc(6px + var(--zgn) * 14px) rgb(0 0 0 / calc(.06 + var(--zgn) * .18));
+  transform:translate(calc(var(--i) * 4px),calc(var(--i) * 6px)) rotate(var(--obrot));transition:transform var(--s-ruch)}
+.sk-kartka:nth-child(n+4){visibility:hidden}
+/* rozłożony stos: po najechaniu, po fokusie z klawiatury i zawsze w panelu na telefonie */
+.sk-stos:hover > .sk-kartka,.sk-stos:focus-within > .sk-kartka,.sk-stos.rozlozony > .sk-kartka{grid-area:auto;visibility:visible;transform:rotate(var(--obrot))}
+/* pognieciona: zagięty róg i ukośne załamanie rosną z wiekiem */
+.sk-kartka::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(155deg,transparent 42%,rgb(0 0 0 / calc(var(--zgn) * .08)) 50%,transparent 58%)}
+.sk-kartka::after{content:"";position:absolute;top:0;right:0;width:calc(var(--zgn) * 18px);height:calc(var(--zgn) * 18px);border-radius:0 0 0 3px;
+  background:linear-gradient(225deg,var(--s-tlo) 50%,color-mix(in srgb,var(--s-kartka) 75%,#000) 50%)}
+.sk-pytanie{margin:0 0 4px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.sk-tekst{margin:0;font-size:15px;line-height:1.35;overflow-wrap:anywhere;white-space:pre-wrap}
+.sk-dol{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px}
+.sk-przyciski{display:flex;margin-right:-10px}
+.sk-usun,.sk-zrobione{display:grid;place-items:center;width:var(--s-cel);height:var(--s-cel);border:0;border-radius:8px;background:none;color:inherit;cursor:pointer}
+.sk-usun svg,.sk-zrobione svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sk-usun:hover,.sk-zrobione:hover,.sk-cel:hover{background:rgb(0 0 0 / .08)}
+/* przenoszenie: → Tablica / → Plany / → WOOP (cel 44 px, tekst zrozumiały bez instrukcji) */
+.sk-przenies{display:flex;flex-wrap:wrap;gap:2px 4px;margin:6px 0 0 -8px}
+.sk-cel{display:inline-flex;align-items:center;min-height:var(--s-cel);padding:0 8px;border-radius:8px;color:inherit;font-size:13.5px;font-weight:600;text-decoration:none}
+.sk-kartka:focus-visible,.sk-usun:focus-visible,.sk-zrobione:focus-visible,.sk-cel:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
+.sk-pasek{display:none;gap:8px;align-items:center}
+.sk-otworz{display:inline-flex;align-items:center;gap:6px;min-height:var(--s-cel);padding:0 12px;border:1px solid var(--s-linia-mocna);border-radius:var(--s-zaokr);
+  background:var(--s-pow);color:var(--s-tusz);font:600 15px var(--s-kroj);cursor:pointer;flex:none}
+.sk-otworz svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sk-otworz:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
+dialog.sk-panel{box-sizing:border-box;margin:auto 0 0;width:100%;max-width:none;max-height:85vh;overflow:auto;border:0;border-radius:16px 16px 0 0;
+  padding:var(--s-4) var(--s-4) calc(var(--s-4) + env(safe-area-inset-bottom,0px));background:var(--s-tlo);color:var(--s-tusz);box-shadow:var(--s-cien-menu)}
+dialog.sk-panel::backdrop{background:rgb(0 0 0 / .45)}
+dialog.sk-panel[open]{animation:sk-wjazd .22s ease-out}
+@keyframes sk-wjazd{from{transform:translateY(48px);opacity:0}}
+.sk-panel-glowa{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:var(--s-3)}
+@media (max-width:899px){.pp-uklad{grid-template-columns:minmax(0,1fr)}.sk,.pm-kolumna{display:none}.sk-pasek{display:flex}}
+@media (prefers-reduced-motion:reduce){.sk-kartka{transition:none}dialog.sk-panel[open]{animation:none}}
+html[data-skin="cyber"] .sk-kartka{border-radius:0;box-shadow:0 0 0 1px rgb(252 238 10 / calc(.2 + var(--zolc) * .4)),0 0 calc(var(--zgn) * 18px) rgb(252 238 10 / .18)}
 
 /* informacje i kopia */
 .pp-info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:var(--s-4)}
@@ -104,7 +196,23 @@ html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
        za darmo, do użytku niekomercyjnego.</p>
   </header>
 
-  <div class="pp-siatka" id="pulpit"></div>
+  <div class="pp-uklad">
+    <div class="sk-pasek">
+      <form class="sk-pole" data-skrzynka-pole><input type="text" aria-label="Wrzuć myśl do skrzynki" placeholder="Wrzuć myśl…" maxlength="280" enterkeyhint="send" autocomplete="off"></form>
+      <button class="pm-otworz" type="button" data-pomidor-otworz aria-controls="pm-panel" aria-expanded="false" aria-label="Otwórz pomidora (timer)">
+        <svg class="pm-ikona" viewBox="0 0 100 100" aria-hidden="true"><circle class="pm-skorka" cx="50" cy="55" r="38"/><circle class="pm-miazsz" cx="50" cy="55" r="33"/><path class="pm-lisc" d="M50 22c-3-6-9-8-15-6 5 1 8 3 10 7-6-1-11 1-14 5 6-1 11 0 15 2-2 3-2 7 0 10 2-3 2-7 4-10 4-2 9-3 15-2-3-4-8-6-14-5 2-4 5-6 10-7-6-2-12 0-15 6z"/></svg><span data-pomidor-czas></span></button>
+      <button class="sk-otworz" type="button" data-skrzynka-otworz aria-controls="sk-panel" aria-expanded="false" aria-label="Otwórz skrzynkę na myśli">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h5l1.5 3h5L16 13h5M5 5h14l2 8v6H3v-6z"/></svg><span data-skrzynka-licznik>0</span></button>
+    </div>
+    <aside class="pm-kolumna" data-pomidor aria-label="Pomidor"></aside>
+    <div class="pp-pulpit" id="pulpit"></div>
+    <aside class="sk" aria-labelledby="sk-tytul">
+      <h2 class="sk-naglowek" id="sk-tytul">Skrzynka na myśli</h2>
+      <form class="sk-pole" data-skrzynka-pole><input type="text" aria-label="Wrzuć myśl do skrzynki" placeholder="Wrzuć myśl i Enter" maxlength="280" enterkeyhint="send" autocomplete="off"></form>
+      <p class="sk-pusto" data-skrzynka-pusto>Pusto. Wrzuć tu to, co krąży po głowie, a zajmiesz się tym później.</p>
+      <ol class="sk-stos" data-skrzynka-stos></ol>
+    </aside>
+  </div>
 
   <div class="pp-info">
     <section class="note">
@@ -147,9 +255,26 @@ html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
   </footer>
 </main>
 
+<dialog class="sk-panel" id="sk-panel" aria-labelledby="sk-panel-tytul">
+  <div class="sk-panel-glowa">
+    <h2 class="sk-naglowek" id="sk-panel-tytul">Skrzynka na myśli</h2>
+    <button class="s-przycisk cichy maly" type="button" data-skrzynka-zamknij>Zamknij</button>
+  </div>
+  <p class="sk-pusto" data-skrzynka-pusto>Pusto. Wrzuć tu to, co krąży po głowie, a zajmiesz się tym później.</p>
+  <ol class="sk-stos rozlozony" data-skrzynka-stos></ol>
+</dialog>
+
+<dialog class="sk-panel pm-panel" id="pm-panel" aria-label="Pomidor">
+  <div class="sk-panel-glowa"><span></span><button class="s-przycisk cichy maly" type="button" data-pomidor-zamknij>Zamknij</button></div>
+  <div data-pomidor></div>
+</dialog>
+
 <script src="./wspolne/narzedzia.js"></script>
+<script src="./wspolne/pomidor.js"></script>
 <script src="./wspolne/pasek-gorny.js"></script>
 <script src="./wspolne/pulpit.js"></script>
+<script src="./wspolne/skroty.js"></script>
+<script src="./wspolne/skrzynka.js"></script>
 <script>
 /* ── PULPIT DNIA ──────────────────────────────────────────────────────────
    Narzędzia dopisujesz w wspolne/narzedzia.js, ich liczbę dnia w wspolne/pulpit.js. */
@@ -172,16 +297,18 @@ function stanKopii(zDanymi) {
 }
 function odswiezPulpit() {
   const teraz = new Date();
-  const zDanymi = Pulpit.rysuj($k("pulpit"), { korzen: "./" });
+  // kolejność i wielkość kart wg pory dnia z godziny urządzenia (wspolne/pulpit.js)
+  const zDanymi = Pulpit.rysuj($k("pulpit"), { korzen: "./", teraz });
   stanKopii(zDanymi);
   const data = teraz.toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long" });
-  $k("pp-data").textContent = zDanymi ? data.charAt(0).toUpperCase() + data.slice(1) : "";
-  $k("pp-tytul").textContent = zDanymi ? "Dzisiaj" : "Narzędzia";
+  $k("pp-data").textContent = data.charAt(0).toUpperCase() + data.slice(1);
+  $k("pp-tytul").textContent = Pulpit.pora(teraz).tytul;
   $k("pp-wstep").hidden = !!zDanymi;
 }
 odswiezPulpit();
-// wracasz z narzędzia, dane przyszły z Google Drive albo z innej karty — liczby się odświeżają
-addEventListener("pageshow", e => { if (e.persisted) odswiezPulpit(); });
+// wracasz z narzędzia albo na kartę, dane przyszły z Google Drive albo z innej karty — liczby i pora się odświeżają
+addEventListener("pageshow", e => { if (e.persisted) { odswiezPulpit(); Skrzynka.rysuj(); } });
+Skrzynka.zamontuj({ korzen: "./" });
 addEventListener("storage", odswiezPulpit);
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") odswiezPulpit(); });
 
@@ -196,7 +323,8 @@ const ILE = {
 };
 const DANE = (window.NARZEDZIA || []).filter(n => n.klucz)
   .map(n => ({ klucz: n.klucz, nazwa: n.nazwa, ile: ILE[n.id] || (() => "") }))
-  .concat([{ klucz: "adhd.skin", nazwa: null }]);
+  .concat([{ klucz: Skrzynka.KLUCZ, nazwa: "Skrzynka na myśli", ile: d => ile((d.kartki || []).length, "karteczka", "karteczki", "karteczek") },
+           { klucz: "adhd.skin", nazwa: null }]);
 const msg = t => { $k("kopia-msg").textContent = t; };
 let doWczytania = null;
 
@@ -243,6 +371,7 @@ $k("kopia-tak").addEventListener("click", () => {
   doWczytania = null; $k("kopia-potw").hidden = true;
   msg("Wczytano dane " + n + (n === 1 ? " narzędzia." : " narzędzi."));
   odswiezPulpit();
+  Skrzynka.rysuj();
 });
 </script>
 </body>

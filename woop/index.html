@@ -394,6 +394,7 @@ html.vt-skin::view-transition-old(root),html.vt-skin::view-transition-new(root){
 <script src="../wspolne/chmura.js"></script>
 <script src="../wspolne/odmiana.js"></script>
 <script src="../wspolne/skroty.js"></script>
+<script src="../wspolne/skrzynka.js"></script>
 <script src="../wspolne/kopia.js"></script>
 </head>
 <body>
@@ -817,7 +818,8 @@ document.addEventListener('click',e=>{
     case'saveWiz':{const d=WIZ.d;
       if(WIZ.editId){const x=byId(WIZ.editId);if(x){Object.assign(x,{wish:d.wish.trim(),outcome:d.outcome.trim(),obstacle:d.obstacle.trim(),ifText:d.ifText.trim(),thenText:d.thenText.trim(),szop:d.szop,updated:Date.now()});}}
       else S.items.unshift(normItem({wish:d.wish.trim(),outcome:d.outcome.trim(),obstacle:d.obstacle.trim(),ifText:d.ifText.trim(),thenText:d.thenText.trim(),szop:d.szop}));
-      save();toast(WIZ.editId?'Zapisano zmiany':'Zapisano WOOP');WIZ=null;saveDraft();TAB='moje';go('',true);break;}
+      save();if(WIZ.zSkrzynki&&window.Skrzynka)Skrzynka.przeniesiono(WIZ.zSkrzynki);   /* karteczka ze skrzynki znika dopiero teraz */
+      toast(WIZ.editId?'Zapisano zmiany':'Zapisano WOOP');WIZ=null;saveDraft();TAB='moje';go('',true);break;}
     case'imagine':{const k=el.dataset.k;if(IMG&&IMG.k===k){IMG=null;}else IMG={k,end:Date.now()+30000};render();break;}
     case'check':{const x=byId(id);if(!x)break;const t=today();x.checks[t]=x.checks[t]===el.dataset.s?undefined:el.dataset.s;if(!x.checks[t])delete x.checks[t];save();JUST=id;render();JUST=null;break;}
     case'rehearse':RUN={id,step:0};IMG=null;go('',true);break;
@@ -864,6 +866,10 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 try{if(localStorage.getItem('adhd.skin')===null&&S.config.skin==='cyber')localStorage.setItem('adhd.skin','cyber');}catch(e){}
 applySkin();
 render();
+/* karteczka ze skrzynki na myśli (pulpit → „→ WOOP”): kreator z karteczką jako życzeniem.
+   Karteczka zostaje w skrzynce, dopóki WOOP nie jest zapisany (saveWiz); „Anuluj” jej nie rusza. */
+(function(){const k=window.Skrzynka&&Skrzynka.odbierz();if(k===null){toast('Tej karteczki nie ma już w skrzynce');return;}if(!k)return;
+  WIZ=newDraft();WIZ.d.wish=k.tekst;WIZ.zSkrzynki=k.id;saveDraft();TAB='nowy';RUN=null;render();focusField();})();
 addEventListener('storage',e=>{if(e.key==='adhd.skin')applySkin();});
 /* Ctrl+Z / Ctrl+Y cofają i ponawiają zmiany; Delete usuwa kartę WOOP, na której jest kursor albo myszka */
 let HOVER=null;

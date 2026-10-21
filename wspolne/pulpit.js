@@ -143,20 +143,34 @@
 
   const SKROTY = { pasek, tablica, plany, woop };
 
+  /* ---------- pora dnia ----------
+     Stałe godziny z planu (docs/plan.md, „Pulpit według pory dnia”); własne godziny w ustawieniach to późniejszy krok.
+     Pora: od której godziny trwa, tytuł pulpitu i karty u góry (id z rejestru, w tej kolejności). */
+  const PORY = [
+    { id: 'rano', od: 5, tytul: 'Dzień dobry', karty: ['pasek', 'tablica'] },
+    { id: 'dzien', od: 12, tytul: 'Popołudnie', karty: ['plany', 'pasek'] },
+    { id: 'wieczor', od: 18, tytul: 'Wieczór', karty: ['woop', 'tablica'] }
+  ];
+  function pora(teraz) {
+    const h = (teraz || new Date()).getHours();
+    for (let i = PORY.length - 1; i >= 0; i--) if (h >= PORY[i].od) return PORY[i];
+    return PORY[PORY.length - 1];   // 0:00–4:59 to jeszcze wieczór
+  }
+
   /* ---------- rysowanie ---------- */
   const czytaj = k => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } };
   const styl = n => `--k:var(--k-${n.kolor});--kt:var(--k-${n.kolor}-tlo)`;
   const znak = (n, tonal) => `<span class="pp-znak${tonal ? ' tonal' : ''}">${window.znakNarzedzia ? znakNarzedzia(n) : esc(n.znak)}</span>`;
 
-  function kafelek(n, korzen) {
-    return `<a class="pp-w pp-pusty" style="${styl(n)}" href="${esc(korzen + n.href)}">
+  function kafelek(n, korzen, maly) {
+    return `<a class="pp-w pp-pusty${maly ? ' maly' : ''}" style="${styl(n)}" href="${esc(korzen + n.href)}" data-narzedzie="${esc(n.id)}">
       ${n.mini ? `<div class="pp-mini" aria-hidden="true"><svg viewBox="0 0 220 92">${n.mini}</svg></div>` : ''}
       <div class="pp-glowa">${znak(n, true)}<span class="pp-tytul">${esc(n.nazwa)}</span></div>
       ${n.pytanie ? `<p class="pp-zyczenie">${esc(n.pytanie)}</p>` : ''}
       <p class="pp-opis">${esc(n.opis)}</p>
       <span class="pp-akcja cicha">${esc(n.start || 'Otwórz')}</span></a>`;
   }
-  function widzet(n, s, korzen) {
+  function widzet(n, s, korzen, maly) {
     // ten sam układ co kafelek: miniatura u góry, ikona i nazwa, potem liczba dnia i przycisk
     const mini = n.mini ? `<a class="pp-mini" href="${esc(korzen + n.href)}" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 220 92">${n.mini}</svg></a>` : '';
     const glowa = mini + `<div class="pp-glowa">${znak(n, true)}<a class="pp-tytul pp-nazwa-n" href="${esc(korzen + n.href)}">${esc(n.nazwa)}</a></div>`;
@@ -165,23 +179,36 @@
       ? `<p class="pp-zyczenie">${esc(tekst)}</p><div class="pp-wiersz"><p class="pp-podpis">${esc(s.podpis)}</p>${s.obok || ''}</div>`
       : `<div class="pp-wiersz"><div><div class="pp-liczba">${esc(s.liczba)}<small>${esc(s.jednostka || '')}</small></div><p class="pp-podpis">${esc(s.podpis)}</p></div>${s.obok || ''}</div>`;
     const glowna = s.akcja.glowna !== false;
-    return `<section class="pp-w" style="${styl(n)}" aria-label="${esc(n.nazwa)}">${glowa}${gora}${s.srodek || ''}
+    return `<section class="pp-w${maly ? ' maly' : ''}" style="${styl(n)}" aria-label="${esc(n.nazwa)}" data-narzedzie="${esc(n.id)}">${glowa}${gora}${s.srodek || ''}
       <a class="pp-akcja${glowna ? '' : ' cicha'}" href="${esc(korzen + s.akcja.href)}">${esc(s.akcja.tekst)}</a></section>`;
   }
 
+  /* opcje.teraz — data, z której liczymy porę dnia (domyślnie teraz; test podmienia godzinę) */
   function rysuj(cel, opcje) {
     opcje = opcje || {};
     const korzen = opcje.korzen || './';
     const lista = window.NARZEDZIA || [];
-    const skroty = lista.map(n => {
-      try { return SKROTY[n.id] && n.klucz ? SKROTY[n.id](czytaj(n.klucz)) : null; } catch (e) { console.warn('[pulpit]', n.id, e); return null; }
+    const skroty = {};
+    lista.forEach(n => {
+      try { skroty[n.id] = SKROTY[n.id] && n.klucz ? SKROTY[n.id](czytaj(n.klucz)) : null; } catch (e) { console.warn('[pulpit]', n.id, e); skroty[n.id] = null; }
     });
-    const zDanymi = skroty.filter(Boolean).length;
+    const zDanymi = lista.filter(n => skroty[n.id]).length;
     // narzędzie z danymi = widżet z liczbą dnia; bez danych = kafelek z miniaturą i przyciskiem na start
-    const html = lista.map((n, i) => skroty[i] ? widzet(n, skroty[i], korzen) : kafelek(n, korzen)).join('');
-    cel.innerHTML = html;
+    const karta = (n, maly) => skroty[n.id] ? widzet(n, skroty[n.id], korzen, maly) : kafelek(n, korzen, maly);
+
+    // u góry duże karty bieżącej pory; reszta niżej, mniejsza: „Później dziś”, jeśli narzędzie ma
+    // jeszcze dziś swoją porę (albo nie ma żadnej), inaczej „Wcześniej dziś”
+    const p = pora(opcje.teraz), nr = PORY.indexOf(p);
+    const teraz = p.karty.map(id => lista.find(n => n.id === id)).filter(Boolean);
+    const reszta = lista.filter(n => !teraz.includes(n));
+    const pozniej = n => PORY.some((q, i) => i > nr && q.karty.includes(n.id)) || !PORY.some(q => q.karty.includes(n.id));
+    const grupa = (tytul, n) => n.length ? `<section class="pp-grupa" aria-label="${tytul}"><h2 class="pp-grupa-tytul">${tytul}</h2>
+      <div class="pp-siatka maly">${n.map(x => karta(x, true)).join('')}</div></section>` : '';
+    cel.innerHTML = `<div class="pp-siatka">${teraz.map(n => karta(n, false)).join('')}</div>` +
+      grupa('Później dziś', reszta.filter(pozniej)) + grupa('Wcześniej dziś', reszta.filter(n => !pozniej(n)));
+    cel.dataset.pora = p.id;
     return zDanymi;
   }
 
-  window.Pulpit = { rysuj, SKROTY, dzis };
+  window.Pulpit = { rysuj, SKROTY, dzis, pora, PORY };
 })();
