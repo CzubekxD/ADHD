@@ -41,3 +41,17 @@ Linki do `.css` i `.js` piszemy bez numerów wersji; workflow publikacji dopisuj
 Sprawdź zmienione strony w przeglądarce przy szerokości 1100 i 390 px, w motywie jasnym, ciemnym i CYBER:
 zero błędów w konsoli, brak poziomego przewijania, Ctrl+Z cofa nową zmianę. Do PR-a dołącz zrzuty ekranu.
 `pasek/test.js`, `wspolne/pulpit.test.js`, `wspolne/skrzynka.test.js`, `wspolne/pomidor.test.js` i `wspolne/przypomnienia.test.js` (jsdom) mają przechodzić.
+
+## Agent skills
+
+### Issue tracker
+
+Zgłoszenia żyją w GitHub Issues repo `CzubekxD/ADHD` (przez `gh`, zapasowo REST). Zobacz `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Domyślne etykiety: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. Zobacz `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Jeden kontekst: `CONTEXT.md` i `docs/adr/` w głównym katalogu, obok `docs/plan.md`. Zobacz `docs/agents/domain.md`.
