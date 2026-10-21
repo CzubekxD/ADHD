@@ -11,7 +11,7 @@
   --surface-1:#fcfcfb; --page:#f4f4f1; --card:#ffffff;
   --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
   --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10); --rest:#e3e2dc; --goldwash:rgba(176,120,0,.10);
-  --bar:#2a78d6; --bar-soft:#cde2fb; --total:#c0447a; --gold:#b07800; --gold-soft:#f7e6bd; --silver:#6b7683;
+  --bar:#2a78d6; --bar-soft:#cde2fb; --total:#c0447a; --gold:#b07800; --gold-soft:#f7e6bd; --silver:var(--k-lupek);   /* łupek z system.css sam przełącza się jasny/ciemny */
   --t1:#0ca30c; --t2:#fab219; --t3:#ec835a; --t4:#d03b3b;
   --t1-bg:#e6f6e6; --t2-bg:#fdf1d8; --t3-bg:#fbe9e0; --t4-bg:#f9e0e0;
   --good:#006300; --shadow:0 1px 2px rgba(11,11,11,.05), 0 4px 16px rgba(11,11,11,.05);
@@ -24,7 +24,7 @@
     --surface-1:#1a1a19; --page:#0d0d0d; --card:#1a1a19;
     --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
     --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.12); --rest:#33332f; --goldwash:rgba(242,184,51,.13);
-    --bar:#3987e5; --bar-soft:#184f95; --total:#d55181; --gold:#c98500; --gold-soft:#4a3a10; --silver:#b4bcc6;
+    --bar:#3987e5; --bar-soft:#184f95; --total:#d55181; --gold:#c98500; --gold-soft:#4a3a10;
     --t1:#0ca30c; --t2:#fab219; --t3:#ec835a; --t4:#d03b3b;
     --t1-bg:#12290f; --t2-bg:#332608; --t3-bg:#331d12; --t4-bg:#330f0f;
     --good:#0ca30c; --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
@@ -35,7 +35,7 @@
   --surface-1:#1a1a19; --page:#0d0d0d; --card:#1a1a19;
   --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
   --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.12); --rest:#33332f; --goldwash:rgba(242,184,51,.13);
-  --bar:#3987e5; --bar-soft:#184f95; --total:#d55181; --gold:#c98500; --gold-soft:#4a3a10; --silver:#b4bcc6;
+  --bar:#3987e5; --bar-soft:#184f95; --total:#d55181; --gold:#c98500; --gold-soft:#4a3a10;
   --t1:#0ca30c; --t2:#fab219; --t3:#ec835a; --t4:#d03b3b;
   --t1-bg:#12290f; --t2-bg:#332608; --t3-bg:#331d12; --t4-bg:#330f0f;
   --good:#0ca30c; --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
@@ -230,6 +230,7 @@ tr.done td.task input { color:var(--muted) !important; font-weight:500 !importan
 .col.total .fill { background:var(--total); }
 .col.total.full .fill { background:var(--gold); }
 .col.full:not(.total) .fill { box-shadow:inset 0 3px 0 var(--gold); }
+.chart.srebrny .col.full:not(.total) .fill { box-shadow:inset 0 3px 0 var(--silver); }
 .col .track.empty { background:var(--rest); }
 .col .vlab b { font-weight:inherit; }
 .col .vlab i { font-style:normal; }
@@ -1371,7 +1372,7 @@ function renderToday() {
         if (t.done) { t.done = false; t.doneAt = null; t.started = false; t.startDay = null; }
         else if (t.started) { t.done = true; t.doneAt = new Date().toISOString(); fired = "done"; }
         else { t.started = true; t.startDay = S.today.date; fired = "start"; }
-        const medal = fired === "done" ? dayMedal() : null;   // przed save(): jeden krok Ctrl+Z
+        const medal = fired === "done" ? odbierzMedalDnia() : null;   // przed save(): jeden krok Ctrl+Z
         save(); renderToday();
         if (fired === "done") fxTaskDone(t, o, medal);
         else if (fired === "start") { fxStartSpark(o); toast(`Ruszone — masz już ${Math.round(taskPoints(t) * START_SHARE)} pkt z ${taskPoints(t)}`); }
@@ -1383,7 +1384,7 @@ function renderToday() {
       cb.addEventListener("change", () => {
         const o = fxRect(cb), now = cb.checked;
         t.done = now; t.doneAt = now ? new Date().toISOString() : null;
-        const medal = now ? dayMedal() : null;                // przed save(): jeden krok Ctrl+Z
+        const medal = now ? odbierzMedalDnia() : null;                // przed save(): jeden krok Ctrl+Z
         save(); renderToday();
         if (now) fxTaskDone(t, o, medal);
       });
@@ -1461,23 +1462,33 @@ function score(tasks) {
   const perfect = allDone && heavyDone > 0;
   return { cats:[...byCat.values()], pts:[...byPts.values()].sort((a,b) => a.pts - b.pts),
            earned, possible, done, total, heavyDone, heavyTotal, running, oldest,
-           allDone, perfect, silver: allDone && !perfect,
+           allDone, perfect,
            pct: possible ? earned/possible : 0 };
 }
-/* srebrny dzień = komplet odhaczony, ale bez domkniętego zadania od 8 pkt;
-   liczony z `allDone` i `perfect`, więc działa też na starych zapisach w historii */
-const isSilverDay = r => !!(r && r.allDone && !r.perfect);
+
+/* Medal dnia — jedna reguła dla Dziś, Historii i zapisu:
+   komplet z domkniętym zadaniem od 8 pkt = złoty, komplet bez niego = srebrny, inaczej brak.
+   Działa na wyniku score() i na wpisie w historii (pola perfect i allDone). */
+const MEDALE = {
+  zloty:   { klasa:"gold",   kolor:"var(--gold)",   nazwa:"złoty dzień",   znak:"★", opis:"komplet z zadaniem od 8 pkt" },
+  srebrny: { klasa:"silver", kolor:"var(--silver)", nazwa:"srebrny dzień", znak:"☆", opis:"komplet bez zadania od 8 pkt" }
+};
+const medalDnia = r => !r ? null : r.perfect ? "zloty" : r.allDone ? "srebrny" : null;
+const klasaMedalu = r => { const m = medalDnia(r); return m ? " " + MEDALE[m].klasa : ""; };
 
 function renderHero() {
   const s = score(S.today.tasks);
   const pct = Math.round(s.pct * 100);
   const h = document.getElementById("heroPct");
   h.textContent = pct + "%";
-  h.classList.toggle("done", s.perfect);
-  h.classList.toggle("silver", s.silver);
+  const medal = medalDnia(s);
+  h.classList.toggle("done", medal === "zloty");
+  h.classList.toggle("silver", medal === "srebrny");
   let tail = "";
-  if (s.perfect) tail = ` &nbsp;·&nbsp; <b style="color:var(--gold)">złoty dzień</b>`;
-  else if (s.silver) tail = ` &nbsp;·&nbsp; <b style="color:var(--silver)">srebrny dzień</b> &nbsp;·&nbsp; <span style="color:var(--muted)">do złota brakuje zadania od 8 pkt</span>`;
+  if (medal) {
+    tail = ` &nbsp;·&nbsp; <b style="color:${MEDALE[medal].kolor}">${MEDALE[medal].nazwa}</b>`;
+    if (medal === "srebrny") tail += ` &nbsp;·&nbsp; <span style="color:var(--muted)">do złota brakuje zadania od 8 pkt</span>`;
+  }
   else if (s.heavyTotal === 0) tail = ` &nbsp;·&nbsp; <span style="color:var(--muted)">brak ciężkiego zadania na dziś</span>`;
   else if (s.heavyDone === 0) tail = ` &nbsp;·&nbsp; <span style="color:var(--muted)">ciężkie: ${s.heavyDone}/${s.heavyTotal}${s.running ? ", " + s.running + " w toku" : ""}</span>`;
   if (s.oldest > 0) tail += ` &nbsp;·&nbsp; <span style="color:var(--t4)">najstarsze wisi ${s.oldest} ${s.oldest === 1 ? "dzień" : "dni"}</span>`;
@@ -1525,9 +1536,9 @@ function renderDayChart() {
   }
   const col = e => {
     const pct = e.possible ? e.earned/e.possible : 0;
-    const full = e.total_ ? !!e.gold : (e.possible > 0 && e.earned === e.possible);
+    const full = e.total_ ? e.medal === "zloty" : (e.possible > 0 && e.earned === e.possible);
     const bg = (S.dayMode === "pts" && e.pts && !e.total_) ? ` background:var(--t${tierOf(e.pts)}, var(--bar));` : "";
-    return `<div class="col${e.total_ ? " total" : ""}${full ? " full" : ""}${e.total_ && e.silver ? " silver" : ""}">
+    return `<div class="col${e.total_ ? " total" : ""}${full ? " full" : ""}${e.total_ && e.medal === "srebrny" ? " silver" : ""}">
       <div class="track">
         <span class="vlab"><b>${e.earned}/${e.possible} pkt</b><i class="vx"> · ${Math.round(pct*100)}%</i></span>
         <div class="fill" style="height:${e.earned ? Math.max(pct*100, 2) : 0}%;${bg}"></div>
@@ -1535,7 +1546,11 @@ function renderDayChart() {
       <div class="xlab" title="${esc(e.name)}">${esc(e.name)}</div>
     </div>`;
   };
-  const totalEntry = { name:"TOTAL", earned:s.earned, possible:s.possible, total_:true, gold:s.perfect, silver:s.silver };
+  const medal = medalDnia(s);
+  const totalEntry = { name:"TOTAL", earned:s.earned, possible:s.possible, total_:true, medal };
+  // w srebrny dzień pasek „kategoria w 100%” też jest srebrny, żeby kolory się nie mieszały
+  const kolorPaska = medal === "srebrny" ? "var(--silver)" : "var(--gold)";
+  const opisMedalu = MEDALE[medal || "zloty"];
   const leg = document.getElementById("dayLegend");
   if (leg) leg.innerHTML =
     (S.dayMode === "pts"
@@ -1543,10 +1558,10 @@ function renderDayChart() {
       : `<span><i style="background:var(--bar)"></i> zdobyte</span>`) +
     `<span><i style="background:var(--rest)"></i> zostało do zdobycia</span>` +
     `<span><i style="background:var(--total)"></i> TOTAL (na punktach)</span>` +
-    `<span><i style="background:var(--gold)"></i> domknięte w 100%</span>` +
-    (s.silver ? `<span><i style="background:var(--silver)"></i> srebrny dzień — komplet bez zadania od 8 pkt</span>` : "");
+    `<span><i style="background:${kolorPaska}"></i> kategoria w 100%</span>` +
+    `<span><i style="background:${opisMedalu.kolor}"></i> ${opisMedalu.nazwa} — ${opisMedalu.opis}</span>`;
   host.innerHTML =
-    `<div class="chart">
+    `<div class="chart${medal === "srebrny" ? " srebrny" : ""}">
        <div class="gridlines">
          <div style="top:50%"><span>50%</span></div>
          <div class="base" style="bottom:0"><span>0</span></div>
@@ -1820,18 +1835,18 @@ function renderHistory() {
   const rows = histInRange();
 
   // stats
-  const gold = rows.filter(r => r.perfect).length;
-  const silver = rows.filter(isSilverDay).length;
+  const zlote = rows.filter(r => medalDnia(r) === "zloty").length;
+  const srebrne = rows.filter(r => medalDnia(r) === "srebrny").length;
   const pts = rows.reduce((a,r) => a + r.earned, 0);
   const poss = rows.reduce((a,r) => a + r.possible, 0);
   const avg = poss ? Math.round(pts/poss*100) : 0;
   const best = rows.reduce((a,r) => Math.max(a, r.earned), 0);
   let streak = 0, bestStreak = 0;
-  rows.forEach(r => { if (r.perfect) { streak++; bestStreak = Math.max(bestStreak, streak); } else streak = 0; });
+  rows.forEach(r => { if (medalDnia(r) === "zloty") { streak++; bestStreak = Math.max(bestStreak, streak); } else streak = 0; });
   document.getElementById("histStats").innerHTML = `
     <div class="stat"><div class="v">${rows.length}</div><div class="k">zapisanych dni</div></div>
     <div class="stat"><div class="v">${avg}%</div><div class="k">średnie wykonanie (${pts}/${poss} pkt)</div></div>
-    <div class="stat"><div class="v gold">${gold}${silver ? ` <span class="silver">+ ${silver}</span>` : ""}</div><div class="k">${silver ? `złote + srebrne dni` : `złote dni`}</div></div>
+    <div class="stat"><div class="v gold">${zlote}${srebrne ? ` <span class="silver">+ ${srebrne}</span>` : ""}</div><div class="k">${srebrne ? `złote + srebrne dni` : `złote dni`}</div></div>
     <div class="stat"><div class="v">${bestStreak}</div><div class="k">najdłuższa złota seria</div></div>
     <div class="stat"><div class="v">${best}</div><div class="k">rekord punktów w dniu</div></div>
     <div class="stat"><div class="v">${rows.reduce((a,r) => a + (r.heavyDone || 0), 0)}</div><div class="k">domkniętych ciężkich zadań</div></div>`;
@@ -1842,7 +1857,7 @@ function renderHistory() {
   else {
     const max = Math.max(...rows.map(r => r.earned), 1);
     host.innerHTML = `<div class="days">${rows.map(r => `
-      <div class="day${r.perfect ? " gold" : isSilverDay(r) ? " silver" : ""}" data-t="${esc(plDate(r.date))} · ${r.earned}/${r.possible} pkt · ${Math.round(r.possible ? r.earned/r.possible*100 : 0)}% · ${r.done}/${r.total} ${r.total === 1 ? "zadania" : "zadań"}${r.perfect ? " · złoty dzień" : isSilverDay(r) ? " · srebrny dzień" : ""}">
+      <div class="day${klasaMedalu(r)}" data-t="${esc(plDate(r.date))} · ${r.earned}/${r.possible} pkt · ${Math.round(r.possible ? r.earned/r.possible*100 : 0)}% · ${r.done}/${r.total} ${r.total === 1 ? "zadania" : "zadań"}${medalDnia(r) ? " · " + MEDALE[medalDnia(r)].nazwa : ""}">
         <i style="height:${Math.max(r.earned/max*100, 1.5)}%"></i>
       </div>`).join("")}</div>
       <div class="row sub" style="justify-content:space-between; margin-top:6px">
@@ -1890,8 +1905,7 @@ function renderHistory() {
       <td style="font-variant-numeric:tabular-nums">${r.earned}/${r.possible}</td>
       <td style="font-variant-numeric:tabular-nums">${Math.round(r.possible ? r.earned/r.possible*100 : 0)}%</td>
       <td style="font-variant-numeric:tabular-nums">${r.done}/${r.total}</td>
-      <td>${r.perfect ? '<span style="color:var(--gold)" title="złoty dzień">★ 100%</span>'
-          : isSilverDay(r) ? '<span style="color:var(--silver)" title="srebrny dzień — komplet bez zadania od 8 pkt">☆ 100%</span>' : ""}</td>
+      <td>${(m => m ? `<span style="color:${MEDALE[m].kolor}" title="${MEDALE[m].nazwa} — ${MEDALE[m].opis}">${MEDALE[m].znak} 100%</span>` : "")(medalDnia(r))}</td>
       <td class="del"><button class="delbtn" data-del="${r.date}" title="usuń zapis">×</button></td>
     </tr>`).join("")}</tbody></table>` +
     (all.length > 30 ? `<div class="row" style="margin-top:10px"><button class="act ghost" id="btnMore">${histShowAll ? "Pokaż tylko 30 ostatnich" : `Pokaż wszystkie (${all.length})`}</button></div>` : "");
@@ -1926,7 +1940,7 @@ function saveScore(silent) {
   S.history.sort((a,b) => a.date.localeCompare(b.date));
   save();
   if (S.autoBackup && fsHandle) backupWrite(true);
-  if (!silent) toast(`${again ? "Zaktualizowano zapis dnia" : "Zapisano"}: ${snap.earned}/${snap.possible} pkt (${Math.round(snap.possible ? snap.earned/snap.possible*100 : 0)}%)` + (snap.perfect ? " ★" : isSilverDay(snap) ? " ☆" : ""));
+  if (!silent) toast(`${again ? "Zaktualizowano zapis dnia" : "Zapisano"}: ${snap.earned}/${snap.possible} pkt (${Math.round(snap.possible ? snap.earned/snap.possible*100 : 0)}%)` + (medalDnia(snap) ? " " + MEDALE[medalDnia(snap)].znak : ""));
   return true;
 }
 function planCopy(t, extraCarry) {
@@ -2338,20 +2352,27 @@ function fxStar(points, inner) {
   return `polygon(${pts.join(",")})`;
 }
 let comicT;
-function fxComic(text, kind) {          // kind: "gold" | "silver" | brak
+/* wygląd panelu: liczba ramion gwiazdy, głębokość wcięć, czas na ekranie */
+const PANELE = {
+  zwykly: { klasa:"",       ramiona:12, wciecie:40, czas:1300 },
+  srebro: { klasa:"silver", ramiona:14, wciecie:42, czas:1900 },
+  zloto:  { klasa:"gold",   ramiona:16, wciecie:42, czas:2400 }
+};
+function fxComic(text, rodzaj = "zwykly") {
   const host = document.getElementById("comic");
-  const gold = kind === "gold", big = !!kind;
-  host.innerHTML = `<div class="burst${kind ? " " + kind : ""}"><i class="bg"></i><i class="dots"></i><b>${esc(text)}</b></div>`;
+  const panel = PANELE[rodzaj];
+  host.innerHTML = `<div class="burst${panel.klasa ? " " + panel.klasa : ""}"><i class="bg"></i><i class="dots"></i><b>${esc(text)}</b></div>`;
   const b = host.querySelector(".burst");
-  const clip = fxStar(big ? (gold ? 16 : 14) : 12, big ? 42 : 40);
+  const clip = fxStar(panel.ramiona, panel.wciecie);
   host.querySelector(".bg").style.clipPath = clip;
   host.querySelector(".dots").style.clipPath = clip;
   b.style.setProperty("--tilt", (Math.random() * 10 - 5).toFixed(1) + "deg");
   host.classList.add("on");
   clearTimeout(comicT);
-  comicT = setTimeout(() => host.classList.remove("on"), gold ? 2400 : big ? 1900 : 1300);
+  comicT = setTimeout(() => host.classList.remove("on"), panel.czas);
 }
 
+const losuj = lista => lista[(Math.random() * lista.length) | 0];
 function fxRect(el) {
   const r = el && el.getBoundingClientRect ? el.getBoundingClientRect() : null;
   return (r && r.width) ? { x: r.left + r.width / 2, y: r.top + r.height / 2 }
@@ -2374,22 +2395,22 @@ function fxHeavy(o) {
     fxSpawn({ x: o.x - 40, y: o.y, count: 45, spread: 1.5, dir: -Math.PI / 2 - 0.35, speed: 11 });
     fxSpawn({ x: o.x + 40, y: o.y, count: 45, spread: 1.5, dir: -Math.PI / 2 + 0.35, speed: 11 });
   }
-  fxComic(FX_TEXTS[(Math.random() * FX_TEXTS.length) | 0]);
+  fxComic(losuj(FX_TEXTS));
 }
 /* srebrny dzień — panel i salwa z rogów, bez pełnego show; złoto zostaje nagrodą za ciężkie zadanie */
 function fxSilver() {
   const mode = fxMode();
   if (mode === "off") return;
-  fxComic(FX_SILVER_TEXTS[(Math.random() * FX_SILVER_TEXTS.length) | 0], "silver");
+  fxComic(losuj(FX_SILVER_TEXTS), "srebro");
   if (mode !== "full") return;
-  const cannon = (x, dir) => fxSpawn({ x, y: innerHeight - 10, count: 40, spread: 0.8, dir, speed: 15, colors: FX_SILVER, gravity: 0.26 });
-  cannon(10, -Math.PI / 2 + 0.6);
-  cannon(innerWidth - 10, -Math.PI / 2 - 0.6);
+  const salwa = (x, dir) => fxSpawn({ x, y: innerHeight - 10, count: 40, spread: 0.8, dir, speed: 15, colors: FX_SILVER, gravity: 0.26 });
+  salwa(10, -Math.PI / 2 + 0.6);
+  salwa(innerWidth - 10, -Math.PI / 2 - 0.6);
 }
 function fxGold() {
   const mode = fxMode();
   if (mode === "off") return;
-  fxComic(FX_GOLD_TEXTS[(Math.random() * FX_GOLD_TEXTS.length) | 0], "gold");
+  fxComic(losuj(FX_GOLD_TEXTS), "zloto");
   if (mode !== "full") return;
   const variant = (Math.random() * 3) | 0;
   // z rogów, zawsze
@@ -2415,19 +2436,20 @@ function fxGold() {
 }
 
 /* wpięcie w domykanie zadań */
-/* Ustawia znacznik „medal dnia już pokazany” i mówi, który pokazać.
-   Wołane PRZED save() w obsłudze domknięcia, żeby domknięcie i znacznik były jednym krokiem Ctrl+Z
-   (osobny save() robił z nich dwa kroki i pierwsze Ctrl+Z cofało tylko znacznik). */
-function dayMedal() {
-  const s = score(S.today.tasks);
-  if (s.perfect && !S.today.goldShown) { S.today.goldShown = true; return "gold"; }
-  if (s.silver && !S.today.silverShown) { S.today.silverShown = true; return "silver"; }
+/* Odbiera medal dnia: zaznacza go jako pokazany i zwraca "zloty", "srebrny" albo null.
+   Zmienia stan, więc wołane PRZED save() w obsłudze domknięcia — wtedy domknięcie i znacznik
+   to jeden krok Ctrl+Z (osobny save() robił z nich dwa kroki).
+   Jeden medal na dzień: po złocie srebro już się nie pokazuje. */
+function odbierzMedalDnia() {
+  const medal = medalDnia(score(S.today.tasks));
+  if (medal === "zloty" && !S.today.goldShown) { S.today.goldShown = true; return medal; }
+  if (medal === "srebrny" && !S.today.goldShown && !S.today.silverShown) { S.today.silverShown = true; return medal; }
   return null;
 }
 function fxTaskDone(t, o, medal) {
   if (isHeavy(t)) fxHeavy(o); else fxMicro(o);
-  if (medal === "gold") setTimeout(fxGold, isHeavy(t) ? 700 : 300);
-  else if (medal === "silver") setTimeout(fxSilver, 300);
+  if (medal === "zloty") setTimeout(fxGold, isHeavy(t) ? 700 : 300);
+  else if (medal === "srebrny") setTimeout(fxSilver, 300);
 }
 
 /* ---------- kolejność domykania: co i o której ---------- */

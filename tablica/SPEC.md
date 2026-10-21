@@ -18,7 +18,7 @@ Jeden plik HTML, bez zewnętrznych bibliotek i assetów (wyjątek: opcjonalny OC
 
 ## System punktacji
 
-Skala **1 / 3 / 8 / 21** (wykładnicza) · start ciężkiego zadania (≥8) płaci 30% od razu, raz, w dniu startu · każde przerzucenie na kolejny dzień +50%, sufit ×2 · złoty dzień wymaga kompletu **i** domkniętego zadania ≥8 pkt · komplet bez takiego zadania to **srebrny dzień** (v16): srebrny kolor w nagłówku, słupku TOTAL, historii i tabeli, krótsze świętowanie raz dziennie (`silverShown`). Srebro nie jest zapisywane osobno — liczy się z `allDone && !perfect`, więc działa też na starej historii. Przesłanka: w ADHD stromo spada wartość nagrody odroczonej, nie wysiłkowej (Mies i wsp., Cortex 2018; metaanaliza Marx i wsp.).
+Skala **1 / 3 / 8 / 21** (wykładnicza) · start ciężkiego zadania (≥8) płaci 30% od razu, raz, w dniu startu · każde przerzucenie na kolejny dzień +50%, sufit ×2 · złoty dzień wymaga kompletu **i** domkniętego zadania ≥8 pkt · komplet bez takiego zadania to **srebrny dzień** (v16). Jeden medal na dzień: złoto wygrywa, a po złotym świętowaniu srebro już się nie pokazuje. Regułę trzyma jedna funkcja `medalDnia()` (+ mapa `MEDALE`): srebrny nagłówek z podpowiedzią, srebrny TOTAL i paski kategorii w 100%, legenda, słupki i „☆ 100%” w Historii, krótsze świętowanie raz dziennie (`silverShown`). Srebro nie jest zapisywane osobno — liczy się z `allDone && !perfect`; starsze wpisy historii bez pola `allDone` zostają bez medalu. Przesłanka: w ADHD stromo spada wartość nagrody odroczonej, nie wysiłkowej (Mies i wsp., Cortex 2018; metaanaliza Marx i wsp.).
 
 ### Poziomy Check (v12)
 Gotowa ścieżka dociskania sprawy, dodawana przyciskiem w Kategoriach: **Check L1 czat** (1), **Check L2 telefon / przełożony** (3), **Check L3 wizyta osobista** (8).
