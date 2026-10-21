@@ -40,7 +40,7 @@ html[data-skin="cyber"]:root{
   /* Tablica scoringowa i strona startowa */
   --page:var(--cy-bg); --card:var(--cy-surface); --surface-1:#100E1F; --ink-2:#C6D6EA;
   --grid:#211C42; --axis:#3A3270; --ring:rgb(0 240 255 / .22); --rest:#1A1636; --goldwash:rgb(252 238 10 / .08);
-  --bar:var(--cy-cyan); --bar-soft:#06343A; --total:var(--cy-pink); --gold:var(--cy-yellow); --gold-soft:#2A2805;
+  --bar:var(--cy-cyan); --bar-soft:#06343A; --total:var(--cy-pink); --gold:var(--cy-yellow); --gold-soft:#2A2805; --silver:#C8D0E0;
   --t1:var(--cy-green); --t2:var(--cy-yellow); --t3:var(--cy-orange); --t4:var(--cy-pink);
   --t1-bg:#03281D; --t2-bg:#262404; --t3-bg:#2B1A06; --t4-bg:#2E0A18;
   --good:var(--cy-green);
