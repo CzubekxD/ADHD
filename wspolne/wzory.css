@@ -84,12 +84,12 @@
   --mask-d:100% var(--d);
 }
 
-/* ---------- tło strony: kręgi od środka (receptura „Red Circles”, codepen.io/joshuar/pen/qNBYLK) ----------
+/* ---------- tło strony: kręgi od środka (albo od --s-kregi-x/-y, np. środka tarczy pomidora na pulpicie) (receptura „Red Circles”, codepen.io/joshuar/pen/qNBYLK) ----------
    w kolorze --s-kregi (dopełnienie akcentu, 40%); przy wejściu na stronę przechodzi przez nie fala */
 @property --s-faza{syntax:"<length>";inherits:false;initial-value:0px}
 .s-tlo-kregi{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background-color:var(--s-kregi);
-  background-image:radial-gradient(circle at center center,black,#ccc),
-    repeating-radial-gradient(circle at center center,black var(--s-faza),black calc(1rem + var(--s-faza)),transparent calc(2rem + var(--s-faza)));
+  background-image:radial-gradient(circle at var(--s-kregi-x,50%) var(--s-kregi-y,50%),black,#ccc),
+    repeating-radial-gradient(circle at var(--s-kregi-x,50%) var(--s-kregi-y,50%),black var(--s-faza),black calc(1rem + var(--s-faza)),transparent calc(2rem + var(--s-faza)));
   background-blend-mode:multiply}
 .s-tlo-kregi::before,.s-tlo-kregi::after{content:"";position:absolute;top:0;width:200%;height:100%}
 .s-tlo-kregi::before{left:0;background:repeating-linear-gradient(45deg,transparent,transparent 1px,rgb(0 0 0 / .1) 1px,rgb(255 255 255 / .05) 5px)}
