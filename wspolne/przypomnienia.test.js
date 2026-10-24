@@ -13,6 +13,8 @@ window.addEventListener('error', e => bledy.push(e.message));
 const kod = fs.readFileSync(path.join(__dirname, 'przypomnienia.js'), 'utf8');
 ['skroty.js'].forEach(f => window.eval(fs.readFileSync(path.join(__dirname, f), 'utf8')));
 window.eval(kod);
+// nowszy jsdom zostawia stronę w stanie „loading” — moduł montuje się dopiero po DOMContentLoaded
+if (window.document.readyState === 'loading') window.document.dispatchEvent(new window.Event('DOMContentLoaded'));
 const { document, Przypomnienia: P } = window;
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));

@@ -48,7 +48,7 @@ html[data-skin="cyber"]:root{
 
   /* Pasek zdrowia × SZOP */
   --tlo:var(--cy-bg); --powierzchnia:var(--cy-surface); --powierzchnia-2:#100E1F;
-  --tusz:var(--cy-ink); --przygaszony:var(--cy-muted); --slaby:#6F6A9C;
+  --tusz:var(--cy-ink); --przygaszony:var(--cy-muted); --slaby:#8A85B8;   /* etykiety w Pasku: cichsze od tekstu, ale ≥ 4,5:1 na tle karty (strażnik kontrastu) */
   --linia:rgb(0 240 255 / .14); --linia-mocna:rgb(0 240 255 / .32);
   --akcent:var(--cy-cyan); --akcent-tlo:rgb(0 240 255 / .10);
   --alarm:var(--cy-pink); --alarm-tlo:rgb(255 42 109 / .12);
