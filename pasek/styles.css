@@ -1,37 +1,21 @@
 :root {
-  --tlo:        #E7E9E5;
-  --powierzchnia: #F4F5F2;
-  --powierzchnia-2: #FBFCFA;
-  --tusz:       #21262B;
-  --przygaszony:#666D73;
-  --slaby:      #8C9297;
-  --linia:      rgba(33, 38, 43, 0.13);
-  --linia-mocna:rgba(33, 38, 43, 0.28);
-  --akcent:     #16655A;
-  --akcent-tlo: rgba(22, 101, 90, 0.10);
-  --alarm:      #A9463C;
-  --alarm-tlo:  rgba(169, 70, 60, 0.10);
+  --tlo:        #14171A;
+  --powierzchnia: #1C2023;
+  --powierzchnia-2: #22272A;
+  --tusz:       #E2E5E1;
+  --przygaszony:#9EA5A9;
+  --slaby:      #7B8286;
+  --linia:      rgba(226, 229, 225, 0.12);
+  --linia-mocna:rgba(226, 229, 225, 0.26);
+  --akcent:     #6DBBA6;
+  --akcent-tlo: rgba(109, 187, 166, 0.13);
+  --alarm:      #D98078;
+  --alarm-tlo:  rgba(217, 128, 120, 0.13);
   --promien:    9px;
   --sans: 'Instrument Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --tlo:        #14171A;
-    --powierzchnia: #1C2023;
-    --powierzchnia-2: #22272A;
-    --tusz:       #E2E5E1;
-    --przygaszony:#9EA5A9;
-    --slaby:      #7B8286;
-    --linia:      rgba(226, 229, 225, 0.12);
-    --linia-mocna:rgba(226, 229, 225, 0.26);
-    --akcent:     #6DBBA6;
-    --akcent-tlo: rgba(109, 187, 166, 0.13);
-    --alarm:      #D98078;
-    --alarm-tlo:  rgba(217, 128, 120, 0.13);
-  }
-}
 
 * { box-sizing: border-box; }
 

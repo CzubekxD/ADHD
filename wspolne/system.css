@@ -15,28 +15,34 @@
 
 /* ================= 1. TOKENY ================= */
 :root{
-  /* baza: chłodna mgła; tekst ≥ 4,5:1, ramka przycisku ≥ 3:1, karta wyraźnie odcina się od tła */
-  --s-tlo:#ECEFED; --s-pow:#FFFFFF; --s-pow-2:#E7EBE9; --s-pow-3:#DDE3E0;
-  --s-tusz:#1C2320; --s-tusz-2:#3C4742; --s-przygaszony:#57625D;
-  --s-linia:#C2CBC6; --s-linia-mocna:#86928C;
-  --s-ok:#2B7552; --s-ok-tlo:#DDEFE5; --s-uwaga:#8F5E10; --s-uwaga-tlo:#F6EAD3; --s-blad:#AE3F37; --s-blad-tlo:#F7E1DE;
-  /* karteczka w skrzynce na myśli: żółknie od bladej do nasyconej (wspolne/skrzynka.js) */
-  --s-kartka-blada:#FFFBE6; --s-kartka:#F6D96B; --s-kartka-tusz:#2B2610;
-  --s-cien:0 1px 2px rgb(20 30 25 / .06),0 4px 14px rgb(20 30 25 / .06);
-  --s-cien-menu:0 2px 6px rgb(20 30 25 / .10),0 14px 34px rgb(20 30 25 / .14);
+  /* jeden motyw: ciemny. Baza chłodna, zgaszona zieleń-grafit; tekst ≥ 4,5:1 */
 
-  /* paleta kolorów przewodnich — kolejne narzędzia biorą następny wolny kolor */
-  --k-szalwia:#2E6B5E;  --k-szalwia-tlo:#DFEDE8;
-  --k-bursztyn:#875810; --k-bursztyn-tlo:#F6EAD5;
-  --k-granat:#2F5591;   --k-granat-tlo:#E1E9F6;
-  --k-sliwka:#74407E;   --k-sliwka-tlo:#F0E4F2;
-  --k-morski:#1D6A80;   --k-morski-tlo:#DCEEF3;
-  --k-terakota:#9A4730; --k-terakota-tlo:#F6E3DC;
-  --k-oliwka:#56631C;   --k-oliwka-tlo:#ECEFD8;
-  --k-lupek:#4A5868;    --k-lupek-tlo:#E5E9EE;
+  --s-tlo:#0F1312; --s-pow:#1E2523; --s-pow-2:#262F2C; --s-pow-3:#303A36;
+  --s-tusz:#E4EAE7; --s-tusz-2:#C3CDC8; --s-przygaszony:#9AA6A0;
+  --s-linia:#3B4843; --s-linia-mocna:#66736D;
+  --s-ok:#6CC59A; --s-ok-tlo:#183026; --s-uwaga:#E2B061; --s-uwaga-tlo:#33281A; --s-blad:#F08A80; --s-blad-tlo:#3A1F1C;
+  --s-kartka-blada:#2C2A1E; --s-kartka:#5E5016; --s-kartka-tusz:#F4EDCF;
+  --s-cien:0 1px 2px rgb(0 0 0 / .35),0 4px 14px rgb(0 0 0 / .25);
+  --s-cien-menu:0 2px 6px rgb(0 0 0 / .4),0 14px 34px rgb(0 0 0 / .45);
+  --k-szalwia:#7FC4B2;  --k-szalwia-tlo:#1E302B;
+  --k-bursztyn:#E3B467; --k-bursztyn-tlo:#33291A;
+  --k-granat:#8FB2EB;   --k-granat-tlo:#1C2638;
+  --k-sliwka:#D2A2DC;   --k-sliwka-tlo:#2E2032;
+  --k-morski:#79C3D9;   --k-morski-tlo:#17303A;
+  --k-terakota:#EB9C83; --k-terakota-tlo:#3A231B;
+  --k-oliwka:#BCCB79;   --k-oliwka-tlo:#2A2E17;
+  --k-lupek:#AEBBCB;    --k-lupek-tlo:#252B33;
+  --s-akcent-tusz:#121715;
 
-  /* kolor przewodni bieżącego narzędzia — ustawia go html[data-kolor] */
-  --s-akcent:var(--k-lupek); --s-akcent-tlo:var(--k-lupek-tlo); --s-akcent-tusz:#FFFFFF;
+  /* jeden akcent dla wszystkich narzędzi: bursztyn. Narzędzia rozróżniają faktury (wzory), nie kolory */
+  --s-akcent:var(--k-bursztyn); --s-akcent-tlo:var(--k-bursztyn-tlo);
+  /* bursztyn w 40%: wypełnienie przycisków i wzorów; ramki kart i przycisków w tym samym kolorze */
+  --s-akcent-40:color-mix(in oklch,var(--s-akcent) 40%,var(--s-tlo));
+  --s-ramka:color-mix(in oklch,var(--s-akcent) 40%,var(--s-pow));
+  /* niepowodzenia (nie zadziałało, pominięty dzień): dopełnienie bursztynu na kole barw — wybija się, a zostaje w palecie */
+  --s-niepowodzenie:#8FB2EB; --s-niepowodzenie-tlo:color-mix(in oklch,#8FB2EB 18%,transparent);
+  /* tło strony: kręgi w kolorze dopełnienia, 40% */
+  --s-kregi:color-mix(in oklch,var(--s-niepowodzenie) 40%,var(--s-tlo));
 
   /* pismo: jeden krój, sześć rozmiarów */
   --s-kroj:"Host Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -54,43 +60,8 @@
   --s-zaokr:10px; --s-zaokr-duze:14px;
   --s-cel:44px;        /* minimalny cel do kliknięcia / dotknięcia */
   --s-ruch:180ms;
+  color-scheme:dark;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --s-tlo:#0F1312; --s-pow:#1E2523; --s-pow-2:#262F2C; --s-pow-3:#303A36;
-  --s-tusz:#E4EAE7; --s-tusz-2:#C3CDC8; --s-przygaszony:#9AA6A0;
-  --s-linia:#3B4843; --s-linia-mocna:#66736D;
-  --s-ok:#6CC59A; --s-ok-tlo:#183026; --s-uwaga:#E2B061; --s-uwaga-tlo:#33281A; --s-blad:#F08A80; --s-blad-tlo:#3A1F1C;
-  --s-kartka-blada:#2C2A1E; --s-kartka:#5E5016; --s-kartka-tusz:#F4EDCF;
-  --s-cien:0 1px 2px rgb(0 0 0 / .35),0 4px 14px rgb(0 0 0 / .25);
-  --s-cien-menu:0 2px 6px rgb(0 0 0 / .4),0 14px 34px rgb(0 0 0 / .45);
-  --k-szalwia:#7FC4B2;  --k-szalwia-tlo:#1E302B;
-  --k-bursztyn:#E3B467; --k-bursztyn-tlo:#33291A;
-  --k-granat:#8FB2EB;   --k-granat-tlo:#1C2638;
-  --k-sliwka:#D2A2DC;   --k-sliwka-tlo:#2E2032;
-  --k-morski:#79C3D9;   --k-morski-tlo:#17303A;
-  --k-terakota:#EB9C83; --k-terakota-tlo:#3A231B;
-  --k-oliwka:#BCCB79;   --k-oliwka-tlo:#2A2E17;
-  --k-lupek:#AEBBCB;    --k-lupek-tlo:#252B33;
-  --s-akcent-tusz:#121715;
-  color-scheme:dark}}
-:root[data-theme="dark"]{
-  --s-tlo:#0F1312; --s-pow:#1E2523; --s-pow-2:#262F2C; --s-pow-3:#303A36;
-  --s-tusz:#E4EAE7; --s-tusz-2:#C3CDC8; --s-przygaszony:#9AA6A0;
-  --s-linia:#3B4843; --s-linia-mocna:#66736D;
-  --s-ok:#6CC59A; --s-ok-tlo:#183026; --s-uwaga:#E2B061; --s-uwaga-tlo:#33281A; --s-blad:#F08A80; --s-blad-tlo:#3A1F1C;
-  --s-kartka-blada:#2C2A1E; --s-kartka:#5E5016; --s-kartka-tusz:#F4EDCF;
-  --s-cien:0 1px 2px rgb(0 0 0 / .35),0 4px 14px rgb(0 0 0 / .25);
-  --s-cien-menu:0 2px 6px rgb(0 0 0 / .4),0 14px 34px rgb(0 0 0 / .45);
-  --k-szalwia:#7FC4B2;  --k-szalwia-tlo:#1E302B;
-  --k-bursztyn:#E3B467; --k-bursztyn-tlo:#33291A;
-  --k-granat:#8FB2EB;   --k-granat-tlo:#1C2638;
-  --k-sliwka:#D2A2DC;   --k-sliwka-tlo:#2E2032;
-  --k-morski:#79C3D9;   --k-morski-tlo:#17303A;
-  --k-terakota:#EB9C83; --k-terakota-tlo:#3A231B;
-  --k-oliwka:#BCCB79;   --k-oliwka-tlo:#2A2E17;
-  --k-lupek:#AEBBCB;    --k-lupek-tlo:#252B33;
-  --s-akcent-tusz:#121715;
-  color-scheme:dark}
 
 /* kolor przewodni wg narzędzia (ustawia pasek-gorny.js z rejestru narzędzi) */
 html[data-kolor="szalwia"]{--s-akcent:var(--k-szalwia);--s-akcent-tlo:var(--k-szalwia-tlo)}
@@ -115,10 +86,10 @@ html[data-kolor="lupek"]{--s-akcent:var(--k-lupek);--s-akcent-tlo:var(--k-lupek-
 .s-liczby{font-variant-numeric:tabular-nums}
 
 .s-przycisk{display:inline-flex;align-items:center;justify-content:center;gap:var(--s-2);min-height:var(--s-cel);padding:0 var(--s-4);
-  border-radius:var(--s-zaokr);border:1px solid var(--s-linia-mocna);background:var(--s-pow);color:var(--s-tusz);
+  border-radius:var(--s-zaokr);border:1px solid var(--s-ramka);background:var(--s-pow);color:var(--s-tusz);
   font:600 15px/1.2 var(--s-kroj);cursor:pointer;text-decoration:none;transition:background-color var(--s-ruch),border-color var(--s-ruch)}
-.s-przycisk:hover{border-color:var(--s-przygaszony)}
-.s-przycisk.glowny{background:var(--s-akcent);border-color:var(--s-akcent);color:var(--s-akcent-tusz)}
+.s-przycisk:hover{border-color:var(--s-akcent)}
+.s-przycisk.glowny{background:var(--s-akcent-40);border-color:var(--s-ramka);color:var(--s-tusz)}
 .s-przycisk.glowny:hover{filter:brightness(1.07)}
 .s-przycisk.cichy{background:transparent;border-color:transparent;color:var(--s-tusz-2)}
 .s-przycisk.cichy:hover{background:var(--s-pow-2)}
@@ -154,7 +125,7 @@ html[data-kolor="lupek"]{--s-akcent:var(--k-lupek);--s-akcent-tlo:var(--k-lupek-
 .s-przelacznik[aria-checked="true"] .tor::after{transform:translateX(16px)}
 
 /* ================= 3. MOLEKUŁY ================= */
-.s-karta{min-width:0;background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);padding:var(--s-5);box-shadow:var(--s-cien)}
+.s-karta{min-width:0;background:var(--s-pow);border:1.5px solid var(--s-ramka);border-radius:var(--s-zaokr-duze);padding:var(--s-5);box-shadow:var(--s-cien)}
 
 .s-zakladki{min-width:0;display:flex;gap:var(--s-1);border-bottom:1px solid var(--s-linia);overflow-x:auto;scrollbar-width:none}
 .s-zakladki::-webkit-scrollbar{display:none}
@@ -280,6 +251,7 @@ html[data-skin="cyber"]:root{
   --k-oliwka:#C6FF3D; --k-oliwka-tlo:#1E2A06;
   --k-lupek:#A8B8FF; --k-lupek-tlo:#141A33;
   --s-akcent-tusz:#07060D;
+  --s-niepowodzenie:#00F0FF; --s-niepowodzenie-tlo:color-mix(in oklch,#00F0FF 16%,transparent);
   --s-zaokr:2px; --s-zaokr-duze:0px;
   color-scheme:dark}
 html[data-skin="cyber"] .s-tytul,html[data-skin="cyber"] .s-naglowek,html[data-skin="cyber"] .pg-narzedzie{font-family:"Chakra Petch",var(--s-kroj);text-transform:uppercase;letter-spacing:.03em}
