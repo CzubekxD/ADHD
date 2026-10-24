@@ -1,0 +1,80 @@
+# Strażnicy jakości: uruchamiają się przy każdym PR i każdej zmianie w main.
+#   1. testy jednostkowe (jsdom) — wszystkie pliki testów z CLAUDE.md
+#   2. strony w przeglądarce — 7 stron × 1100/390 px × ciemny/CYBER: konsola, poziome przewijanie,
+#      dostępność (axe, WCAG 2 AA) i kontrast tokenów; twarde progi, PR nie przejdzie z błędem
+#   3. zmiany wyglądu — zrzuty PR porównane ze zrzutami gałęzi bazowej; nie blokuje, tylko pokazuje
+# Wyniki: podsumowanie przebiegu (zakładka Summary) i artefakt „zrzuty” ze zrzutami oraz obrazami różnic.
+# Wszystko lokalnie: cd testy && npm ci && npx playwright install chromium && npm run wszystko
+name: Strażnicy
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: straznicy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  jednostkowe:
+    name: Testy jednostkowe
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: testy/package-lock.json
+      - run: npm ci --no-audit --no-fund
+        working-directory: testy
+      - run: npm run jednostkowe
+        working-directory: testy
+
+  strony:
+    name: Strony w przeglądarce
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: pr
+      - name: Gałąź bazowa do porównania wyglądu
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: baza
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: pr/testy/package-lock.json
+      - run: npm ci --no-audit --no-fund
+        working-directory: pr/testy
+      - run: npx playwright install --with-deps chromium
+        working-directory: pr/testy
+      - name: Strony (twarde progi)
+        id: strony
+        run: node strony.js .. --wyniki wyniki
+        working-directory: pr/testy
+      - name: Zrzuty gałęzi bazowej
+        if: always() && github.event_name == 'pull_request'
+        run: node strony.js ../../baza --wyniki wyniki-baza --tylko-zrzuty
+        working-directory: pr/testy
+      - name: Porównanie wyglądu z gałęzią bazową
+        if: always() && github.event_name == 'pull_request'
+        run: node porownaj.js wyniki-baza/zrzuty wyniki/zrzuty wyniki/roznice
+        working-directory: pr/testy
+      - name: Zrzuty i różnice jako artefakt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zrzuty
+          path: |
+            pr/testy/wyniki/
+          retention-days: 14

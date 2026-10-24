@@ -23,7 +23,7 @@ Każde narzędzie i każda nowa funkcja korzysta ze wspólnych modułów, zamias
 
 - **Rejestr narzędzi** `narzedzia.js`: nazwa, kolor, ikona, miniatura, `klucz` danych. Nowe narzędzie = jeden wpis;
   jego liczba dnia na pulpicie = jedna funkcja w `pulpit.js`.
-- **Wygląd** `system.css`: tylko tokeny `--s-*` i `--k-*` (kolory działają w jasnym, ciemnym i CYBER), komponenty `s-*`,
+- **Wygląd** `system.css`: tylko tokeny `--s-*` i `--k-*` (kolory działają w ciemnym i CYBER; jasnego motywu nie ma), komponenty `s-*`,
   cel kliknięcia co najmniej 44 px. `przejscie.css` podpina stare style narzędzi pod tokeny — nowy kod pisz od razu
   na tokenach.
 - **Cofnij** `skroty.js`: każda zmiana danych przechodzi przez `Skroty.zapisano()`, więc działa Ctrl+Z, Ctrl+Y, Delete
@@ -38,6 +38,9 @@ Linki do `.css` i `.js` piszemy bez numerów wersji; workflow publikacji dopisuj
 
 ## Zanim otworzysz PR
 
-Sprawdź zmienione strony w przeglądarce przy szerokości 1100 i 390 px, w motywie jasnym, ciemnym i CYBER:
-zero błędów w konsoli, brak poziomego przewijania, Ctrl+Z cofa nową zmianę. Do PR-a dołącz zrzuty ekranu.
-`pasek/test.js`, `wspolne/pulpit.test.js`, `wspolne/skrzynka.test.js`, `wspolne/pomidor.test.js` i `wspolne/przypomnienia.test.js` (jsdom) mają przechodzić.
+Sprawdzają to **strażnicy** (`testy/`, workflow `Strażnicy` przy każdym PR):
+testy jednostkowe jsdom, każda strona przy 1100 i 390 px w motywie ciemnym i CYBER (zero błędów w konsoli,
+brak poziomego przewijania, zero poważnych naruszeń dostępności axe WCAG AA, kontrast tokenów ≥ 4,5:1)
+i porównanie zrzutów z gałęzią bazową. PR z czerwonym strażnikiem nie jest gotowy.
+Lokalnie: `cd testy && npm ci && npx playwright install chromium && npm run wszystko`.
+Ręcznie zostaje: Ctrl+Z cofa nową zmianę. Zrzuty i obrazy różnic są w artefakcie „zrzuty” przebiegu.

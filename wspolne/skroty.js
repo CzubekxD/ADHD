@@ -76,7 +76,10 @@
     try { teraz = cfg.snapshot(); } catch (e) { return; }
     if (teraz === ostatni) return;
     const czas = Date.now();
-    const zPola = piszeTekst(document.activeElement);
+    // scalamy tylko pisanie: zapis z kliknięcia albo wysłania formularza to osobny krok, nawet gdy fokus
+    // został w polu (Safari nie przenosi fokusu na kliknięty przycisk, więc kosz kleił się z wpisaną myślą)
+    const zdarzenie = window.event && window.event.type;
+    const zPola = piszeTekst(document.activeElement) && !/^(click|submit|keydown|change)$/.test(zdarzenie || '');
     // kolejne znaki wpisywane w pole łączymy w jeden krok cofania
     const scal = zPola && ostatniZPola && czas - ostatniCzas < SCAL_MS && wstecz.length;
     if (!scal && ostatni != null) {

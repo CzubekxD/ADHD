@@ -195,16 +195,18 @@ html[data-skin="cyber"] .sk-kartka{border-radius:0;box-shadow:0 0 0 1px rgb(252 
 @media (max-width:900px){.pp-info{grid-template-columns:minmax(0,1fr)}}
 .note{background:var(--s-pow);border:1.5px solid var(--s-ramka);border-radius:var(--s-zaokr-duze);padding:12px 16px;min-width:0;display:flex;flex-direction:column;cursor:pointer}
 .note .brow{padding-top:10px}
-.note h2{font-size:15px;margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:24px}
+.note h2{font-size:15px;margin:0}
+/* cały tytuł to przycisk rozwijania (klawiatura, czytnik ekranu); klik w dowolne miejsce bloku działa tak samo */
+.note-przelacz{all:unset;box-sizing:border-box;width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:24px;cursor:pointer;font:inherit;color:inherit}
+.note-przelacz:focus-visible{outline:2px solid var(--s-akcent);outline-offset:4px;border-radius:4px}
 /* zwinięty: widać tylko tytuł ze strzałką; .otwarte rozwija (wspolne skrypt na dole strony) */
-.note h2::after{content:"";width:8px;height:8px;flex:none;border-right:2px solid var(--s-akcent);border-bottom:2px solid var(--s-akcent);transform:translateY(-2px) rotate(45deg);transition:transform .3s}
-.note.otwarte h2::after{transform:translateY(2px) rotate(225deg)}
+.note-przelacz::after{content:"";width:8px;height:8px;flex:none;border-right:2px solid var(--s-akcent);border-bottom:2px solid var(--s-akcent);transform:translateY(-2px) rotate(45deg);transition:transform .3s}
+.note.otwarte .note-przelacz::after{transform:translateY(2px) rotate(225deg)}
 .note-zwin{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
 .note.otwarte .note-zwin{grid-template-rows:1fr}
 .note-zwin>div{overflow:hidden;min-height:0}
 .note-zwin>div>:first-child{margin-top:10px}
-.note:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){.note-zwin,.note h2::after{transition:none}}
+@media (prefers-reduced-motion:reduce){.note-zwin,.note-przelacz::after{transition:none}}
 .note p{margin:0 0 8px;color:var(--s-tusz-2);font-size:14px}
 .note p:last-child{margin-bottom:0}
 .note a{color:var(--s-akcent)}
@@ -260,16 +262,16 @@ html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
   </div>
 
   <div class="pp-info">
-    <section class="note" tabindex="0" role="button" aria-expanded="false">
-      <h2>Gdzie leżą dane</h2>
-      <div class="note-zwin"><div>
+    <section class="note">
+      <h2><button class="note-przelacz" type="button" aria-expanded="false" aria-controls="note-1">Gdzie leżą dane</button></h2>
+      <div class="note-zwin" id="note-1"><div>
       <p>Wszystko, co wpiszesz, zostaje w tej przeglądarce. Nic nie leci na żaden serwer, bo serwera nie ma.</p>
       <p>Te same dane na telefonie i komputerze: menu ⋯ → <b>Zapisuj na Google Drive</b>. Więcej w <a href="./prywatnosc.html">prywatności</a>.</p>
       </div></div>
     </section>
-    <section class="note" tabindex="0" role="button" aria-expanded="false">
-      <h2>Wspólne skróty</h2>
-      <div class="note-zwin"><div>
+    <section class="note">
+      <h2><button class="note-przelacz" type="button" aria-expanded="false" aria-controls="note-2">Wspólne skróty</button></h2>
+      <div class="note-zwin" id="note-2"><div>
       <ul class="keys">
         <li><span><kbd>Ctrl</kbd> + <kbd>Z</kbd></span> cofa ostatnią zmianę</li>
         <li><span><kbd>Ctrl</kbd> + <kbd>Y</kbd></span> ponawia</li>
@@ -278,9 +280,9 @@ html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
       <p><b>CYBER</b> w pasku u góry: neonowy motyw wszędzie naraz.</p>
       </div></div>
     </section>
-    <section class="note" id="kopia" tabindex="0" role="button" aria-expanded="false">
-      <h2>Kopia wszystkiego</h2>
-      <div class="note-zwin"><div>
+    <section class="note" id="kopia">
+      <h2><button class="note-przelacz" type="button" aria-expanded="false" aria-controls="note-3">Kopia wszystkiego</button></h2>
+      <div class="note-zwin" id="note-3"><div>
       <p>Jeden plik z danymi wszystkich narzędzi z tej przeglądarki, na backup albo przeprowadzkę.</p>
       <p class="kopia-stan" id="kopia-stan"></p>
       <div class="brow"><button class="s-przycisk maly" id="kopia-pobierz" type="button">Pobierz kopię</button><button class="s-przycisk maly" id="kopia-wczytaj" type="button">Wczytaj kopię</button></div>
@@ -346,7 +348,7 @@ function stanKopii(zDanymi) {
   el.hidden = !tekst;
   el.classList.toggle("dawno", !sync && !!zDanymi && (dni == null || dni >= 7));
   // przypomnienie o kopii ma być widać bez rozwijania bloku
-  if (el.classList.contains("dawno")) { const b = $k("kopia"); b.classList.add("otwarte"); b.setAttribute("aria-expanded", "true"); }
+  if (el.classList.contains("dawno")) { const b = $k("kopia"); b.classList.add("otwarte"); b.querySelector(".note-przelacz").setAttribute("aria-expanded", "true"); }
 }
 function odswiezPulpit() {
   const teraz = new Date();
@@ -385,15 +387,16 @@ odswiezPulpit();
    klik albo Enter/spacja przełącza i przypina stan, aż klikniesz znowu */
 document.querySelectorAll(".note").forEach(b => {
   let timer = 0, przypiety = b.classList.contains("otwarte");   // rozwinięty z góry (przypomnienie o kopii) zostaje
-  const ustaw = o => { b.classList.toggle("otwarte", o); b.setAttribute("aria-expanded", String(o)); };
+  const przycisk = b.querySelector(".note-przelacz");
+  const ustaw = o => { b.classList.toggle("otwarte", o); przycisk.setAttribute("aria-expanded", String(o)); };
   b.addEventListener("mouseenter", () => { if (przypiety) return; clearTimeout(timer); timer = setTimeout(() => ustaw(true), 700); });
   b.addEventListener("mouseleave", () => { clearTimeout(timer); if (!przypiety) ustaw(false); });
   const przelacz = e => {
-    if (e.target.closest("button, a, input, select")) return;   // przyciski w środku działają normalnie
+    const cel = e.target.closest("button, a, input, select");
+    if (cel && cel !== przycisk) return;   // przyciski i linki w treści działają normalnie
     clearTimeout(timer); const o = !b.classList.contains("otwarte"); ustaw(o); przypiety = o;
   };
   b.addEventListener("click", przelacz);
-  b.addEventListener("keydown", e => { if (e.target === b && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); przelacz(e); } });
 });
 // wracasz z narzędzia albo na kartę, dane przyszły z Google Drive albo z innej karty — liczby i pora się odświeżają
 addEventListener("pageshow", e => { if (e.persisted) { odswiezPulpit(); Skrzynka.rysuj(); } });

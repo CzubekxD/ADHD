@@ -80,7 +80,7 @@ button.act {
   padding:9px 14px; border:1px solid var(--ring); background:var(--card); color:var(--ink);
 }
 button.act:hover { border-color:var(--axis); }
-button.act.primary { background:var(--bar); border-color:var(--bar); color:#fff; }
+button.act.primary { background:var(--bar); border-color:var(--bar); color:var(--s-akcent-tusz,#121715); }   /* tusz na akcencie: biały na bursztynie miał 1,9:1 */
 button.act.primary:hover { filter:brightness(1.06); }
 button.act.ghost { color:var(--ink-2); }
 button.act.danger:hover { color:var(--t4); border-color:var(--t4); }
@@ -535,13 +535,13 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
   <input type="file" id="fileIn" accept="application/json" hidden>
 </header>
 
-<nav id="tabs">
-  <button data-tab="dzis" aria-selected="true">Dziś</button>
-  <button data-tab="plan" aria-selected="false">Plan <span id="tomCount" class="sub"></span></button>
-  <button data-tab="historia" aria-selected="false">Historia</button>
-  <button data-tab="kategorie" aria-selected="false">Kategorie</button>
-  <button data-tab="import" aria-selected="false">Import</button>
-  <button data-tab="info" aria-selected="false">Pomoc</button>
+<nav id="tabs" role="tablist" aria-label="Widoki tablicy">
+  <button role="tab" data-tab="dzis" aria-selected="true">Dziś</button>
+  <button role="tab" data-tab="plan" aria-selected="false">Plan <span id="tomCount" class="sub"></span></button>
+  <button role="tab" data-tab="historia" aria-selected="false">Historia</button>
+  <button role="tab" data-tab="kategorie" aria-selected="false">Kategorie</button>
+  <button role="tab" data-tab="import" aria-selected="false">Import</button>
+  <button role="tab" data-tab="info" aria-selected="false">Pomoc</button>
 </nav>
 
 <!-- ============ DZIŚ ============ -->
@@ -622,7 +622,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
       Wrzucaj zadania na konkretne dni. Przy starcie nowego dnia tablica zabiera wszystko, co zaplanowane na dziś i na dni,
       które już minęły — nic nie przepada. Strzałki przy zadaniu przesuwają je o dzień.
     </div>
-    <div class="wtabs" id="weekTabs"></div>
+    <div class="wtabs" id="weekTabs" role="tablist" aria-label="Dni tygodnia"></div>
     <div class="wpanel" id="weekPanel"></div>
     <div class="week" id="weekGrid" hidden></div>
   </div>
@@ -1697,6 +1697,7 @@ function renderPlan() {
       const b = document.createElement("button");
       b.type = "button";
       b.className = dayClasses(d, "wtab").join(" ");
+      b.setAttribute("role", "tab");
       b.setAttribute("aria-selected", d === S.planDay);
       const n = dayCount(d), pts = dayPts(d);
       b.innerHTML = `<span class="d">${DOW3[dowOf(d)]}</span> <span class="dt">${plDate(d).slice(0,5)}</span>
