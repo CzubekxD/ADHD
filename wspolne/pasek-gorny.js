@@ -97,6 +97,15 @@
       </div>
     </div>`;
 
+    // wspólny wygląd każdej strony: tło z kręgami (z falą przy wejściu) i pas z fakturą narzędzia pod paskiem.
+    // Style w wspolne/wzory.css — dociągamy je, jeśli strona ich nie ładuje.
+    if (!document.querySelector('link[href*="wzory.css"]')) {
+      const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = korzen + 'wspolne/wzory.css';
+      document.head.appendChild(l);
+    }
+    if (!document.querySelector('.s-tlo-kregi')) document.body.insertAdjacentHTML('afterbegin', '<div class="s-tlo-kregi" aria-hidden="true"></div>');
+    if (ja && ja.wzor) el.insertAdjacentHTML('beforeend', `<div class="pg-faktura" aria-hidden="true"><div class="s-wzor s-wzor-${Number(ja.wzor)}"></div></div>`);
+
     // menu: otwieranie, zamykanie (Esc, klik obok), strzałki góra/dół
     const przyciski = el.querySelectorAll('[data-pg]');
     const zamknij = (wyj) => przyciski.forEach(b => { if (b === wyj) return; b.setAttribute('aria-expanded', 'false'); b.nextElementSibling.hidden = true; });
