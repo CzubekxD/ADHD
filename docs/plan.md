@@ -22,6 +22,11 @@ Powiadomienia: przypomnienia w kalendarzu użytkownika plus powiadomienie z otwa
 w zagrożeniu życia 112.” Numery sprawdzone na gov.pl („Gdzie uzyskać pomoc psychologiczną i psychiatryczną”):
 116 123 i 800 70 2222 działają całą dobę, bezpłatnie.
 
+**Pulpit zapisuje jedną rzecz: wynik dnia WOOP.** Kropki 7 dni na karcie WOOP to przyciski: klik przełącza
+zadziałało → nie zadziałało → nie było okazji → brak, z Ctrl+Z. W samym WOOP kropka wybiera dzień, a duże przyciski
+zapisują wynik dla niego. Dzięki temu da się uzupełnić dzień, którego nie zaznaczyłeś, i seria liczy prawdziwe dni.
+Przyszłych dni nie da się zaznaczyć. Poza tym pulpit tylko czyta dane i prowadzi do narzędzi.
+
 **Pulpit według pory dnia** (stałe godziny; własne godziny w ustawieniach to późniejszy krok):
 
 | Pora | Godziny | Karty u góry |

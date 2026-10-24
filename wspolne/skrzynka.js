@@ -188,7 +188,8 @@
       d.querySelectorAll('[data-skrzynka-zamknij]').forEach(z => z.addEventListener('click', () => d.close()));
     });
 
-    if (window.Skroty) {
+    // opcje.skroty === false: strona sama ustawia Ctrl+Z (pulpit cofa też wynik dnia WOOP)
+    if (window.Skroty && !(opcje && opcje.skroty === false)) {
       Skroty.init({
         snapshot: () => JSON.stringify(czytaj()),
         restore: t => { try { localStorage.setItem(KLUCZ, t); } catch (e) {} rysuj(); },

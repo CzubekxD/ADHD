@@ -67,5 +67,17 @@ r = rysuj(9);
 sprawdz('9:00 z danymi — widżet WOOP jest mały, pod „Później dziś”', r.pozniej === 'plany,woop' &&
   cel.querySelector('.pp-grupa section.pp-w.maly[data-narzedzie="woop"]') !== null, opis(r));
 
+/* --- 6. wynik dnia WOOP z kropek: jedyny zapis pulpitu --- */
+const wczoraj = (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); })();
+const jutro = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); })();
+const stanWczoraj = () => (JSON.parse(window.localStorage.getItem('woop-v1')).items[0].checks || {})[wczoraj] || '';
+const kolejne = [1, 2, 3, 4].map(() => (Pulpit.ustawDzienWoop('a', wczoraj), stanWczoraj()));
+sprawdz('kropka przełącza: zadziałało → nie zadziałało → nie było okazji → brak', kolejne.join(',') === 'ok,miss,skip,', kolejne.join(','));
+sprawdz('przyszłego dnia nie da się zaznaczyć', Pulpit.ustawDzienWoop('a', jutro) === null && !(JSON.parse(window.localStorage.getItem('woop-v1')).items[0].checks || {})[jutro]);
+sprawdz('nieznany WOOP: nic się nie zapisuje', Pulpit.ustawDzienWoop('nie-ma', wczoraj) === null);
+rysuj(21);
+const kropka = cel.querySelector(`[data-woop-dzien="${wczoraj}"]`);
+sprawdz('kropki na karcie WOOP to przyciski z opisem dnia', kropka && kropka.tagName === 'BUTTON' && /Kliknij, żeby zmienić/.test(kropka.getAttribute('aria-label')) && cel.querySelectorAll('[data-woop-dzien]').length === 7);
+
 console.log('\nBłędy w konsoli: ' + (bledy.length ? '\n  ' + bledy.join('\n  ') : 'brak'));
 if (bledy.length) process.exitCode = 1;
