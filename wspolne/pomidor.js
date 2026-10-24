@@ -19,7 +19,7 @@
    koniec obsługuje pierwsza, która go zauważy (pozostałe widzą już nowy stan).
 
    Zadania z Tablicy: przed startem można wybrać zadanie z dzisiejszej tablicy (albo „bez zadania”);
-   „▶ 25 min” przy zadaniu w Tablicy rusza pomidora z tym zadaniem (startZadania). Ukończony blok
+   Zadanie z Tablicy wybiera się w samym pomidorze (lista przed startem; startZadania zostaje w API). Ukończony blok
    pracy dopisuje się do zadania jako pole `pomidory` (liczba) pod kluczem Tablicy, a strona dostaje
    zdarzenie 'adhd:zapis' — Tablica otwarta w tej samej karcie od razu je pokazuje.
 
@@ -120,7 +120,7 @@
     s.zadanie = zad && zad.id ? { id: zad.id, nazwa: String(zad.nazwa || '') } : null;
     zapisz(s); return s;
   }
-  // „▶ 25 min” w Tablicy (z kliknięcia): nowy blok pracy z tym zadaniem; bieżący blok, jeśli był, kończy się bez zapisu
+  // nowy blok pracy z podanym zadaniem (API); bieżący blok, jeśli był, kończy się bez zapisu
   function startZadania(zad, teraz) {
     odblokujDzwiek(); popros(); schowajKoniec();
     const s = czytaj();
