@@ -254,7 +254,7 @@
     const wolny = !biegnie(s) && !zatrzymany(s);
     const akcja = biegnie(s) ? 'pauza' : zatrzymany(s) ? 'wznów' : 'start';
     return `<div class="pm" data-faza="${s.faza}">
-      <h2 class="pm-naglowek">Pomidor</h2>
+      <h2 class="pm-naglowek">${ikona(ulamek(s, teraz, spokojnie()))}Pomidor</h2>
       <div class="pm-cialo">
         <button class="pm-tarcza" type="button" data-pm="tarcza" aria-label="${esc(opisCzasu(s, teraz))}. Kliknij: ${akcja}">
           ${ikona(ulamek(s, teraz, spokojnie()))}

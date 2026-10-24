@@ -20,7 +20,8 @@
   --s-tlo:#0F1312; --s-pow:#1E2523; --s-pow-2:#262F2C; --s-pow-3:#303A36;
   --s-tusz:#E4EAE7; --s-tusz-2:#C3CDC8; --s-przygaszony:#9AA6A0;
   --s-linia:#3B4843; --s-linia-mocna:#66736D;
-  --s-ok:#6CC59A; --s-ok-tlo:#183026; --s-uwaga:#E2B061; --s-uwaga-tlo:#33281A; --s-blad:#F08A80; --s-blad-tlo:#3A1F1C;
+  --s-ok:#E3B467; --s-ok-tlo:#33291A;   /* „zadziałało” w bursztynie: sukces to akcent */
+   --s-uwaga:#E2B061; --s-uwaga-tlo:#33281A; --s-blad:#F08A80; --s-blad-tlo:#3A1F1C;
   --s-kartka-blada:#2C2A1E; --s-kartka:#5E5016; --s-kartka-tusz:#F4EDCF;
   --s-cien:0 1px 2px rgb(0 0 0 / .35),0 4px 14px rgb(0 0 0 / .25);
   --s-cien-menu:0 2px 6px rgb(0 0 0 / .4),0 14px 34px rgb(0 0 0 / .45);
@@ -164,7 +165,7 @@ html[data-skin="cyber"] .s-stopka .s-stopka-uwaga a{border-radius:0;font-family:
    --pg-wylew = boczny margines strony narzędzia, żeby pasek sięgał krawędzi okna */
 header.pg{display:block;flex-wrap:nowrap;gap:0;padding:0;margin:0 calc(-1 * var(--pg-wylew,0px));max-width:none;text-align:left}
 .pg{position:sticky;top:env(safe-area-inset-top,0px);z-index:100;background:var(--s-tlo);border-bottom:1px solid var(--s-linia);font-family:var(--s-kroj)}
-.pg-in{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:var(--s-2);min-height:56px;
+.pg-in{max-width:1440px;margin:0 auto;display:flex;align-items:center;gap:var(--s-2);min-height:56px;
   padding-left:max(var(--s-4),env(safe-area-inset-left,0px));padding-right:max(var(--s-4),env(safe-area-inset-right,0px))}
 .pg-odstep{flex:1}
 .pg-menu{position:relative}
@@ -238,7 +239,7 @@ html[data-skin="cyber"]:root{
   --s-tlo:#07060D; --s-pow:#0E0C1A; --s-pow-2:#181433; --s-pow-3:#241E4A;
   --s-tusz:#E9F7FF; --s-tusz-2:#C6D6EA; --s-przygaszony:#9490BD;
   --s-linia:#2C2656; --s-linia-mocna:#3A3270;
-  --s-ok:#05FFA1; --s-ok-tlo:#03281D; --s-uwaga:#FCEE0A; --s-uwaga-tlo:#262404; --s-blad:#FF2A6D; --s-blad-tlo:#2E0A18;
+  --s-ok:#FCEE0A; --s-ok-tlo:#262404; --s-uwaga:#FCEE0A; --s-uwaga-tlo:#262404; --s-blad:#FF2A6D; --s-blad-tlo:#2E0A18;
   --s-kartka-blada:#16150A; --s-kartka:#3D3A04; --s-kartka-tusz:#FCF6A8;
   --s-cien:0 0 0 1px rgb(0 240 255 / .12),0 0 22px rgb(0 240 255 / .07);
   --s-cien-menu:0 0 0 1px rgb(0 240 255 / .25),0 0 30px rgb(0 240 255 / .15);
