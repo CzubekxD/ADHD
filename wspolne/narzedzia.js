@@ -10,7 +10,8 @@
      mini    — miniatura ekranu na kafelku: wnętrze <svg viewBox="0 0 220 92">;
                klasy: k (kolor narzędzia), ks (jego obrys), p/ps (karta i jej obrys),
                t/ts (tusz), l (szara kreska), na (tekst na kolorze)
-     kolor   — następny wolny kolor z palety (lista poniżej)
+     kolor   — kolor przewodni; wszystkie narzędzia mają 'bursztyn' (jeden akcent na całą stronę)
+     wzor    — numer faktury na karcie pulpitu (wspolne/wzory.css); narzędzia różnią się fakturą, nie kolorem
      href    — folder narzędzia względem strony startowej
      opis    — jedno zdanie do menu i kafelka
      nazwaHtml — opcjonalnie: własny, animowany znak nazwy w pasku na stronie narzędzia
@@ -22,14 +23,14 @@
    morski, terakota, oliwka, lupek.
    --------------------------------------------------------------- */
 window.NARZEDZIA = [
-  { id: 'pasek', nazwa: 'Pasek zdrowia × SZOP', znak: 'PZ', kolor: 'szalwia', klucz: 'mcz.dane.v1', href: 'pasek/',
+  { id: 'pasek', nazwa: 'Pasek zdrowia × SZOP', znak: 'PZ', kolor: 'bursztyn', wzor: 14, klucz: 'mcz.dane.v1', href: 'pasek/',
     opis: 'Energia, czynniki SZOP, czerwone flagi i to, co realnie pomaga.',
     start: 'Dodaj pierwszy wpis', pytanie: 'Jak dziś bateria?',
     ikona: '<rect x="2.5" y="7" width="17" height="10" rx="2.5"/><path d="M22 10.5v3M6.5 10.5v3M10 10.5v3M13.5 10.5v3"/>',
     mini: [14, 26, 20, 40, 52, 34, 22, 46, 30, 18, 12].map((h, i) =>
         `<rect class="k" opacity="${(.4 + .08 * (i % 4)).toFixed(2)}" x="${22 + i * 16}" y="${78 - h}" width="10" height="${h}" rx="2"/>`).join('') +
       '<polyline class="ts" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="27,22 43,26 59,24 75,40 91,52 107,46 123,36 139,48 155,40 171,30 187,24"/><circle class="t" cx="187" cy="24" r="3.5"/>' },
-  { id: 'tablica', nazwa: 'Tablica scoringowa', znak: 'TS', kolor: 'bursztyn', klucz: 'tablica-scoringowa-v1', href: 'tablica/',
+  { id: 'tablica', nazwa: 'Tablica scoringowa', znak: 'TS', kolor: 'bursztyn', wzor: 17, klucz: 'tablica-scoringowa-v1', href: 'tablica/',
     opis: 'Dzienna tablica zadań z punktacją, plan tygodnia i historia.',
     start: 'Ułóż dzisiejszą tablicę', pytanie: 'Co dziś domkniesz?',
     ikona: '<path d="M4.5 20v-3M9.5 20v-6.5M14.5 20v-10M19.5 20V4"/>',
@@ -39,7 +40,7 @@ window.NARZEDZIA = [
       `<rect class="l" x="48" y="${18 + i * 26}" width="${w - 48}" height="4" rx="2"/>` +
       `<rect class="k" x="166" y="${14 + i * 26}" width="24" height="12" rx="6"/>` +
       `<text class="na" x="178" y="${23.5 + i * 26}" text-anchor="middle" font-size="9">${pkt}</text>`).join('') },
-  { id: 'plany', nazwa: 'Plany Jeżeli… to…', znak: 'JT', kolor: 'granat', klucz: 'plany-jezeli-v1', href: 'plany/',
+  { id: 'plany', nazwa: 'Plany Jeżeli… to…', znak: 'JT', kolor: 'bursztyn', wzor: 13, klucz: 'plany-jezeli-v1', href: 'plany/',
     opis: 'Gotowe ścieżki na trudne momenty, krok po kroku.',
     start: 'Zbuduj pierwszy plan', pytanie: 'Co zrobisz, gdy zrobi się trudno?',
     ikona: '<circle cx="12" cy="5" r="2.2"/><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="19" r="2.2"/><path d="M12 7.2v2.6c0 2.4-6 2.6-6 6.9M12 9.8c0 2.4 6 2.6 6 6.9"/>',
@@ -48,7 +49,7 @@ window.NARZEDZIA = [
       '<rect class="p ps" x="122" y="10" width="56" height="24" rx="6" stroke-width="1"/><text class="t" x="150" y="26" text-anchor="middle" font-size="10">tak</text>' +
       '<rect class="p ps" x="122" y="58" width="56" height="24" rx="6" stroke-width="1"/><text class="t" x="150" y="74" text-anchor="middle" font-size="10">nie</text>' +
       '<circle class="k" cx="202" cy="46" r="5"/>' },
-  { id: 'woop', nazwa: 'WOOP', znak: 'W', kolor: 'sliwka', klucz: 'woop-v1', href: 'woop/',
+  { id: 'woop', nazwa: 'WOOP', znak: 'W', kolor: 'bursztyn', wzor: 4, klucz: 'woop-v1', href: 'woop/',
     // animowany znak W-O-O-P w pasku (style i animacje są w woop/index.html, klasa .brand)
     nazwaHtml: '<b class="c1">W</b><b class="c2">O</b><b class="c3">O</b><b class="c4">P</b>',
     opis: 'Życzenie, efekt, przeszkoda, plan — i codzienny wpis, czy działa.',

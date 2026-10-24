@@ -33,8 +33,8 @@
   if (window.Pomidor) return;      // pasek górny dociąga ten plik sam, gdy strona go nie ładuje
   const KLUCZ = 'pomidor-v1';
   const MIN = 60000;
-  const DLUGOSCI = [15, 25, 45, 60];          // jedno kliknięcie ustawia blok pracy
-  const PRZERWA = { 15: 5, 25: 5, 45: 10, 60: 10 };
+  // długości ustawia człowiek przyciskami −/+ (bez listy gotowych czasów): krok i granice w minutach
+  const ZAKRES = { praca: { krok: 5, min: 5, max: 90 }, przerwa: { krok: 1, min: 1, max: 30 } };
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const ile = (n, a, b, c) => window.ile ? window.ile(n, a, b, c) : n + ' ' + (n === 1 ? a : c);   // wspolne/odmiana.js
   const spokojnie = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
@@ -131,13 +131,16 @@
     rysuj(teraz);
     return nowy;
   }
-  function ustawPrace(min) {
-    const s = czytaj();
-    if (biegnie(s) || zatrzymany(s) || !(min > 0)) return s;
-    s.ustawienia.praca = min; s.ustawienia.przerwa = PRZERWA[min] || 5;
+  // długość pracy albo przerwy; w trakcie bloku (i w pauzie) zablokowana, poza granicami przycinana
+  function ustawDlugosc(faza, min) {
+    const s = czytaj(), z = ZAKRES[faza];
+    if (!z || biegnie(s) || zatrzymany(s) || !(min > 0)) return s;
+    s.ustawienia[faza] = Math.min(z.max, Math.max(z.min, Math.round(min)));
     s.dlugosc = dlugoscFazy(s);
     zapisz(s); return s;
   }
+  const ustawPrace = min => ustawDlugosc('praca', min);
+  const ustawPrzerwe = min => ustawDlugosc('przerwa', min);
   /* Koniec bloku: zwraca opis zakończonego bloku albo null. Stan czytamy świeżo z localStorage,
      więc druga karta, która spóźni się o chwilę, widzi już następną fazę i nic nie robi. */
   function sprawdzKoniec(teraz) {
@@ -214,21 +217,23 @@
   const schowajKoniec = () => { const el = document.querySelector('.pm-koniec'); if (el) el.classList.remove('widoczny'); };
 
   /* ---------- rysowanie ---------- */
-  // miąższ: wycinek koła od godziny 12 zgodnie ze wskazówkami zegara
-  function wycinek(f) {
-    const r = 33, cx = 50, cy = 55;
-    if (f >= 0.9995) return `<circle class="pm-miazsz" cx="${cx}" cy="${cy}" r="${r}"/>`;
-    if (f <= 0) return '';
-    const a = f * 2 * Math.PI, x = cx + r * Math.sin(a), y = cy - r * Math.cos(a);
-    return `<path class="pm-miazsz" d="M${cx} ${cy}L${cx} ${cy - r}A${r} ${r} 0 ${f > 0.5 ? 1 : 0} 1 ${x.toFixed(2)} ${y.toFixed(2)}Z"/>`;
-  }
-  const LISC = '<path class="pm-lisc" d="M50 22c-3-6-9-8-15-6 5 1 8 3 10 7-6-1-11 1-14 5 6-1 11 0 15 2-2 3-2 7 0 10 2-3 2-7 4-10 4-2 9-3 15-2-3-4-8-6-14-5 2-4 5-6 10-7-6-2-12 0-15 6z"/>';
-  // --pm-f: ile bloku zostało; w miarę upływu czasu pomidor przechodzi z czerwieni w zieleń (system.css)
-  const ikona = (f) => `<svg class="pm-ikona" viewBox="0 0 100 100" aria-hidden="true" style="--pm-f:${f.toFixed(3)}"><circle class="pm-skorka" cx="50" cy="55" r="38"/>${wycinek(f)}${LISC}</svg>`;
+  // naczynie z cieczą: --pm-f = ile bloku zostało (1 pełne → 0 puste); ciecz opada jak spuszczana woda
+  // i odsłania tło. Praca w bursztynie, przerwa w błękicie (system.css, sekcja pomidora).
+  const ikona = (f) => `<span class="pm-ikona" aria-hidden="true" style="--pm-f:${f.toFixed(3)}"><span class="pm-ciecz"></span></span>`;
 
   function opisCzasu(s, teraz) {
     const min = Math.ceil(pozostalo(s, teraz) / MIN);
     return (s.faza === 'praca' ? 'Praca' : 'Przerwa') + ': zostało ' + ile(min, 'minuta', 'minuty', 'minut');
+  }
+  // −/+ dla pracy i przerwy (zablokowane w trakcie bloku, jak w klasycznym timerze)
+  function dlugosci(s) {
+    const zablok = biegnie(s) || zatrzymany(s) ? ' disabled' : '';
+    const wiersz = (faza, nazwa) => { const z = ZAKRES[faza], m = s.ustawienia[faza];
+      return `<div class="pm-dl"><span>${nazwa}</span>
+        <button class="pm-krok" type="button" data-pm="${faza}" data-krok="-1" aria-label="${nazwa} krócej"${zablok || (m <= z.min ? ' disabled' : '')}>−</button>
+        <output class="pm-min" aria-label="${nazwa}: ${ile(m, 'minuta', 'minuty', 'minut')}">${m}</output>
+        <button class="pm-krok" type="button" data-pm="${faza}" data-krok="1" aria-label="${nazwa} dłużej"${zablok || (m >= z.max ? ' disabled' : '')}>+</button></div>`; };
+    return `<div class="pm-dlugosci" role="group" aria-label="Długość pracy i przerwy w minutach">${wiersz('praca', 'Praca')}${wiersz('przerwa', 'Przerwa')}</div>`;
   }
   function przyciski(s) {
     if (biegnie(s)) return `<button class="s-przycisk" type="button" data-pm="pauza">Pauza</button><button class="s-przycisk cichy" type="button" data-pm="stop">Stop</button>`;
@@ -247,17 +252,19 @@
   }
   function pelny(s, teraz) {
     const wolny = !biegnie(s) && !zatrzymany(s);
+    const akcja = biegnie(s) ? 'pauza' : zatrzymany(s) ? 'wznów' : 'start';
     return `<div class="pm" data-faza="${s.faza}">
       <h2 class="pm-naglowek">Pomidor</h2>
-      <div class="pm-tarcza" role="img" aria-label="${esc(opisCzasu(s, teraz))}">${ikona(ulamek(s, teraz, spokojnie()))}</div>
-      <p class="pm-czas" role="timer" aria-hidden="true">${mmss(pozostalo(s, teraz))}</p>
-      <p class="pm-faza">${s.faza === 'praca' ? 'Praca' : 'Przerwa'}${zatrzymany(s) ? ' · pauza' : ''}</p>
+      <div class="pm-cialo">
+        <button class="pm-tarcza" type="button" data-pm="tarcza" aria-label="${esc(opisCzasu(s, teraz))}. Kliknij: ${akcja}">
+          ${ikona(ulamek(s, teraz, spokojnie()))}
+          <span class="pm-odczyt"><span class="pm-czas" role="timer" aria-hidden="true">${mmss(pozostalo(s, teraz))}</span>
+          <span class="pm-faza">${s.faza === 'praca' ? 'Praca' : 'Przerwa'}${zatrzymany(s) ? ' · pauza' : ''}</span></span>
+        </button>
+        <div class="pm-stery"><div class="pm-przyciski">${przyciski(s)}</div>${dlugosci(s)}</div>
+      </div>
       ${!wolny && s.faza === 'praca' && s.zadanie ? `<p class="pm-zad-nazwa">${esc(s.zadanie.nazwa)}</p>` : ''}
       ${wolny && s.faza === 'praca' ? wyborZadania(s) : ''}
-      <div class="pm-przyciski">${przyciski(s)}</div>
-      ${wolny && s.faza === 'praca' ? `<div class="pm-dlugosci" role="group" aria-label="Długość bloku pracy">${DLUGOSCI.map(m =>
-        `<button class="s-chip" type="button" data-pm="dlugosc" data-min="${m}" aria-pressed="${s.ustawienia.praca === m}">${m} min</button>`).join('')}</div>
-        <p class="pm-pomoc">Po pracy ${s.ustawienia.przerwa} min przerwy.</p>` : ''}
     </div>`;
   }
   function mini(s, teraz, korzen) {
@@ -286,13 +293,8 @@
     if (!biegnie(s)) return;
     const f = ulamek(s, null, spokojnie()), czas = mmss(pozostalo(s)), opis = opisCzasu(s);
     document.querySelectorAll('.pm-czas, .pm-mini-czas, [data-pomidor-otworz] [data-pomidor-czas]').forEach(el => { if (el.textContent !== czas) el.textContent = czas; });
-    document.querySelectorAll('.pm-ikona').forEach(svg => {
-      svg.style.setProperty('--pm-f', f.toFixed(3));
-      const m = svg.querySelector('.pm-miazsz'), nowy = wycinek(f);
-      if (m) m.remove();
-      if (nowy) svg.querySelector('.pm-skorka').insertAdjacentHTML('afterend', nowy);
-    });
-    document.querySelectorAll('.pm-tarcza').forEach(el => el.setAttribute('aria-label', opis));
+    document.querySelectorAll('.pm-ikona').forEach(el => el.style.setProperty('--pm-f', f.toFixed(3)));
+    document.querySelectorAll('.pm-tarcza').forEach(el => el.setAttribute('aria-label', opis + '. Kliknij: pauza'));
     document.querySelectorAll('.pg-pomidor').forEach(el => { el.title = opis; el.setAttribute('aria-label', 'Pomidor. ' + opis); });
   }
 
@@ -305,7 +307,9 @@
     document.addEventListener('click', e => {
       const b = e.target.closest && e.target.closest('[data-pm]');
       if (!b) return;
-      const co = b.dataset.pm;
+      let co = b.dataset.pm;
+      // klik w tarczę: start, pauza albo wznowienie — zależnie od stanu
+      if (co === 'tarcza') { const s = czytaj(); co = biegnie(s) ? 'pauza' : zatrzymany(s) ? 'wznow' : 'start'; }
       if (co === 'start') {
         odblokujDzwiek(); popros(); schowajKoniec();
         // zadanie zrobione albo usunięte w międzyczasie → blok bez zadania
@@ -316,14 +320,16 @@
       else if (co === 'pauza') pauza();
       else if (co === 'wznow') { odblokujDzwiek(); wznow(); }
       else if (co === 'stop') { schowajKoniec(); stop(); }
-      else if (co === 'dlugosc') ustawPrace(+b.dataset.min);
+      else if (co === 'praca' || co === 'przerwa') { const s = czytaj(); ustawDlugosc(co, s.ustawienia[co] + ZAKRES[co].krok * +b.dataset.krok); }
       else if (co === 'zamknij-koniec') { schowajKoniec(); return; }
       rysuj();
       // fokus wraca na odpowiednik klikniętego przycisku po przerysowaniu
       const cel = b.closest('[data-pomidor]');
       const nast = cel && (cel.querySelector('[data-pm="pauza"], [data-pm="wznow"], [data-pm="start"]'));
-      if (nast && co !== 'dlugosc') nast.focus();
-      else if (cel && co === 'dlugosc') { const c = cel.querySelector(`[data-pm="dlugosc"][data-min="${b.dataset.min}"]`); if (c) c.focus(); }
+      const krok = co === 'praca' || co === 'przerwa';
+      if (cel && b.dataset.pm === 'tarcza') { const t = cel.querySelector('[data-pm="tarcza"]'); if (t) t.focus(); }
+      else if (nast && !krok) nast.focus();
+      else if (cel && krok) { const c = cel.querySelector(`[data-pm="${co}"][data-krok="${b.dataset.krok}"]:not([disabled])`) || cel.querySelector(`[data-pm="${co}"]:not([disabled])`); if (c) c.focus(); }
     });
     document.addEventListener('change', e => {
       const sel = e.target.closest && e.target.closest('[data-pm-zadanie]');
@@ -349,6 +355,6 @@
     tik();
   }
 
-  window.Pomidor = { KLUCZ, czytaj, start, pauza, wznow, stop, ustawPrace, ustawZadanie, startZadania, zadaniaNaDzis, pozostalo, ulamek, sprawdzKoniec, mmss, wycinek, rysuj, tik, zamontuj, odswiez: rysuj };
+  window.Pomidor = { KLUCZ, czytaj, start, pauza, wznow, stop, ustawPrace, ustawPrzerwe, ustawDlugosc, ustawZadanie, startZadania, zadaniaNaDzis, pozostalo, ulamek, sprawdzKoniec, mmss, rysuj, tik, zamontuj, odswiez: rysuj };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', zamontuj); else zamontuj();
 })();

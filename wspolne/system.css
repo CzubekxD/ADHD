@@ -63,15 +63,8 @@
   color-scheme:dark;
 }
 
-/* kolor przewodni wg narzędzia (ustawia pasek-gorny.js z rejestru narzędzi) */
-html[data-kolor="szalwia"]{--s-akcent:var(--k-szalwia);--s-akcent-tlo:var(--k-szalwia-tlo)}
-html[data-kolor="bursztyn"]{--s-akcent:var(--k-bursztyn);--s-akcent-tlo:var(--k-bursztyn-tlo)}
-html[data-kolor="granat"]{--s-akcent:var(--k-granat);--s-akcent-tlo:var(--k-granat-tlo)}
-html[data-kolor="sliwka"]{--s-akcent:var(--k-sliwka);--s-akcent-tlo:var(--k-sliwka-tlo)}
-html[data-kolor="morski"]{--s-akcent:var(--k-morski);--s-akcent-tlo:var(--k-morski-tlo)}
-html[data-kolor="terakota"]{--s-akcent:var(--k-terakota);--s-akcent-tlo:var(--k-terakota-tlo)}
-html[data-kolor="oliwka"]{--s-akcent:var(--k-oliwka);--s-akcent-tlo:var(--k-oliwka-tlo)}
-html[data-kolor="lupek"]{--s-akcent:var(--k-lupek);--s-akcent-tlo:var(--k-lupek-tlo)}
+/* kolor przewodni: jeden na całą stronę (bursztyn z :root). html[data-kolor] zostaje w znacznikach dla zgodności
+   z rejestrem narzędzi, ale nie zmienia już akcentu — narzędzia rozróżniają faktury (wspolne/wzory.css). */
 
 /* ================= 2. ATOMY ================= */
 .s-strona{background:var(--s-tlo);color:var(--s-tusz);font-family:var(--s-kroj);font-size:var(--s-r-tekst);line-height:var(--s-interlinia);
@@ -211,15 +204,22 @@ header.pg{display:block;flex-wrap:nowrap;gap:0;padding:0;margin:0 calc(-1 * var(
 .pg-chmura[data-stan="offline"]{color:var(--s-uwaga)}
 @media (prefers-reduced-motion:no-preference){.pg-chmura[data-stan="pracuje"] svg{animation:pg-puls 1.2s ease-in-out infinite}}
 @keyframes pg-puls{50%{opacity:.35}}
-/* pomidor (wspolne/pomidor.js): skórka, miąższ ubywający jak tarcza zegara, listki; mały pomidor z czasem w pasku */
-.pm-ikona{display:block}
-/* w trakcie bloku pomidor zielenieje: --pm-f = ile zostało (1 czerwony → 0 zielony);
-   mieszanie w oklch prowadzi kolor przez pomarańcz i żółć, a nie przez brąz */
-.pm-ikona{--pm-kolor:color-mix(in oklch,var(--s-blad) calc(var(--pm-f,1) * 100%),var(--s-ok))}
-.pm-skorka{fill:var(--s-pow-2);stroke:var(--pm-kolor);stroke-width:5}
-.pm-miazsz{fill:var(--pm-kolor)}
-[data-faza="przerwa"] .pm-ikona{--pm-kolor:var(--s-ok)}   /* przerwa: dojrzały do odpoczynku, cały zielony */
-.pm-lisc{fill:var(--s-ok)}
+/* pomidor (wspolne/pomidor.js): naczynie z cieczą. --pm-f = ile bloku zostało; ciecz opada jak spuszczana woda
+   i odsłania tło. Praca: złoto-czarna (bursztyn), przerwa: błękit dopełnienia. Mały pomidor w pasku: to samo bez fali. */
+.pm-ikona{--pm-kolor:var(--s-akcent);position:relative;display:block;aspect-ratio:1;border-radius:50%;overflow:hidden;
+  border:2px solid color-mix(in oklch,var(--pm-kolor) 55%,transparent);box-shadow:inset 0 0 0 4px rgb(0 0 0 / .22);transition:border-color .6s}
+[data-faza="przerwa"] .pm-ikona{--pm-kolor:var(--s-niepowodzenie)}
+.pm-ciecz{position:absolute;left:0;right:0;bottom:0;height:calc(var(--pm-f,1) * 100%);transition:height 1s linear;
+  background:repeating-linear-gradient(-45deg,transparent 0 6px,rgb(0 0 0 / .22) 6px 8px),
+    linear-gradient(color-mix(in oklch,var(--pm-kolor) 75%,#000),color-mix(in oklch,var(--pm-kolor) 8%,#000) 85%)}
+/* duża tarcza: powierzchnia z falą (maska), druga warstwa fali płynie w kontrze */
+.pm-tarcza .pm-ciecz,.pm-tarcza .pm-ciecz::after{
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='14'%3E%3Cpath d='M0 7Q15 0 30 7T60 7T90 7T120 7V14H0Z'/%3E%3C/svg%3E") repeat-x 0 0/120px 14px,linear-gradient(#000 0 0) no-repeat 0 13px/100% 100%;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='14'%3E%3Cpath d='M0 7Q15 0 30 7T60 7T90 7T120 7V14H0Z'/%3E%3C/svg%3E") repeat-x 0 0/120px 14px,linear-gradient(#000 0 0) no-repeat 0 13px/100% 100%}
+.pm-tarcza .pm-ciecz::after{content:"";position:absolute;left:0;right:0;top:0;height:22px;background:color-mix(in oklch,var(--pm-kolor) 55%,#fff);opacity:.22}
+@keyframes pm-plyn{to{-webkit-mask-position:120px 0,0 13px;mask-position:120px 0,0 13px}}
+@media (prefers-reduced-motion:no-preference){.pm-tarcza .pm-ciecz{animation:pm-plyn 2.4s linear infinite}.pm-tarcza .pm-ciecz::after{animation:pm-plyn 3.7s linear infinite reverse}}
+@media (prefers-reduced-motion:reduce){.pm-ciecz{transition:none}}
 .pg-pomidor{display:inline-flex;align-items:center;gap:6px;min-height:var(--s-cel);padding:0 8px;border-radius:var(--s-zaokr);
   color:var(--s-tusz);text-decoration:none;font:600 14px var(--s-kroj);font-variant-numeric:tabular-nums}
 .pg-pomidor:hover{background:var(--s-pow-2)}

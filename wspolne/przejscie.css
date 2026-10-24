@@ -122,3 +122,12 @@ html[data-narzedzie="woop"] .pg .brand b{line-height:1}
 /* WOOP był pisany pod stronę z body{margin:0}; bez tego pasek i treść odsuwały się o 8 px */
 html[data-narzedzie="woop"] body{margin:0}
 @media (min-width:900px){html[data-narzedzie="woop"] nav.tabs button span{white-space:nowrap}html[data-narzedzie="woop"] nav.tabs button svg{flex:none}}
+
+/* ---------- niepowodzenia w kolorze dopełnienia akcentu (we wszystkich motywach, także CYBER) ----------
+   „nie zadziałało” w Planach i WOOP, czerwone flagi na pulpicie: --s-niepowodzenie (błękit, w CYBER cyjan).
+   Przyciski usuwania zostają w kolorze błędu, bo to ostrzeżenie, a nie wynik. */
+html[data-narzedzie="woop"]:root{--miss:var(--s-niepowodzenie)}
+html[data-narzedzie="plany"]:root{--bad:var(--s-niepowodzenie);--bad-bg:var(--s-niepowodzenie-tlo)}
+html[data-narzedzie="woop"] .btn.danger,html[data-narzedzie="woop"] .more .menu button.danger,
+html[data-narzedzie="plany"] .btn.danger{color:var(--s-blad);border-color:var(--s-blad)}
+html[data-narzedzie="plany"] .confirm{background:var(--s-blad-tlo);border-color:var(--s-blad)}

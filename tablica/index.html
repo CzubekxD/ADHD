@@ -532,7 +532,6 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
   <span class="spacer"></span>
   <button class="iconbtn" id="btnExport" title="Kopia danych">Eksport</button>
   <button class="iconbtn" id="btnImport">Import</button>
-  <button class="iconbtn" id="btnTheme" title="Motyw">Motyw</button>
   <input type="file" id="fileIn" accept="application/json" hidden>
 </header>
 
@@ -2148,10 +2147,9 @@ function showTab(name) {
   if (name === "plan") renderPlan();
 }
 function applyTheme() {
-  document.documentElement.dataset.theme = S.theme;
+  // jeden motyw na całej stronie: ciemny (zapisany wcześniej wybór motywu w danych tablicy jest pomijany)
+  document.documentElement.dataset.theme = "dark";
   document.documentElement.dataset.fx = fxMode();
-  document.getElementById("btnTheme").textContent =
-    S.theme === "auto" ? "Motyw: auto" : (S.theme === "dark" ? "Motyw: ciemny" : "Motyw: jasny");
 }
 
 function renderAll() {
@@ -2228,10 +2226,6 @@ document.getElementById("fixFrom").addEventListener("change", e => { S.fixFrom =
 document.getElementById("fixTo").addEventListener("change", e => { S.fixTo = e.target.value; save(); renderHistory(); });
 document.getElementById("pinName").addEventListener("input", e => { S.pinned.name = e.target.value; save(); });
 document.getElementById("pinOn").addEventListener("change", e => { S.pinned.on = e.target.checked; save(); });
-document.getElementById("btnTheme").addEventListener("click", () => {
-  S.theme = S.theme === "auto" ? "light" : (S.theme === "light" ? "dark" : "auto");
-  save(); applyTheme();
-});
 const fileIn = document.getElementById("fileIn");
 fileIn.addEventListener("change", () => { if (fileIn.files[0]) doImport(fileIn.files[0]); fileIn.value = ""; });
 document.getElementById("btnExport").addEventListener("click", () => backupWrite());
