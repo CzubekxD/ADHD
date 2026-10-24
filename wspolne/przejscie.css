@@ -131,3 +131,67 @@ html[data-narzedzie="plany"]:root{--bad:var(--s-niepowodzenie);--bad-bg:var(--s-
 html[data-narzedzie="woop"] .btn.danger,html[data-narzedzie="woop"] .more .menu button.danger,
 html[data-narzedzie="plany"] .btn.danger{color:var(--s-blad);border-color:var(--s-blad)}
 html[data-narzedzie="plany"] .confirm{background:var(--s-blad-tlo);border-color:var(--s-blad)}
+
+/* =====================================================================
+   WSPÓLNY SCHEMAT NARZĘDZI (bursztyn): ten sam wygląd co pulpit
+   - tło z kręgami (wstawia je pasek-gorny.js) prześwituje przez stronę
+   - pas z fakturą narzędzia pod paskiem górnym (ta sama co na karcie pulpitu)
+   - karty z bursztynową ramką, główne przyciski w bursztynie 40% z jasnym tuszem
+   - kolory treści z palety: odcienie bursztynu, a to, co nie wychodzi — błękit
+   CYBER ma własne neonowe style kart i przycisków, więc te reguły go omijają.
+   ===================================================================== */
+html[data-narzedzie]{background:var(--s-tlo)}
+html[data-narzedzie] body{background-color:transparent !important}
+html[data-narzedzie="tablica"] body{background:transparent !important}
+
+/* pas z fakturą: dolna krawędź paska górnego */
+.pg-faktura{position:absolute;left:0;right:0;bottom:-1px;height:6px;overflow:hidden;pointer-events:none;border-top:1px solid var(--s-ramka)}
+.pg-faktura .s-wzor{font-size:6px}
+.pg{position:sticky}
+
+/* karty: bursztynowa ramka jak na pulpicie */
+html[data-narzedzie="woop"]:not([data-skin="cyber"]) :is(.woop,.intro,.stage,.mrow,.sect),
+html[data-narzedzie="plany"]:not([data-skin="cyber"]) :is(.trig,.stage,.sumrow,.plan,.graphwrap,.card,.sect,.canvas,.ans),
+html[data-narzedzie="tablica"]:not([data-skin="cyber"]) .card,
+html[data-narzedzie="pasek"]:not([data-skin="cyber"]) .karta{border:1.5px solid var(--s-ramka)}
+html[data-narzedzie="plany"]:not([data-skin="cyber"]) :is(.trig,.ans,.plan):hover{border-color:var(--s-akcent)}
+
+/* przyciski: obrys w ramce, główny w bursztynie 40% z jasnym tuszem */
+html[data-narzedzie="woop"]:not([data-skin="cyber"]) .btn,
+html[data-narzedzie="plany"]:not([data-skin="cyber"]) .btn,
+html[data-narzedzie="tablica"]:not([data-skin="cyber"]) button.act,
+html[data-narzedzie="pasek"]:not([data-skin="cyber"]) button.przycisk{border-color:var(--s-ramka)}
+html[data-narzedzie="woop"]:not([data-skin="cyber"]) .btn.primary,
+html[data-narzedzie="plany"]:not([data-skin="cyber"]) .btn.primary,
+html[data-narzedzie="tablica"]:not([data-skin="cyber"]) button.act.primary,
+html[data-narzedzie="pasek"]:not([data-skin="cyber"]) button.przycisk.glowny{background:var(--s-akcent-40);border:1.5px solid var(--s-ramka);color:var(--s-tusz);font-weight:700}
+html[data-narzedzie]:not([data-skin="cyber"]) :is(.btn.primary,button.act.primary,button.przycisk.glowny):hover{background:color-mix(in oklch,var(--s-akcent) 60%,var(--s-tlo));filter:none}
+html[data-narzedzie="woop"]:not([data-skin="cyber"]) :is(.btn.ghost,.btn:not(.primary)),
+html[data-narzedzie="plany"]:not([data-skin="cyber"]) :is(.btn.ghost,.btn:not(.primary)){color:var(--s-tusz)}
+
+/* WOOP: kroki w odcieniach bursztynu, Przeszkoda w błękicie (to, co staje na drodze) */
+html[data-narzedzie="woop"]:root{
+  --w:var(--s-akcent); --w-bg:color-mix(in srgb,var(--s-akcent) 16%,var(--s-pow));
+  --o1:color-mix(in oklch,var(--s-akcent) 65%,var(--s-tusz)); --o1-bg:color-mix(in srgb,var(--s-akcent) 10%,var(--s-pow));
+  --o2:var(--s-niepowodzenie); --o2-bg:color-mix(in srgb,var(--s-niepowodzenie) 14%,var(--s-pow));
+  --p:var(--s-akcent); --p-bg:color-mix(in srgb,var(--s-akcent) 22%,var(--s-pow));
+  --ex:var(--s-akcent); --ex-bg:color-mix(in srgb,var(--s-akcent) 14%,var(--s-pow));
+  --skip:var(--s-linia-mocna);
+}
+/* Plany: typy kroków w bursztynie, eskalacja w błękicie */
+html[data-narzedzie="plany"]:root{
+  --t-trigger:var(--s-akcent); --t-question:color-mix(in oklch,var(--s-akcent) 70%,var(--s-tusz));
+  --t-choice:color-mix(in oklch,var(--s-akcent) 50%,var(--s-tusz)); --t-action:var(--s-tusz-2);
+  --t-escalate:var(--s-niepowodzenie); --none:var(--s-przygaszony); --none-bg:var(--s-pow-2);
+}
+/* Tablica: trudność zadań jako coraz mocniejszy bursztyn (zamiast zieleni, żółci, pomarańczu i czerwieni) */
+html[data-narzedzie="tablica"]:root{
+  --t1:color-mix(in oklch,var(--s-akcent) 45%,var(--s-tusz-2)); --t2:color-mix(in oklch,var(--s-akcent) 70%,var(--s-tusz));
+  --t3:var(--s-akcent); --t4:color-mix(in oklch,var(--s-akcent) 80%,#ff6a00);
+  --t1-bg:color-mix(in srgb,var(--s-akcent) 8%,var(--s-pow)); --t2-bg:color-mix(in srgb,var(--s-akcent) 14%,var(--s-pow));
+  --t3-bg:color-mix(in srgb,var(--s-akcent) 20%,var(--s-pow)); --t4-bg:color-mix(in srgb,var(--s-akcent) 28%,var(--s-pow));
+  --gold:var(--s-akcent); --gold-soft:var(--s-akcent-tlo); --goldwash:color-mix(in oklch,var(--s-akcent) 13%,transparent);
+  --total:var(--s-akcent); --good:var(--s-ok); --bar-soft:var(--s-akcent-40);
+}
+/* CYBER: ta sama zasada na neonach — akcent żółty (--s-akcent), dopełnienie cyjan (--s-niepowodzenie) */
+html[data-narzedzie][data-skin="cyber"]:root{--accent:var(--s-akcent);--accent-ink:var(--s-akcent-tusz);--glow:0 0 14px color-mix(in srgb,var(--s-akcent) 45%,transparent)}
