@@ -65,7 +65,7 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 .pp-pkt{font-size:12px;font-weight:700;border-radius:99px;padding:1px 9px;background:var(--kt);color:var(--k);font-variant-numeric:tabular-nums}
 .pp-dni{display:flex;gap:0;margin:-5px -5px -5px 0}
 /* kropka 14 px w polu do kliknięcia 24 px; najechanie podświetla ramkę */
-.pp-dzien{display:grid;place-items:center;width:24px;height:24px;border-radius:7px}
+.pp-dzien{display:grid;place-items:center;width:24px;height:24px;border-radius:7px;border:0;padding:0;background:none;cursor:pointer}
 .pp-dzien:hover i{box-shadow:0 0 0 2px var(--s-ramka)}
 .pp-dzien:focus-visible{outline:2px solid var(--s-akcent);outline-offset:0}
 .pp-dni i{width:14px;height:14px;border-radius:4px;background:var(--s-pow-3);transition:box-shadow .15s}
@@ -400,7 +400,30 @@ document.querySelectorAll(".note").forEach(b => {
 });
 // wracasz z narzędzia albo na kartę, dane przyszły z Google Drive albo z innej karty — liczby i pora się odświeżają
 addEventListener("pageshow", e => { if (e.persisted) { odswiezPulpit(); Skrzynka.rysuj(); } });
-Skrzynka.zamontuj({ korzen: "./" });
+Skrzynka.zamontuj({ korzen: "./", skroty: false });
+/* Ctrl+Z na pulpicie cofa zmiany skrzynki i wynik dnia WOOP zaznaczony kropką */
+const WOOP_KLUCZ = ((window.NARZEDZIA || []).find(n => n.id === "woop") || {}).klucz;
+if (window.Skroty) Skroty.init({
+  snapshot: () => JSON.stringify([Skrzynka.KLUCZ, WOOP_KLUCZ].map(k => { try { return localStorage.getItem(k); } catch (e) { return null; } })),
+  restore: t => {
+    const [s, w] = JSON.parse(t);
+    [[Skrzynka.KLUCZ, s], [WOOP_KLUCZ, w]].forEach(([k, v]) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} });
+    Skrzynka.rysuj(); odswiezPulpit();
+  },
+  wiersz: ".sk-kartka",
+  przycisk: ".sk-usun"
+});
+document.getElementById("pulpit").addEventListener("click", e => {
+  const b = e.target.closest("[data-woop-dzien]");
+  if (!b) return;
+  const w = Pulpit.ustawDzienWoop(b.dataset.woopId, b.dataset.woopDzien);
+  if (!w) return;
+  if (window.Skroty) { Skroty.zapisano(); Skroty.komunikat(`${w.dzien}: ${w.opis}`); }
+  const dzien = b.dataset.woopDzien;
+  odswiezPulpit();
+  const nowy = document.querySelector(`[data-woop-dzien="${dzien}"]`);
+  if (nowy) nowy.focus();
+});
 addEventListener("storage", odswiezPulpit);
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") odswiezPulpit(); });
 

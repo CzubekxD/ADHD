@@ -1,7 +1,8 @@
 /* ---------------------------------------------------------------
    PULPIT DNIA — skróty dnia z danych narzędzi na stronie startowej.
-   Pulpit tylko CZYTA dane narzędzi (localStorage), niczego nie zapisuje.
-   Przyciski prowadzą do narzędzia, które samo zapisuje zmiany.
+   Pulpit CZYTA dane narzędzi (localStorage). Jedyny zapis: wynik dnia w WOOP z kropek na karcie
+   (ustawDzienWoop) — żeby uzupełnić dzień bez wchodzenia do narzędzia (docs/plan.md, „Decyzje”).
+   Pozostałe przyciski prowadzą do narzędzia, które samo zapisuje zmiany.
 
    Każde narzędzie ma tu jedną funkcję: SKROTY[id](dane) zwraca
      null              — brak danych: pokazujemy kafelek z miniaturą i przyciskiem „start”
@@ -129,9 +130,9 @@
     const klucze = [];
     for (let i = 6; i >= 0; i--) { const t = new Date(); t.setDate(t.getDate() - i); klucze.push(dzien(t)); dni.push(ch[dzien(t)] || ''); }
     const OPIS = { ok: 'zadziałało', miss: 'nie zadziałało', skip: 'pominięte', '': 'brak wpisu' };
-    // każdy dzień to link do WOOP z podpisem dnia i wyniku (pulpit tylko czyta — zaznaczasz w narzędziu)
-    const kropki = `<div class="pp-dni" role="group" aria-label="Ostatnie 7 dni">${dni.map((s, i) =>
-      `<a class="pp-dzien" href="{{KORZEN}}woop/" title="${esc(dzienTyg(klucze[i]))}: ${OPIS[s]}" aria-label="${esc(dzienTyg(klucze[i]))}: ${OPIS[s]}. Otwórz WOOP"><i class="${s}"></i></a>`).join('')}</div>`;
+    // każdy dzień to przycisk: klik przełącza wynik (zadziałało → nie zadziałało → nie było okazji → brak), z Ctrl+Z
+    const kropki = `<div class="pp-dni" role="group" aria-label="Ostatnie 7 dni — kliknij dzień, żeby zmienić wynik">${dni.map((s, i) =>
+      `<button type="button" class="pp-dzien" data-woop-id="${esc(glowny.id)}" data-woop-dzien="${klucze[i]}" title="${esc(dzienTyg(klucze[i]))}: ${OPIS[s]}" aria-label="${esc(dzienTyg(klucze[i]))}: ${OPIS[s]}. Kliknij, żeby zmienić"><i class="${s}"></i></button>`).join('')}</div>`;
     const dzisiaj = ch[dzis()];
     const reszta = aktywne.length - 1;
     return {
@@ -143,6 +144,21 @@
         : `<div class="pp-pytanie"><span>Czy plan dziś zadziałał?</span></div>`,
       akcja: { tekst: dzisiaj ? 'Otwórz WOOP' : 'Odpowiedz w WOOP', href: 'woop/', glowna: !dzisiaj }
     };
+  }
+
+  /* zapis wyniku dnia WOOP z pulpitu: kolejny stan po kliknięciu; zwraca nowy stan albo null */
+  const KOLEJNY = { '': 'ok', ok: 'miss', miss: 'skip', skip: '' };
+  function ustawDzienWoop(id, dzienK) {
+    const n = (window.NARZEDZIA || []).find(x => x.id === 'woop');
+    if (!n || !n.klucz || !dzienK || dzienK > dzis()) return null;
+    let d; try { d = JSON.parse(localStorage.getItem(n.klucz) || 'null'); } catch (e) { return null; }
+    const x = d && (d.items || []).find(i => i && i.id === id);
+    if (!x) return null;
+    x.checks = x.checks && typeof x.checks === 'object' ? x.checks : {};
+    const nowy = KOLEJNY[x.checks[dzienK] || ''];
+    if (nowy) x.checks[dzienK] = nowy; else delete x.checks[dzienK];
+    try { localStorage.setItem(n.klucz, JSON.stringify(d)); } catch (e) { return null; }
+    return { stan: nowy, opis: ({ ok: 'zadziałało', miss: 'nie zadziałało', skip: 'nie było okazji', '': 'brak wpisu' })[nowy], dzien: dzienTyg(dzienK) };
   }
 
   const SKROTY = { pasek, tablica, plany, woop };
@@ -216,5 +232,5 @@
     return zDanymi;
   }
 
-  window.Pulpit = { rysuj, SKROTY, dzis, pora, PORY };
+  window.Pulpit = { rysuj, SKROTY, dzis, pora, PORY, ustawDzienWoop };
 })();
