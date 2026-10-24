@@ -42,7 +42,7 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 .pp-znak svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .pp-nazwa-n{color:var(--s-tusz);text-decoration:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pp-nazwa-n:hover{color:var(--k)}
-.pp-tytul{font-size:17px;font-weight:650;letter-spacing:-.01em}
+.pp-tytul{font-size:20px;font-weight:650;letter-spacing:-.01em}
 .pp-wiersz{display:flex;align-items:flex-end;justify-content:space-between;gap:12px 16px;flex-wrap:wrap}
 .pp-liczba{font-size:40px;font-weight:650;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
 .pp-liczba small{font-size:17px;font-weight:550;color:var(--s-przygaszony);letter-spacing:0;margin-left:6px}
@@ -85,7 +85,7 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 /* mniejsza karta: ten sam układ, ciaśniej i drobniej */
 .pp-w.maly{padding:12px 14px 14px;gap:10px}
 .pp-w.maly .pp-mini{margin:-12px -14px 0;height:74px}
-.pp-w.maly .pp-tytul{font-size:15px}
+.pp-w.maly .pp-tytul{font-size:18px}
 .pp-w.maly .pp-znak{width:28px;height:28px}
 .pp-w.maly .pp-zyczenie{font-size:16px}
 .pp-w.maly .pp-liczba{font-size:28px}
@@ -99,8 +99,8 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
    i panel od dołu. Karteczka żółknie (--zolc 0…1) i gniecie się (--zgn 0…1) z wiekiem. */
 .pp-uklad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch}
 /* pomidor (wspolne/pomidor.js): lewa kolumna na komputerze, panel od dołu na telefonie */
-/* pomidor: prawa kolumna, rząd mniejszych kart — ma ich wysokość */
-.pm-kolumna{grid-column:3;grid-row:3;min-width:0;display:flex}
+/* pomidor: prawa kolumna, pierwszy rząd — wysokość dużych kart; z jego tarczy rozchodzą się kręgi tła */
+.pm-kolumna{grid-column:3;grid-row:1;min-width:0;display:flex}
 /* karta pomidora: jak karta narzędzia; tarcza po lewej, sterowanie po prawej. Tło karty prześwituje, bo ciecz odsłania kręgi */
 .pm{flex:1;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto 1fr auto;align-items:center;align-content:stretch;gap:12px 14px;padding:16px 18px 18px;min-width:0;
   background:color-mix(in oklch,var(--s-pow) 25%,transparent);border:1.5px solid var(--s-ramka);border-radius:var(--s-zaokr-duze)}
@@ -138,10 +138,11 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 .pm-otworz:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
 dialog.pm-panel .pm-kolumna,dialog.pm-panel .pm{background:none}
 dialog.pm-panel .pm-tarcza{width:170px}
-/* skrzynka: prawa kolumna, pierwszy rząd; tytuł i pole w jednej ramce, a karteczki wysuwają się w dół nad pomidora */
-.sk{grid-column:3;grid-row:1;align-self:start;position:relative;z-index:30;min-width:0}
-.sk-glowa{display:grid;gap:10px;padding:12px;background:var(--s-pow);border:1.5px solid var(--s-ramka);border-radius:var(--s-zaokr-duze)}
-.sk-lista{position:absolute;left:0;right:0;top:calc(100% + 12px);display:grid;gap:12px}
+/* skrzynka: prawa kolumna, rząd mniejszych kart; jedno pole — tytuł, wpisywanie i karteczki w jednej ramce */
+.sk{grid-column:3;grid-row:3;align-self:stretch;position:relative;z-index:30;min-width:0;display:flex}
+.sk-glowa{flex:1;display:flex;flex-direction:column;gap:10px;padding:16px 18px 18px;background:var(--s-pow);border:1.5px solid var(--s-ramka);border-radius:var(--s-zaokr-duze);min-width:0}
+.sk-lista{display:grid;gap:12px;min-width:0}
+.sk-glowa .sk-pole{flex:none}
 .sk-naglowek{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--s-tusz);margin:0}
 .sk-pole{display:flex;gap:8px;min-width:0;flex:1}
 .sk-pole input{box-sizing:border-box;flex:1;min-width:0;min-height:var(--s-cel);padding:10px 12px;border:1.5px solid var(--s-ramka);border-radius:var(--s-zaokr);
@@ -250,10 +251,10 @@ html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
       <div class="sk-glowa">
         <h2 class="sk-naglowek" id="sk-tytul">Skrzynka na myśli</h2>
         <form class="sk-pole" data-skrzynka-pole><input type="text" aria-label="Wrzuć myśl do skrzynki" placeholder="Wrzuć myśl i Enter" maxlength="280" enterkeyhint="send" autocomplete="off"></form>
-      </div>
-      <div class="sk-lista">
-        <p class="sk-pusto" data-skrzynka-pusto>Pusto. Wrzuć tu to, co krąży po głowie, a zajmiesz się tym później.</p>
-        <ol class="sk-stos" data-skrzynka-stos></ol>
+        <div class="sk-lista">
+          <p class="sk-pusto" data-skrzynka-pusto>Pusto. Wrzuć tu to, co krąży po głowie, a zajmiesz się tym później.</p>
+          <ol class="sk-stos" data-skrzynka-stos></ol>
+        </div>
       </div>
     </aside>
   </div>
@@ -358,6 +359,27 @@ function odswiezPulpit() {
   $k("pp-wstep").hidden = !!zDanymi;
 }
 odswiezPulpit();
+
+/* kręgi tła rozchodzą się ze środka tarczy pomidora (warstwa jest przypięta do okna, więc liczymy przy przewijaniu);
+   na telefonie, gdy tarczy nie widać, wracają na środek okna */
+(function () {
+  const tlo = document.querySelector(".s-tlo-kregi");
+  if (!tlo) return;
+  let czeka = false;
+  const ustaw = () => {
+    czeka = false;
+    const t = document.querySelector(".pm-kolumna .pm-tarcza");
+    const r = t && t.getBoundingClientRect();
+    if (r && r.width) { tlo.style.setProperty("--s-kregi-x", (r.left + r.width / 2) + "px"); tlo.style.setProperty("--s-kregi-y", (r.top + r.height / 2) + "px"); }
+    else { tlo.style.removeProperty("--s-kregi-x"); tlo.style.removeProperty("--s-kregi-y"); }
+  };
+  const zaplanuj = () => { if (!czeka) { czeka = true; requestAnimationFrame(ustaw); } };
+  addEventListener("scroll", zaplanuj, { passive: true });
+  addEventListener("resize", zaplanuj);
+  new MutationObserver(zaplanuj).observe(document.querySelector(".pm-kolumna") || document.body, { childList: true });
+  addEventListener("load", zaplanuj);
+  ustaw();
+})();
 
 /* dolne bloki: przytrzymanie kursora ~0,7 s rozwija (zjechanie zwija);
    klik albo Enter/spacja przełącza i przypina stan, aż klikniesz znowu */
