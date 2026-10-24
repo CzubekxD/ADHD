@@ -1,7 +1,7 @@
 # Strażnicy jakości: uruchamiają się przy każdym PR i każdej zmianie w main.
 #   1. testy jednostkowe (jsdom) — wszystkie pliki testów z CLAUDE.md
-#   2. strony w przeglądarce — 7 stron × 1100/390 px × ciemny/CYBER: konsola, poziome przewijanie,
-#      dostępność (axe, WCAG 2 AA) i kontrast tokenów; twarde progi, PR nie przejdzie z błędem
+#   2. strony w przeglądarce — 7 stron × 1100/390 px × ciemny/CYBER × Chromium i Safari (WebKit): konsola,
+#      poziome przewijanie, dostępność (axe, WCAG 2 AA), kontrast i barwa tokenów; twarde progi, PR nie przejdzie z błędem
 #   3. zmiany wyglądu — zrzuty PR porównane ze zrzutami gałęzi bazowej; nie blokuje, tylko pokazuje
 # Wyniki: podsumowanie przebiegu (zakładka Summary) i artefakt „zrzuty” ze zrzutami oraz obrazami różnic.
 # Wszystko lokalnie: cd testy && npm ci && npx playwright install chromium && npm run wszystko
@@ -56,15 +56,19 @@ jobs:
           cache-dependency-path: pr/testy/package-lock.json
       - run: npm ci --no-audit --no-fund
         working-directory: pr/testy
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit
         working-directory: pr/testy
       - name: Strony (twarde progi)
         id: strony
         run: node strony.js .. --wyniki wyniki
+        env:
+          PRZEGLADARKI: chromium,webkit
         working-directory: pr/testy
       - name: Zrzuty gałęzi bazowej
         if: always() && github.event_name == 'pull_request'
         run: node strony.js ../../baza --wyniki wyniki-baza --tylko-zrzuty
+        env:
+          PRZEGLADARKI: chromium,webkit
         working-directory: pr/testy
       - name: Porównanie wyglądu z gałęzią bazową
         if: always() && github.event_name == 'pull_request'
