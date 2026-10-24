@@ -119,15 +119,19 @@
   }
 
   /* ---------- WOOP ---------- */
+  const dzienTyg = k => new Date(k + 'T12:00').toLocaleDateString('pl-PL', { weekday: 'short', day: 'numeric', month: 'short' });
   function woop(d) {
     const aktywne = (d && d.items || []).filter(x => x && !x.archived && (x.wish || '').trim());
     if (!aktywne.length) return null;
     const glowny = aktywne.slice().sort((a, b) => (b.updated || 0) - (a.updated || 0))[0];
     const ch = glowny.checks || {};
     const dni = [];
-    for (let i = 6; i >= 0; i--) { const t = new Date(); t.setDate(t.getDate() - i); dni.push(ch[dzien(t)] || ''); }
+    const klucze = [];
+    for (let i = 6; i >= 0; i--) { const t = new Date(); t.setDate(t.getDate() - i); klucze.push(dzien(t)); dni.push(ch[dzien(t)] || ''); }
     const OPIS = { ok: 'zadziałało', miss: 'nie zadziałało', skip: 'pominięte', '': 'brak wpisu' };
-    const kropki = `<div class="pp-dni" role="img" aria-label="Ostatnie 7 dni: ${dni.map(s => OPIS[s]).join(', ')}">${dni.map(s => `<i class="${s}"></i>`).join('')}</div>`;
+    // każdy dzień to link do WOOP z podpisem dnia i wyniku (pulpit tylko czyta — zaznaczasz w narzędziu)
+    const kropki = `<div class="pp-dni" role="group" aria-label="Ostatnie 7 dni">${dni.map((s, i) =>
+      `<a class="pp-dzien" href="{{KORZEN}}woop/" title="${esc(dzienTyg(klucze[i]))}: ${OPIS[s]}" aria-label="${esc(dzienTyg(klucze[i]))}: ${OPIS[s]}. Otwórz WOOP"><i class="${s}"></i></a>`).join('')}</div>`;
     const dzisiaj = ch[dzis()];
     const reszta = aktywne.length - 1;
     return {
@@ -181,7 +185,7 @@
       ? `<p class="pp-zyczenie">${esc(tekst)}</p><div class="pp-wiersz"><p class="pp-podpis">${esc(s.podpis)}</p>${s.obok || ''}</div>`
       : `<div class="pp-wiersz"><div><div class="pp-liczba">${esc(s.liczba)}<small>${esc(s.jednostka || '')}</small></div><p class="pp-podpis">${esc(s.podpis)}</p></div>${s.obok || ''}</div>`;
     const glowna = s.akcja.glowna !== false;
-    return `<section class="pp-w${maly ? ' maly' : ''}" style="${styl(n)}" aria-label="${esc(n.nazwa)}" data-narzedzie="${esc(n.id)}">${glowa}${gora}${s.srodek || ''}
+    return `<section class="pp-w${maly ? ' maly' : ''}" style="${styl(n)}" aria-label="${esc(n.nazwa)}" data-narzedzie="${esc(n.id)}">${glowa}${gora.split('{{KORZEN}}').join(esc(korzen))}${s.srodek || ''}
       <a class="pp-akcja${glowna ? '' : ' cicha'}" href="${esc(korzen + s.akcja.href)}">${esc(s.akcja.tekst)}</a></section>`;
   }
 

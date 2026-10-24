@@ -126,8 +126,8 @@ html[data-narzedzie="woop"] body{margin:0}
 /* ---------- niepowodzenia w kolorze dopełnienia akcentu (we wszystkich motywach, także CYBER) ----------
    „nie zadziałało” w Planach i WOOP, czerwone flagi na pulpicie: --s-niepowodzenie (błękit, w CYBER cyjan).
    Przyciski usuwania zostają w kolorze błędu, bo to ostrzeżenie, a nie wynik. */
-html[data-narzedzie="woop"]:root{--miss:var(--s-niepowodzenie)}
-html[data-narzedzie="plany"]:root{--bad:var(--s-niepowodzenie);--bad-bg:var(--s-niepowodzenie-tlo)}
+html[data-narzedzie="woop"]:root{--miss:var(--s-niepowodzenie);--ok:var(--s-ok)}
+html[data-narzedzie="plany"]:root{--bad:var(--s-niepowodzenie);--bad-bg:var(--s-niepowodzenie-tlo);--ok:var(--s-ok);--ok-bg:var(--s-ok-tlo)}
 html[data-narzedzie="woop"] .btn.danger,html[data-narzedzie="woop"] .more .menu button.danger,
 html[data-narzedzie="plany"] .btn.danger{color:var(--s-blad);border-color:var(--s-blad)}
 html[data-narzedzie="plany"] .confirm{background:var(--s-blad-tlo);border-color:var(--s-blad)}
