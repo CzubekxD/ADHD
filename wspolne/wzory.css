@@ -1,0 +1,101 @@
+/* ---------------------------------------------------------------
+   WZORY (FAKTURY) NARZĘDZI
+   Jeden kolor na całą stronę, więc narzędzia rozróżnia faktura, nie barwa.
+   Wzory z pena Any Tudor „1 element card background patterns”
+   (codepen.io/thebabydino/pen/GRRpzNX), skompilowane z SCSS i podpięte pod tokeny:
+   --wz-0 = bursztyn 40% (--s-akcent-40), --wz-1 = tło strony (--s-tlo).
+   W CYBER tokeny podmieniają się same.
+
+   Użycie: <div class="s-wzor s-wzor-13"></div> wewnątrz elementu z position i overflow:hidden.
+   Numer wzoru narzędzia jest w rejestrze (wspolne/narzedzia.js, pole „wzor”).
+   --------------------------------------------------------------- */
+.s-wzor{
+  --wz-0:var(--s-akcent-40); --wz-1:var(--s-tlo);
+  position:absolute;inset:0;overflow:hidden;font-size:12px;
+  background:linear-gradient(var(--ang,180deg),var(--wz-0),var(--wz-1));
+}
+.s-wzor,.s-wzor::before,.s-wzor::after{
+  --strip-stop:100%;
+  --strip-f:.25;
+  --strip-stop-0:calc(var(--strip-f)*var(--strip-stop));
+  --strip-stop-1:calc(var(--strip-stop) - var(--strip-stop-0));
+  --strip-end:red;
+  --strip-mid:transparent;
+  --strip-list:var(--strip-end) 0,var(--strip-end) var(--strip-stop-0),var(--strip-mid) 0,var(--strip-mid) var(--strip-stop-1),var(--strip-end) 0,var(--strip-end) var(--strip-stop);
+  --joint-list:var(--joint-end,red) var(--joint-stop,25%),var(--joint-mid,transparent) 0;
+}
+.s-wzor::before,.s-wzor::after{
+  --i:0;
+  --noti:calc(1 - var(--i));
+  --sgni:calc(2*var(--i) - 1);
+  --c:hsl(0 0% 0% / var(--i));
+  --notc:hsl(0 0% 0% / var(--noti));
+  --fill:linear-gradient(var(--c),var(--c));
+  /* kolory warstw: przy --i:0 pierwsza warstwa jest bursztynowa, przy --i:1 odwrotnie */
+  --c0:color-mix(in srgb,var(--wz-1) calc(var(--i)*100%),var(--wz-0));
+  --c1:color-mix(in srgb,var(--wz-0) calc(var(--i)*100%),var(--wz-1));
+  content:"";position:absolute;inset:0;
+  -webkit-mask:var(--mask);mask:var(--mask);
+  -webkit-mask-position:var(--mask-o,50% 50%);mask-position:var(--mask-o,50% 50%);
+  -webkit-mask-size:var(--mask-d);mask-size:var(--mask-d);
+}
+.s-wzor::after{--i:1}
+
+/* 4 — ukośne pasy (WOOP): droga od życzenia do planu */
+.s-wzor-4::before,.s-wzor-4::after{
+  background:linear-gradient(calc(var(--i)*180deg + 45deg),var(--c1),transparent);
+  --strip-stop:1em;
+  --strip-f:calc(.125 + .25*var(--i));
+  --mask:var(--fill),repeating-linear-gradient(-45deg,var(--strip-list));
+  -webkit-mask-composite:xor;mask-composite:exclude;
+}
+
+/* 13 — siatka trójkątów przecięta po skosie (Plany): dwa stany, jeżeli / to */
+.s-wzor-13{--ang:60deg}
+.s-wzor-13::before,.s-wzor-13::after{
+  --strip-end:transparent;
+  --strip-mid:var(--c0);
+  --strip-stop:10px;
+  --strip-f:.4;
+  background:repeating-linear-gradient(var(--strip-list)),repeating-linear-gradient(60deg,var(--strip-list)),repeating-linear-gradient(-60deg,var(--strip-list));
+  --mask:linear-gradient(var(--ang),var(--c) 50%,var(--notc) 0);
+}
+
+/* 14 — pionowe słupki (Pasek zdrowia): poziom baterii */
+.s-wzor-14{--d:2em;background:conic-gradient(var(--wz-0),var(--wz-1),var(--wz-0))}
+.s-wzor-14::before,.s-wzor-14::after{
+  background:linear-gradient(calc(var(--i)*180deg),var(--c0),var(--c1),var(--c0));
+  --mask:linear-gradient(90deg,var(--joint-list));
+  --mask-o:calc(50% + (var(--i) - .25)*.5*var(--d));
+  --mask-d:var(--d);
+}
+
+/* 17 — łuki i kręgi (Tablica scoringowa) */
+.s-wzor-17{--d:5em;--ang:135deg}
+.s-wzor-17::before,.s-wzor-17::after{
+  --strip-end:var(--c0);
+  --strip-stop:calc(.1*var(--d));
+  background:repeating-radial-gradient(circle,var(--strip-list)) calc(50% - var(--i)*.5*var(--d)) 50%/var(--d) var(--d);
+  --joint-end:var(--notc);
+  --joint-mid:var(--c);
+  --joint-stop:50%;
+  --mask:linear-gradient(var(--joint-list));
+  --mask-o:50% 50%;
+  --mask-d:100% var(--d);
+}
+
+/* ---------- tło strony: kręgi od środka (receptura „Red Circles”, codepen.io/joshuar/pen/qNBYLK) ----------
+   w kolorze --s-kregi (dopełnienie akcentu, 40%); przy wejściu na stronę przechodzi przez nie fala */
+@property --s-faza{syntax:"<length>";inherits:false;initial-value:0px}
+.s-tlo-kregi{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background-color:var(--s-kregi);
+  background-image:radial-gradient(circle at center center,black,#ccc),
+    repeating-radial-gradient(circle at center center,black var(--s-faza),black calc(1rem + var(--s-faza)),transparent calc(2rem + var(--s-faza)));
+  background-blend-mode:multiply}
+.s-tlo-kregi::before,.s-tlo-kregi::after{content:"";position:absolute;top:0;width:200%;height:100%}
+.s-tlo-kregi::before{left:0;background:repeating-linear-gradient(45deg,transparent,transparent 1px,rgb(0 0 0 / .1) 1px,rgb(255 255 255 / .05) 5px)}
+.s-tlo-kregi::after{right:0;background:repeating-linear-gradient(-45deg,transparent,transparent 1px,rgb(0 0 0 / .1) 1px,rgb(255 255 255 / .05) 5px)}
+/* fala: kręgi płyną od środka o trzy okresy (6rem) i stają dokładnie tam, gdzie zaczęły */
+@keyframes s-fala{from{--s-faza:0px}to{--s-faza:6rem}}
+@media (prefers-reduced-motion:no-preference){.s-tlo-kregi{animation:s-fala 3.2s cubic-bezier(.2,.6,.3,1) .2s both}}
+/* CYBER maluje na body własne tło i siatkę; na stronie z kręgami body przepuszcza je (siatka zostaje na wierzchu) */
+html[data-skin="cyber"]:has(.s-tlo-kregi) body{background-color:transparent!important}

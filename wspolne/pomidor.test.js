@@ -18,6 +18,9 @@ function strona(stan) {
   if (stan) w.localStorage.setItem('pomidor-v1', stan);
   w.eval(fs.readFileSync(path.join(__dirname, 'odmiana.js'), 'utf8'));
   w.eval(kod);
+  // nowszy jsdom zostawia stronę w stanie „loading” — pomidor montuje się dopiero po DOMContentLoaded.
+  // Strona z zapisanym stanem tylko czyta (bez montowania, które od razu sprawdza koniec bloku prawdziwym zegarem).
+  if (!stan && w.document.readyState === 'loading') w.document.dispatchEvent(new w.Event('DOMContentLoaded'));
   return w;
 }
 function sprawdz(nazwa, warunek, dodatek) {
@@ -36,15 +39,22 @@ const klik = el => el.dispatchEvent(new w.Event('click', { bubbles: true }));
 let s = P.czytaj();
 sprawdz('domyślnie 25 min pracy i 5 przerwy', s.ustawienia.praca === 25 && s.ustawienia.przerwa === 5 && s.faza === 'praca');
 sprawdz('przed startem widać 25:00', P.mmss(P.pozostalo(s)) === '25:00' && $('.pm-czas').textContent === '25:00');
-sprawdz('przycisk „Start pracy” i cztery długości do wyboru', /Start pracy/.test($('[data-pm="start"]').textContent) && $$('[data-pm="dlugosc"]').length === 4);
-sprawdz('25 min zaznaczone', $('[data-pm="dlugosc"][aria-pressed="true"]').dataset.min === '25');
+sprawdz('przycisk „Start pracy” i −/+ dla pracy i przerwy', /Start pracy/.test($('[data-pm="start"]').textContent) && $$('[data-pm="praca"]').length === 2 && $$('[data-pm="przerwa"]').length === 2);
+sprawdz('długości widać jako liczby minut: 25 i 5', $$('.pm-min').map(e => e.textContent).join(',') === '25,5');
+sprawdz('tarcza to przycisk (klik startuje i pauzuje)', $('.pm-tarcza') && $('.pm-tarcza').tagName === 'BUTTON' && $('.pm-tarcza').dataset.pm === 'tarcza');
 sprawdz('mały pomidor w pasku schowany, gdy timer stoi', $('[data-pomidor-mini]').innerHTML === '');
 
-/* --- 2. własny czas jednym kliknięciem --- */
-klik($('[data-pm="dlugosc"][data-min="45"]'));
+/* --- 2. własny czas: −/+ bez listy gotowych długości --- */
+klik($('[data-pm="praca"][data-krok="1"]'));
+klik($('[data-pm="przerwa"][data-krok="1"]'));
 s = P.czytaj();
-sprawdz('klik w 45 min ustawia blok i dłuższą przerwę', s.ustawienia.praca === 45 && s.ustawienia.przerwa === 10 && $('.pm-czas').textContent === '45:00');
-P.ustawPrace(25);
+sprawdz('+ przy pracy dodaje 5 min, + przy przerwie 1 min', s.ustawienia.praca === 30 && s.ustawienia.przerwa === 6 && $('.pm-czas').textContent === '30:00');
+klik($('[data-pm="praca"][data-krok="-1"]'));
+sprawdz('− przy pracy odejmuje 5 min', P.czytaj().ustawienia.praca === 25);
+sprawdz('granice: praca 5–90, przerwa 1–30', P.ustawPrace(200).ustawienia.praca === 90 && P.ustawPrace(1).ustawienia.praca === 5 && P.ustawPrzerwe(0.5).ustawienia.przerwa === 1 && P.ustawPrzerwe(99).ustawienia.przerwa === 30);
+P.ustawPrace(25); P.ustawPrzerwe(5); P.rysuj();
+sprawdz('przy granicy przycisk jest wyłączony', (P.ustawPrzerwe(1), P.rysuj(), $('[data-pm="przerwa"][data-krok="-1"]').disabled));
+P.ustawPrzerwe(5); P.rysuj();
 
 /* --- 3. odliczanie --- */
 s = P.start(T0);
@@ -57,13 +67,11 @@ sprawdz('ustawianie długości zablokowane w trakcie', P.ustawPrace(60).ustawien
 sprawdz('w połowie zostaje pół miąższu', Math.abs(P.ulamek(s, T0 + 12.5 * MIN, false) - 0.5) < 1e-9);
 sprawdz('płynnie: po 30 s ubywa', P.ulamek(s, T0 + 30000, false) < 1);
 sprawdz('reduced-motion: skokowo co pełną minutę', P.ulamek(s, T0 + 30000, true) === 1 && P.ulamek(s, T0 + 61000, true) === 24 / 25);
-sprawdz('pełny pomidor to koło, pusty to nic', /^<circle/.test(P.wycinek(1)) && P.wycinek(0) === '');
-sprawdz('ćwiartka: łuk od godziny 12 do 3', /M50 55L50 22A33 33 0 0 1 83\.00 55\.00Z/.test(P.wycinek(0.25)), P.wycinek(0.25));
 
 P.rysuj(T0);
-sprawdz('na starcie pomidor czerwony (--pm-f:1)', /--pm-f:1\.000/.test($('.pm-tarcza .pm-ikona').getAttribute('style')));
+sprawdz('na starcie naczynie pełne (--pm-f:1)', /--pm-f:1\.000/.test($('.pm-tarcza .pm-ikona').getAttribute('style')));
 P.rysuj(T0 + 12.5 * MIN);
-sprawdz('w połowie w pół drogi do zieleni (--pm-f:0.5)', /--pm-f:0\.500/.test($('.pm-tarcza .pm-ikona').getAttribute('style')));
+sprawdz('w połowie ciecz do połowy (--pm-f:0.5)', /--pm-f:0\.500/.test($('.pm-tarcza .pm-ikona').getAttribute('style')));
 
 /* --- 5. pauza i wznowienie --- */
 s = P.pauza(T0 + 10 * MIN);
@@ -100,7 +108,7 @@ sprawdz('koniec bloku: komunikat na stronie z „Start przerwy”', kom && kom.c
 klik($('.pm-koniec [data-pm="start"]'));
 s = P.czytaj();
 sprawdz('„Start przerwy” rusza przerwę i chowa komunikat', s.faza === 'przerwa' && s.koniec !== null && !$('.pm-koniec').classList.contains('widoczny'));
-sprawdz('w trakcie: Pauza i Stop', $('[data-pm="pauza"]') && $('[data-pm="stop"]') && !$('[data-pm="dlugosc"]'));
+sprawdz('w trakcie: Pauza i Stop, długości zablokowane', $('[data-pm="pauza"]') && $('[data-pm="stop"]') && $$('.pm-krok').every(b => b.disabled));
 
 /* bez zgody na powiadomienia zostaje dźwięk i komunikat */
 w.Notification.permission = 'denied';

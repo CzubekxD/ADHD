@@ -160,11 +160,13 @@
   /* ---------- rysowanie ---------- */
   const czytaj = k => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } };
   const styl = n => `--k:var(--k-${n.kolor});--kt:var(--k-${n.kolor}-tlo)`;
+  // miniatura karty: faktura narzędzia (wspolne/wzory.css), a bez numeru wzoru — rysunek ekranu
+  const obraz = n => n.wzor ? `<div class="s-wzor s-wzor-${Number(n.wzor)}"></div>` : `<svg viewBox="0 0 220 92">${n.mini}</svg>`;
   const znak = (n, tonal) => `<span class="pp-znak${tonal ? ' tonal' : ''}">${window.znakNarzedzia ? znakNarzedzia(n) : esc(n.znak)}</span>`;
 
   function kafelek(n, korzen, maly) {
     return `<a class="pp-w pp-pusty${maly ? ' maly' : ''}" style="${styl(n)}" href="${esc(korzen + n.href)}" data-narzedzie="${esc(n.id)}">
-      ${n.mini ? `<div class="pp-mini" aria-hidden="true"><svg viewBox="0 0 220 92">${n.mini}</svg></div>` : ''}
+      ${n.mini || n.wzor ? `<div class="pp-mini" aria-hidden="true">${obraz(n)}</div>` : ''}
       <div class="pp-glowa">${znak(n, true)}<span class="pp-tytul">${esc(n.nazwa)}</span></div>
       ${n.pytanie ? `<p class="pp-zyczenie">${esc(n.pytanie)}</p>` : ''}
       <p class="pp-opis">${esc(n.opis)}</p>
@@ -172,7 +174,7 @@
   }
   function widzet(n, s, korzen, maly) {
     // ten sam układ co kafelek: miniatura u góry, ikona i nazwa, potem liczba dnia i przycisk
-    const mini = n.mini ? `<a class="pp-mini" href="${esc(korzen + n.href)}" tabindex="-1" aria-hidden="true"><svg viewBox="0 0 220 92">${n.mini}</svg></a>` : '';
+    const mini = n.mini || n.wzor ? `<a class="pp-mini" href="${esc(korzen + n.href)}" tabindex="-1" aria-hidden="true">${obraz(n)}</a>` : '';
     const glowa = mini + `<div class="pp-glowa">${znak(n, true)}<a class="pp-tytul pp-nazwa-n" href="${esc(korzen + n.href)}">${esc(n.nazwa)}</a></div>`;
     const tekst = s.zyczenie != null ? s.zyczenie : s.naglowek;
     const gora = tekst != null

@@ -8,10 +8,13 @@
 <meta name="description" content="Zestaw małych narzędzi do samomonitorowania i ogarniania dnia. Wszystko działa w przeglądarce, bez konta i bez serwera.">
 <link rel="stylesheet" href="./wspolne/cyber.css">
 <link rel="stylesheet" href="./wspolne/system.css">
+<link rel="stylesheet" href="./wspolne/wzory.css">
 <style>
 /* Pulpit dnia: nagłówek z datą, siatka 2 × 2 widżetów (jedna liczba, jedno zdanie, jedna akcja),
    pod spodem informacje o danych i kopia. Kolory i krój z wspolne/system.css. */
-body{margin:0;background:var(--s-tlo);color:var(--s-tusz);font:16px/1.5 var(--s-kroj);-webkit-text-size-adjust:100%}
+html{background:var(--s-tlo)}
+/* tło z kręgami (wspolne/wzory.css) leży pod stroną, więc body jest przezroczyste */
+body{margin:0;background:transparent;color:var(--s-tusz);font:16px/1.5 var(--s-kroj);-webkit-text-size-adjust:100%}
 main{max-width:1240px;margin:0 auto;padding-block:var(--s-6) var(--s-7);display:grid;gap:var(--s-5);
   padding-left:max(var(--s-4),env(safe-area-inset-left,0px));padding-right:max(var(--s-4),env(safe-area-inset-right,0px))}
 .pp-naglowek .data{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--s-przygaszony)}
@@ -19,20 +22,23 @@ main{max-width:1240px;margin:0 auto;padding-block:var(--s-6) var(--s-7);display:
 .pp-naglowek p{margin:var(--s-2) 0 0;color:var(--s-tusz-2);max-width:62ch}
 
 /* siatka widżetów: u góry duże karty bieżącej pory, niżej mniejsze „Później dziś” / „Wcześniej dziś” */
-.pp-pulpit{display:grid;gap:var(--s-5)}
-.pp-siatka{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.pp-siatka.maly{grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
-@media (max-width:720px){.pp-siatka,.pp-siatka.maly{grid-template-columns:minmax(0,1fr)}}
-.pp-grupa{display:grid;gap:10px}
-.pp-grupa-tytul{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--s-przygaszony);margin:0}
-.pp-w{background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);padding:16px 18px 18px;
-  display:flex;flex-direction:column;gap:14px;min-width:0;color:inherit;text-decoration:none}
-a.pp-w{transition:border-color .15s}
-a.pp-w:hover{border-color:var(--s-linia-mocna)}
+/* pulpit rysuje karty w grupach (wspolne/pulpit.js); tu grupy „znikają” (display:contents),
+   a karty, skrzynka i pomidor stają w jednej siatce 3 równych kolumn — krawędzie zgadzają się w pionie */
+.pp-pulpit,.pp-siatka,.pp-grupa{display:contents}
+.pp-grupa-tytul{grid-column:1 / -1;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--s-przygaszony);margin:6px 0 -6px}
+.pp-w{background:var(--s-pow);border:1.5px solid var(--s-ramka);border-radius:var(--s-zaokr-duze);padding:16px 18px 18px;
+  display:flex;flex-direction:column;gap:14px;min-width:0;color:inherit;text-decoration:none;
+  transition:transform .35s cubic-bezier(.2,.7,.3,1),box-shadow .35s,border-color .15s}
+a.pp-w:hover{border-color:var(--s-akcent)}
+/* najechanie: karta się unosi, a faktura w miniaturze powoli dryfuje */
+@keyframes pp-dryf{0%,100%{transform:scale(1.08) translate(0,0)}50%{transform:scale(1.14) translate(-4%,3%)}}
+@media (prefers-reduced-motion:no-preference){
+  .pp-w:hover,.pp-w:focus-within{transform:translateY(-4px) rotate(-.4deg);box-shadow:0 14px 34px rgb(0 0 0 / .55)}
+  .pp-w:hover .pp-mini .s-wzor,.pp-w:focus-within .pp-mini .s-wzor{animation:pp-dryf 6s ease-in-out infinite}}
 a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2px solid var(--k);outline-offset:2px}
 .pp-glowa{display:flex;align-items:center;gap:10px;min-width:0}
 .pp-znak{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:9px;flex:none;background:var(--k);color:var(--s-akcent-tusz);font-weight:700;font-size:12.5px}
-.pp-znak.tonal{background:var(--kt);color:var(--k)}
+.pp-znak.tonal{background:var(--kt);color:var(--k);box-shadow:inset 0 0 0 1.5px var(--s-ramka)}
 .pp-znak svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .pp-nazwa-n{color:var(--s-tusz);text-decoration:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pp-nazwa-n:hover{color:var(--k)}
@@ -45,7 +51,7 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 .pp-zyczenie{font-size:19px;font-weight:600;line-height:1.3;margin:0;text-wrap:balance;overflow-wrap:anywhere}
 .pp-chipy{display:flex;gap:6px;flex-wrap:wrap}
 .pp-chip{font-size:13px;border-radius:999px;padding:2px 10px;background:var(--s-pow-2);color:var(--s-tusz-2);white-space:nowrap}
-.pp-chip.flaga{background:var(--s-blad-tlo);color:var(--s-blad)}
+.pp-chip.flaga{background:var(--s-niepowodzenie-tlo);color:var(--s-niepowodzenie);font-weight:600;box-shadow:inset 0 0 0 1px color-mix(in oklch,var(--s-niepowodzenie) 45%,transparent)}
 .pp-chip.ok{background:var(--s-ok-tlo);color:var(--s-ok)}
 .pp-spark{width:150px;height:44px;flex:none}
 .pp-spark .ks{stroke:var(--k)} .pp-spark .k{fill:var(--k)} .pp-spark .kt{fill:var(--kt)}
@@ -59,20 +65,22 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 .pp-pkt{font-size:12px;font-weight:700;border-radius:99px;padding:1px 9px;background:var(--kt);color:var(--k);font-variant-numeric:tabular-nums}
 .pp-dni{display:flex;gap:4px}
 .pp-dni i{width:14px;height:14px;border-radius:4px;background:var(--s-pow-3)}
-.pp-dni i.ok{background:var(--s-ok)} .pp-dni i.miss{background:var(--s-blad)} .pp-dni i.skip{background:var(--s-linia-mocna)}
+.pp-dni i.ok{background:var(--s-ok)} .pp-dni i.miss{background:var(--s-niepowodzenie)} .pp-dni i.skip{background:var(--s-linia-mocna)}
 .pp-pytanie{background:var(--kt);border-radius:var(--s-zaokr);padding:12px 14px;font-weight:600}
 .pp-pytanie.gotowe{background:var(--s-pow-2);font-weight:500;color:var(--s-tusz-2)}
 .pp-akcja{align-self:flex-start;margin-top:auto;display:inline-flex;align-items:center;min-height:var(--s-cel);padding:0 16px;border-radius:var(--s-zaokr);
-  background:var(--k);color:var(--s-akcent-tusz);border:1px solid var(--k);font-weight:600;font-size:15px;text-decoration:none}
-.pp-akcja.cicha{background:var(--s-pow);color:var(--k);border-color:var(--s-linia-mocna)}
-.pp-mini{display:block;margin:-16px -18px 0;height:96px;background:var(--kt);border-radius:13px 13px 0 0;overflow:hidden}
+  background:var(--s-akcent-40);color:var(--s-tusz);border:1.5px solid var(--s-ramka);font-weight:700;font-size:15px;text-decoration:none}
+.pp-akcja:hover{background:color-mix(in oklch,var(--s-akcent) 60%,var(--s-tlo))}
+.pp-akcja.cicha{background:var(--s-pow);color:var(--s-tusz)}
+.pp-mini{display:block;position:relative;margin:-16px -18px 0;height:96px;background:var(--s-tlo);border-radius:13px 13px 0 0;overflow:hidden;border-bottom:1.5px solid var(--s-ramka)}
+.pp-mini .s-wzor{inset:-20%;transition:transform 1.2s cubic-bezier(.2,.7,.3,1)}
 .pp-mini svg{width:100%;height:100%;display:block}
 .pp-mini .k{fill:var(--k)} .pp-mini .ks{stroke:var(--k)} .pp-mini .p{fill:var(--s-pow)} .pp-mini .ps{stroke:var(--s-linia-mocna)}
 .pp-mini .t{fill:var(--s-tusz)} .pp-mini .ts{stroke:var(--s-tusz)} .pp-mini .l{fill:var(--s-linia-mocna)} .pp-mini .na{fill:var(--s-akcent-tusz)}
 .pp-mini text{font-family:var(--s-kroj);font-weight:700}
 /* mniejsza karta: ten sam układ, ciaśniej i drobniej */
 .pp-w.maly{padding:12px 14px 14px;gap:10px}
-.pp-w.maly .pp-mini{margin:-12px -14px 0;height:64px}
+.pp-w.maly .pp-mini{margin:-12px -14px 0;height:74px}
 .pp-w.maly .pp-tytul{font-size:15px}
 .pp-w.maly .pp-znak{width:28px;height:28px}
 .pp-w.maly .pp-zyczenie{font-size:16px}
@@ -85,21 +93,32 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 
 /* skrzynka na myśli (wspolne/skrzynka.js): na komputerze prawa kolumna, na telefonie pasek nad kartami
    i panel od dołu. Karteczka żółknie (--zolc 0…1) i gniecie się (--zgn 0…1) z wiekiem. */
-.pp-uklad{display:grid;grid-template-columns:190px minmax(0,1fr) 270px;gap:var(--s-5);align-items:start}
-/* karty pulpitu w jednej kolumnie, gdy między pomidorem a skrzynką robi się ciasno */
-.pp-pulpit{container-type:inline-size}
-@container (max-width:540px){.pp-siatka{grid-template-columns:minmax(0,1fr)}}
+.pp-uklad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch}
 /* pomidor (wspolne/pomidor.js): lewa kolumna na komputerze, panel od dołu na telefonie */
-.pm-kolumna{position:sticky;top:calc(56px + var(--s-4));min-width:0}
-.pm{display:grid;justify-items:center;gap:10px;text-align:center}
-.pm-naglowek{justify-self:start;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--s-przygaszony);margin:0}
-.pm-tarcza{width:150px;max-width:100%}
-.pm-tarcza .pm-ikona{width:100%;height:auto}
-.pm-czas{margin:0;font-size:34px;font-weight:650;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
-.pm-faza,.pm-pomoc{margin:0;font-size:14px;color:var(--s-przygaszony)}
-.pm-pomoc{font-size:13px}
-.pm-przyciski,.pm-dlugosci{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.pm-dlugosci .s-chip{min-height:var(--s-cel)}
+/* pomidor: prawa kolumna, rząd mniejszych kart — ma ich wysokość */
+.pm-kolumna{grid-column:3;grid-row:3;min-width:0;display:flex}
+/* karta pomidora: jak karta narzędzia; tarcza po lewej, sterowanie po prawej. Tło karty prześwituje, bo ciecz odsłania kręgi */
+.pm{flex:1;display:grid;grid-template-columns:auto minmax(0,1fr);align-content:space-between;gap:12px 14px;padding:16px 18px 18px;min-width:0;
+  background:color-mix(in oklch,var(--s-pow) 25%,transparent);border:1.5px solid var(--s-ramka);border-radius:var(--s-zaokr-duze)}
+.pm>*{grid-column:1 / -1}
+.pm-naglowek{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--s-tusz);margin:0}
+.pm-cialo{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pm-tarcza{position:relative;flex:none;width:136px;padding:0;border:0;background:none;color:var(--s-tusz);cursor:pointer;border-radius:50%;
+  box-shadow:0 8px 28px rgb(0 0 0 / .5)}
+.pm-tarcza .pm-ikona{width:100%;height:auto;border-width:3px}
+.pm-tarcza:focus-visible{outline:2px solid var(--s-akcent);outline-offset:4px}
+.pm-odczyt{position:absolute;inset:0;display:grid;place-content:center;gap:2px;text-align:center;text-shadow:0 2px 8px rgb(0 0 0 / .75)}
+.pm-czas{font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.pm-faza{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.pm-stery{display:grid;gap:10px;min-width:0;justify-items:start}
+.pm-przyciski{display:flex;flex-wrap:wrap;gap:6px}
+.pm-dlugosci{display:grid;gap:6px}
+.pm-dl{display:grid;grid-template-columns:58px 32px 34px 32px;align-items:center;gap:4px;font-size:13px;color:var(--s-przygaszony)}
+.pm-krok{width:32px;height:32px;border-radius:9px;border:1.5px solid var(--s-ramka);background:var(--s-pow);color:var(--s-tusz);font:700 16px/1 var(--s-kroj);cursor:pointer}
+.pm-krok:hover:not(:disabled){background:var(--s-akcent-40)}
+.pm-krok:disabled{opacity:.4;cursor:not-allowed}
+.pm-krok:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
+.pm-min{display:grid;place-items:center;height:32px;color:var(--s-tusz);font-weight:700;font-variant-numeric:tabular-nums}
 .pm-zadanie{display:grid;gap:4px;width:100%;text-align:left;font-size:13px;color:var(--s-przygaszony)}
 .pm-zadanie select{box-sizing:border-box;width:100%;min-height:var(--s-cel);padding:0 8px;border:1px solid var(--s-linia-mocna);border-radius:var(--s-zaokr);
   background:var(--s-pow);color:var(--s-tusz);font:400 15px var(--s-kroj)}
@@ -107,15 +126,19 @@ a.pp-w:focus-visible,.pp-akcja:focus-visible,.pp-nazwa-n:focus-visible{outline:2
 .pm-zad-nazwa{margin:0;font-size:15px;font-weight:600;overflow-wrap:anywhere}
 .pm-otworz{display:inline-flex;align-items:center;gap:6px;min-height:var(--s-cel);min-width:var(--s-cel);justify-content:center;padding:0 10px;border:1px solid var(--s-linia-mocna);
   border-radius:var(--s-zaokr);background:var(--s-pow);color:var(--s-tusz);font:600 15px var(--s-kroj);font-variant-numeric:tabular-nums;cursor:pointer;flex:none}
-.pm-otworz .pm-ikona{width:22px;height:22px}
+.pm-otworz .pm-ikona{width:22px;height:22px;border-width:1.5px}
 .pm-otworz [data-pomidor-czas]:empty{display:none}
 .pm-otworz[data-biegnie="1"]{border-color:var(--s-blad)}
 .pm-otworz:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
-dialog.pm-panel .pm-tarcza{width:180px}
-.sk{position:sticky;top:calc(56px + var(--s-4));display:grid;gap:12px;min-width:0}
-.sk-naglowek{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--s-przygaszony);margin:0}
+dialog.pm-panel .pm-kolumna,dialog.pm-panel .pm{background:none}
+dialog.pm-panel .pm-tarcza{width:170px}
+/* skrzynka: prawa kolumna, pierwszy rząd; tytuł i pole w jednej ramce, a karteczki wysuwają się w dół nad pomidora */
+.sk{grid-column:3;grid-row:1;align-self:start;position:relative;z-index:30;min-width:0}
+.sk-glowa{display:grid;gap:10px;padding:12px;background:var(--s-pow);border:1.5px solid var(--s-ramka);border-radius:var(--s-zaokr-duze)}
+.sk-lista{position:absolute;left:0;right:0;top:calc(100% + 12px);display:grid;gap:12px}
+.sk-naglowek{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--s-tusz);margin:0}
 .sk-pole{display:flex;gap:8px;min-width:0;flex:1}
-.sk-pole input{box-sizing:border-box;flex:1;min-width:0;min-height:var(--s-cel);padding:10px 12px;border:1px solid var(--s-linia-mocna);border-radius:var(--s-zaokr);
+.sk-pole input{box-sizing:border-box;flex:1;min-width:0;min-height:var(--s-cel);padding:10px 12px;border:1.5px solid var(--s-ramka);border-radius:var(--s-zaokr);
   background:var(--s-pow);color:var(--s-tusz);font:400 16px/1.3 var(--s-kroj)}
 .sk-pole input::placeholder{color:var(--s-przygaszony)}
 .sk-pole input:focus{outline:2px solid var(--s-akcent);outline-offset:0;border-color:transparent}
@@ -156,15 +179,25 @@ dialog.sk-panel[open]{animation:sk-wjazd .22s ease-out}
 @keyframes sk-wjazd{from{transform:translateY(48px);opacity:0}}
 .sk-panel-glowa{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:var(--s-3)}
 @media (max-width:899px){.pp-uklad{grid-template-columns:minmax(0,1fr)}.sk,.pm-kolumna{display:none}.sk-pasek{display:flex}}
+@media (min-width:900px) and (max-width:1100px){.pp-w .pp-wiersz{flex-direction:column;align-items:flex-start}}
 @media (prefers-reduced-motion:reduce){.sk-kartka{transition:none}dialog.sk-panel[open]{animation:none}}
 html[data-skin="cyber"] .sk-kartka{border-radius:0;box-shadow:0 0 0 1px rgb(252 238 10 / calc(.2 + var(--zolc) * .4)),0 0 calc(var(--zgn) * 18px) rgb(252 238 10 / .18)}
 
 /* informacje i kopia */
-.pp-info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:var(--s-4)}
+.pp-info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start;margin-top:var(--s-2)}
 @media (max-width:900px){.pp-info{grid-template-columns:minmax(0,1fr)}}
-.note{background:var(--s-pow);border:1px solid var(--s-linia);border-radius:var(--s-zaokr-duze);padding:16px 18px;min-width:0;display:flex;flex-direction:column}
-.note .brow{margin-top:auto;padding-top:10px}
-.note h2{font-size:15px;margin:0 0 8px}
+.note{background:var(--s-pow);border:1.5px solid var(--s-ramka);border-radius:var(--s-zaokr-duze);padding:12px 16px;min-width:0;display:flex;flex-direction:column;cursor:pointer}
+.note .brow{padding-top:10px}
+.note h2{font-size:15px;margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:24px}
+/* zwinięty: widać tylko tytuł ze strzałką; .otwarte rozwija (wspolne skrypt na dole strony) */
+.note h2::after{content:"";width:8px;height:8px;flex:none;border-right:2px solid var(--s-akcent);border-bottom:2px solid var(--s-akcent);transform:translateY(-2px) rotate(45deg);transition:transform .3s}
+.note.otwarte h2::after{transform:translateY(2px) rotate(225deg)}
+.note-zwin{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease}
+.note.otwarte .note-zwin{grid-template-rows:1fr}
+.note-zwin>div{overflow:hidden;min-height:0}
+.note-zwin>div>:first-child{margin-top:10px}
+.note:focus-visible{outline:2px solid var(--s-akcent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.note-zwin,.note h2::after{transition:none}}
 .note p{margin:0 0 8px;color:var(--s-tusz-2);font-size:14px}
 .note p:last-child{margin-bottom:0}
 .note a{color:var(--s-akcent)}
@@ -175,7 +208,7 @@ kbd{font:600 12px/1 ui-monospace,"SF Mono",Menlo,Consolas,monospace;border:1px s
 .kopia-stan.dawno{align-self:flex-start;color:var(--s-uwaga);background:var(--s-uwaga-tlo);border-radius:999px;padding:3px 12px;font-weight:600}
 .kmsg{margin-top:10px !important;font-size:14px}
 @media (max-width:520px){.pp-naglowek h1{font-size:26px}.pp-liczba{font-size:34px}}
-@media (prefers-reduced-motion:reduce){a.pp-w{transition:none}}
+@media (prefers-reduced-motion:reduce){.pp-w,.pp-mini .s-wzor{transition:none}}
 /* CYBER: przyciski pulpitu tym samym pismem co .s-przycisk */
 html[data-skin="cyber"] .pp-akcja{font-family:"Share Tech Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em;box-shadow:0 0 14px color-mix(in srgb,var(--k) 45%,transparent)}
 html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
@@ -186,6 +219,7 @@ html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
 <script src="./wspolne/kopia.js"></script>
 </head>
 <body>
+<div class="s-tlo-kregi" aria-hidden="true"></div>
 <header class="pg" data-pasek-gorny data-narzedzie="" data-korzen="./"></header>
 <main>
   <header class="pp-naglowek">
@@ -200,37 +234,46 @@ html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
     <div class="sk-pasek">
       <form class="sk-pole" data-skrzynka-pole><input type="text" aria-label="Wrzuć myśl do skrzynki" placeholder="Wrzuć myśl…" maxlength="280" enterkeyhint="send" autocomplete="off"></form>
       <button class="pm-otworz" type="button" data-pomidor-otworz aria-controls="pm-panel" aria-expanded="false" aria-label="Otwórz pomidora (timer)">
-        <svg class="pm-ikona" viewBox="0 0 100 100" aria-hidden="true"><circle class="pm-skorka" cx="50" cy="55" r="38"/><circle class="pm-miazsz" cx="50" cy="55" r="33"/><path class="pm-lisc" d="M50 22c-3-6-9-8-15-6 5 1 8 3 10 7-6-1-11 1-14 5 6-1 11 0 15 2-2 3-2 7 0 10 2-3 2-7 4-10 4-2 9-3 15-2-3-4-8-6-14-5 2-4 5-6 10-7-6-2-12 0-15 6z"/></svg><span data-pomidor-czas></span></button>
+        <span class="pm-ikona" aria-hidden="true"><span class="pm-ciecz"></span></span><span data-pomidor-czas></span></button>
       <button class="sk-otworz" type="button" data-skrzynka-otworz aria-controls="sk-panel" aria-expanded="false" aria-label="Otwórz skrzynkę na myśli">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h5l1.5 3h5L16 13h5M5 5h14l2 8v6H3v-6z"/></svg><span data-skrzynka-licznik>0</span></button>
     </div>
     <aside class="pm-kolumna" data-pomidor aria-label="Pomidor"></aside>
     <div class="pp-pulpit" id="pulpit"></div>
     <aside class="sk" aria-labelledby="sk-tytul">
-      <h2 class="sk-naglowek" id="sk-tytul">Skrzynka na myśli</h2>
-      <form class="sk-pole" data-skrzynka-pole><input type="text" aria-label="Wrzuć myśl do skrzynki" placeholder="Wrzuć myśl i Enter" maxlength="280" enterkeyhint="send" autocomplete="off"></form>
-      <p class="sk-pusto" data-skrzynka-pusto>Pusto. Wrzuć tu to, co krąży po głowie, a zajmiesz się tym później.</p>
-      <ol class="sk-stos" data-skrzynka-stos></ol>
+      <div class="sk-glowa">
+        <h2 class="sk-naglowek" id="sk-tytul">Skrzynka na myśli</h2>
+        <form class="sk-pole" data-skrzynka-pole><input type="text" aria-label="Wrzuć myśl do skrzynki" placeholder="Wrzuć myśl i Enter" maxlength="280" enterkeyhint="send" autocomplete="off"></form>
+      </div>
+      <div class="sk-lista">
+        <p class="sk-pusto" data-skrzynka-pusto>Pusto. Wrzuć tu to, co krąży po głowie, a zajmiesz się tym później.</p>
+        <ol class="sk-stos" data-skrzynka-stos></ol>
+      </div>
     </aside>
   </div>
 
   <div class="pp-info">
-    <section class="note">
+    <section class="note" tabindex="0" role="button" aria-expanded="false">
       <h2>Gdzie leżą dane</h2>
+      <div class="note-zwin"><div>
       <p>Wszystko, co wpiszesz, zostaje w tej przeglądarce. Nic nie leci na żaden serwer, bo serwera nie ma.</p>
       <p>Te same dane na telefonie i komputerze: menu ⋯ → <b>Zapisuj na Google Drive</b>. Więcej w <a href="./prywatnosc.html">prywatności</a>.</p>
+      </div></div>
     </section>
-    <section class="note">
+    <section class="note" tabindex="0" role="button" aria-expanded="false">
       <h2>Wspólne skróty</h2>
+      <div class="note-zwin"><div>
       <ul class="keys">
         <li><span><kbd>Ctrl</kbd> + <kbd>Z</kbd></span> cofa ostatnią zmianę</li>
         <li><span><kbd>Ctrl</kbd> + <kbd>Y</kbd></span> ponawia</li>
         <li><span><kbd>Delete</kbd></span> usuwa zaznaczony wiersz, węzeł albo kartę</li>
       </ul>
       <p><b>CYBER</b> w pasku u góry: neonowy motyw wszędzie naraz.</p>
+      </div></div>
     </section>
-    <section class="note" id="kopia">
+    <section class="note" id="kopia" tabindex="0" role="button" aria-expanded="false">
       <h2>Kopia wszystkiego</h2>
+      <div class="note-zwin"><div>
       <p>Jeden plik z danymi wszystkich narzędzi z tej przeglądarki, na backup albo przeprowadzkę.</p>
       <p class="kopia-stan" id="kopia-stan"></p>
       <div class="brow"><button class="s-przycisk maly" id="kopia-pobierz" type="button">Pobierz kopię</button><button class="s-przycisk maly" id="kopia-wczytaj" type="button">Wczytaj kopię</button></div>
@@ -239,6 +282,7 @@ html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
         <div class="brow"><button class="s-przycisk maly grozny" id="kopia-tak" type="button">Zastąp dane</button><button class="s-przycisk maly" id="kopia-nie" type="button">Anuluj</button></div>
       </div>
       <p class="kmsg" id="kopia-msg" role="status"></p>
+      </div></div>
     </section>
   </div>
 
@@ -294,6 +338,8 @@ function stanKopii(zDanymi) {
   el.textContent = tekst;
   el.hidden = !tekst;
   el.classList.toggle("dawno", !sync && !!zDanymi && (dni == null || dni >= 7));
+  // przypomnienie o kopii ma być widać bez rozwijania bloku
+  if (el.classList.contains("dawno")) { const b = $k("kopia"); b.classList.add("otwarte"); b.setAttribute("aria-expanded", "true"); }
 }
 function odswiezPulpit() {
   const teraz = new Date();
@@ -306,6 +352,21 @@ function odswiezPulpit() {
   $k("pp-wstep").hidden = !!zDanymi;
 }
 odswiezPulpit();
+
+/* dolne bloki: przytrzymanie kursora ~0,7 s rozwija (zjechanie zwija);
+   klik albo Enter/spacja przełącza i przypina stan, aż klikniesz znowu */
+document.querySelectorAll(".note").forEach(b => {
+  let timer = 0, przypiety = b.classList.contains("otwarte");   // rozwinięty z góry (przypomnienie o kopii) zostaje
+  const ustaw = o => { b.classList.toggle("otwarte", o); b.setAttribute("aria-expanded", String(o)); };
+  b.addEventListener("mouseenter", () => { if (przypiety) return; clearTimeout(timer); timer = setTimeout(() => ustaw(true), 700); });
+  b.addEventListener("mouseleave", () => { clearTimeout(timer); if (!przypiety) ustaw(false); });
+  const przelacz = e => {
+    if (e.target.closest("button, a, input, select")) return;   // przyciski w środku działają normalnie
+    clearTimeout(timer); const o = !b.classList.contains("otwarte"); ustaw(o); przypiety = o;
+  };
+  b.addEventListener("click", przelacz);
+  b.addEventListener("keydown", e => { if (e.target === b && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); przelacz(e); } });
+});
 // wracasz z narzędzia albo na kartę, dane przyszły z Google Drive albo z innej karty — liczby i pora się odświeżają
 addEventListener("pageshow", e => { if (e.persisted) { odswiezPulpit(); Skrzynka.rysuj(); } });
 Skrzynka.zamontuj({ korzen: "./" });
