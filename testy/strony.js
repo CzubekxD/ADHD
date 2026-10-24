@@ -8,11 +8,14 @@
    Do porównania zapisuje zrzuty (z wyłączonym ruchem, żeby fala nie psuła porównań).
 
    Użycie: node strony.js <folder strony> [--wyniki <folder>] [--tylko-zrzuty]
-   CHROMIUM=/ścieżka/do/chrome — własna przeglądarka zamiast tej z „npx playwright install”. */
+   CHROMIUM=/ścieżka/do/chrome — własna przeglądarka zamiast tej z „npx playwright install”.
+   PRZEGLADARKI=chromium,webkit — w których silnikach sprawdzać (domyślnie chromium; webkit = Safari na iPhonie).
+   Barwa: tokeny mieszane z akcentu (bursztyn 40%, ramka, kręgi) muszą wyjść tym samym kolorem RGB co prosta
+   mieszanka składników — Safari liczy color-mix w oklch inaczej i bursztyn robił się zielony. */
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { chromium } = require('playwright');
+const playwright = require('playwright');
 const { default: AxeBuilder } = require('@axe-core/playwright');
 const { TERAZ, DANE } = require('./dane-przykladowe');
 
@@ -37,6 +40,12 @@ const PARY = [
   ['--s-przygaszony', '--s-tlo'], ['--s-tusz', '--s-akcent-40'], ['--s-akcent', '--s-pow'], ['--s-akcent', '--s-tlo'],
   ['--s-niepowodzenie', '--s-niepowodzenie-tlo'], ['--s-ok', '--s-ok-tlo'], ['--s-uwaga', '--s-uwaga-tlo'],
   ['--s-blad', '--s-pow'], ['--s-kartka-tusz', '--s-kartka']
+];
+// tokeny mieszane z dwóch kolorów: [token, kolor A, kolor B, udział A]
+const BARWA = [
+  ['--s-akcent-40', '--s-akcent', '--s-tlo', 0.4],
+  ['--s-ramka', '--s-akcent', '--s-pow', 0.4],
+  ['--s-kregi', '--s-niepowodzenie', '--s-tlo', 0.4]
 ];
 const HOSTY_CZCIONEK = /fonts\.(googleapis|gstatic)\.com/;
 
@@ -71,8 +80,11 @@ async function main() {
   fs.mkdirSync(path.join(WYNIKI, 'zrzuty'), { recursive: true });
   const srv = await serwer();
   const adres = `http://127.0.0.1:${srv.address().port}/`;
-  const przegladarka = await chromium.launch(process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
-  const raport = { strony: [], kontrast: [], porazki: [] };
+  const raport = { strony: [], kontrast: [], barwa: [], porazki: [] };
+  const silniki = (process.env.PRZEGLADARKI || 'chromium').split(',').map(x => x.trim()).filter(Boolean);
+  for (const silnik of silniki) {
+  const przegladarka = await playwright[silnik].launch(silnik === 'chromium' && process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM } : {});
+  const przedrostek = silnik === 'chromium' ? '' : (silnik === 'webkit' ? 'safari-' : silnik + '-');
 
   for (const w of WARIANTY) {
     for (const [id, url] of STRONY) {
@@ -110,7 +122,7 @@ async function main() {
           .map(v => ({ regula: v.id, waga: v.impact, opis: v.help, ile: v.nodes.length, przyklad: (v.nodes[0] || {}).target }));
       }
 
-      const plik = `${id}-${w.nazwa}.png`;
+      const plik = `${przedrostek}${id}-${w.nazwa}.png`;
       await strona.screenshot({ path: path.join(WYNIKI, 'zrzuty', plik), fullPage: true });
 
       // kontrast tokenów: raz na motyw, na pulpicie
@@ -127,23 +139,33 @@ async function main() {
             wynik[t] = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
           });
           el.remove(); return wynik;
-        }, [...new Set(PARY.flat())]);
+        }, [...new Set(PARY.flat().concat(BARWA.flat()))]);
         const pow = rgba(kolory['--s-pow']);
         PARY.forEach(([tekst, tlo]) => {
           const t = rgba(kolory[tekst]), b = naloz(rgba(kolory[tlo]), pow);
           const k = kontrast(naloz(t, b), b);
-          raport.kontrast.push({ motyw: w.cyber ? 'CYBER' : 'ciemny', tekst, tlo, kontrast: Math.round(k * 100) / 100, ok: k >= 4.5 });
+          raport.kontrast.push({ motyw: (przedrostek ? 'Safari ' : '') + (w.cyber ? 'CYBER' : 'ciemny'), tekst, tlo, kontrast: Math.round(k * 100) / 100, ok: k >= 4.5 });
+        });
+        // barwa: token mieszany musi mieć kolor prostej mieszanki składników w sRGB (± 8 na kanał)
+        BARWA.forEach(([token, a, b, udzial]) => {
+          const jest = rgba(kolory[token]), A = rgba(kolory[a]), B = rgba(kolory[b]);
+          const ma = [0, 1, 2].map(i => A[i] * udzial + B[i] * (1 - udzial));
+          const roznica = Math.max(...[0, 1, 2].map(i => Math.abs(jest[i] - ma[i]))) * 255;
+          const hex = c => '#' + c.slice(0, 3).map(v => Math.round(v * 255).toString(16).padStart(2, '0')).join('');
+          raport.barwa.push({ motyw: (przedrostek ? 'Safari ' : 'Chromium ') + (w.cyber ? 'CYBER' : 'ciemny'), token, jest: hex(jest), ma: hex(ma), ok: roznica <= 8 });
         });
       }
 
-      raport.strony.push({ strona: id, wariant: w.nazwa, bledy, poziome, dostepnosc, zrzut: plik });
+      raport.strony.push({ strona: id, wariant: przedrostek + w.nazwa, bledy, poziome, dostepnosc, zrzut: plik });
       await kontekst.close();
       const stan = bledy.length || poziome || dostepnosc.length ? 'BŁĄD' : 'ok  ';
-      console.log(`${stan} ${id} ${w.nazwa}${bledy.length ? ' — ' + bledy.join(' | ') : ''}${poziome ? ' — poziome przewijanie' : ''}${dostepnosc.length ? ' — dostępność: ' + dostepnosc.map(d => `${d.regula} (${d.ile})`).join(', ') : ''}`);
+      console.log(`${stan} ${id} ${przedrostek}${w.nazwa}${bledy.length ? ' — ' + bledy.join(' | ') : ''}${poziome ? ' — poziome przewijanie' : ''}${dostepnosc.length ? ' — dostępność: ' + dostepnosc.map(d => `${d.regula} (${d.ile})`).join(', ') : ''}`);
     }
   }
   await przegladarka.close();
+  }
   srv.close();
+  const silnikiOpis = (process.env.PRZEGLADARKI || 'chromium').split(',').map(x => x.trim() === 'webkit' ? 'Safari (WebKit)' : x.trim() === 'chromium' ? 'Chromium' : x.trim()).join(' i ');
 
   if (!TYLKO_ZRZUTY) {
     raport.strony.forEach(s => {
@@ -151,6 +173,7 @@ async function main() {
       if (s.poziome) raport.porazki.push(`${s.strona} ${s.wariant}: poziome przewijanie`);
       s.dostepnosc.forEach(d => raport.porazki.push(`${s.strona} ${s.wariant}: ${d.regula} (${d.waga}, ${d.ile}×) — ${d.opis}`));
     });
+    raport.barwa.filter(b => !b.ok).forEach(b => raport.porazki.push(`barwa ${b.motyw}: ${b.token} wychodzi ${b.jest}, a powinien ${b.ma} (mieszanie kolorów w tej przeglądarce)`));
     raport.kontrast.filter(k => !k.ok).forEach(k => raport.porazki.push(`kontrast ${k.motyw}: ${k.tekst} na ${k.tlo} = ${k.kontrast}:1 (wymagane 4,5:1)`));
     raport.kontrast.forEach(k => console.log(`${k.ok ? 'ok  ' : 'BŁĄD'} kontrast ${k.motyw}: ${k.tekst} na ${k.tlo} = ${k.kontrast}:1`));
   }
@@ -158,8 +181,10 @@ async function main() {
 
   let md = '';
   if (!TYLKO_ZRZUTY) {
-    md += `### Strony w przeglądarce\n\n${raport.strony.length} widoków (7 stron × 1100/390 px × ciemny/CYBER). `;
+    md += `### Strony w przeglądarce\n\n${raport.strony.length} widoków (7 stron × 1100/390 px × ciemny/CYBER × ${silnikiOpis}). `;
     md += raport.porazki.length ? `**${raport.porazki.length} problemów:**\n\n` + raport.porazki.map(p => `- ${p}`).join('\n') + '\n\n' : 'Bez błędów w konsoli, bez poziomego przewijania, bez poważnych naruszeń dostępności.\n\n';
+    md += '<details><summary>Barwa tokenów mieszanych (każda przeglądarka)</summary>\n\n| Przeglądarka i motyw | Token | Wychodzi | Powinien |\n|---|---|---|---|\n' +
+      raport.barwa.map(b => `| ${b.motyw} | \`${b.token}\` | ${b.ok ? '✅' : '❌'} ${b.jest} | ${b.ma} |`).join('\n') + '\n\n</details>\n\n';
     md += '<details><summary>Kontrast par tekst/tło z tokenów</summary>\n\n| Motyw | Tekst | Tło | Kontrast |\n|---|---|---|---|\n' +
       raport.kontrast.map(k => `| ${k.motyw} | \`${k.tekst}\` | \`${k.tlo}\` | ${k.ok ? '✅' : '❌'} ${k.kontrast}:1 |`).join('\n') + '\n\n</details>\n\n';
   }

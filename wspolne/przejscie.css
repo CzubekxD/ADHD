@@ -165,14 +165,14 @@ html[data-narzedzie="woop"]:not([data-skin="cyber"]) .btn.primary,
 html[data-narzedzie="plany"]:not([data-skin="cyber"]) .btn.primary,
 html[data-narzedzie="tablica"]:not([data-skin="cyber"]) button.act.primary,
 html[data-narzedzie="pasek"]:not([data-skin="cyber"]) button.przycisk.glowny{background:var(--s-akcent-40);border:1.5px solid var(--s-ramka);color:var(--s-tusz);font-weight:700}
-html[data-narzedzie]:not([data-skin="cyber"]) :is(.btn.primary,button.act.primary,button.przycisk.glowny):hover{background:color-mix(in oklch,var(--s-akcent) 60%,var(--s-tlo));filter:none}
+html[data-narzedzie]:not([data-skin="cyber"]) :is(.btn.primary,button.act.primary,button.przycisk.glowny):hover{background:color-mix(in srgb,var(--s-akcent) 60%,var(--s-tlo));filter:none}
 html[data-narzedzie="woop"]:not([data-skin="cyber"]) :is(.btn.ghost,.btn:not(.primary)),
 html[data-narzedzie="plany"]:not([data-skin="cyber"]) :is(.btn.ghost,.btn:not(.primary)){color:var(--s-tusz)}
 
 /* WOOP: kroki w odcieniach bursztynu, Przeszkoda w błękicie (to, co staje na drodze) */
 html[data-narzedzie="woop"]:root{
   --w:var(--s-akcent); --w-bg:color-mix(in srgb,var(--s-akcent) 16%,var(--s-pow));
-  --o1:color-mix(in oklch,var(--s-akcent) 65%,var(--s-tusz)); --o1-bg:color-mix(in srgb,var(--s-akcent) 10%,var(--s-pow));
+  --o1:color-mix(in srgb,var(--s-akcent) 65%,var(--s-tusz)); --o1-bg:color-mix(in srgb,var(--s-akcent) 10%,var(--s-pow));
   --o2:var(--s-niepowodzenie); --o2-bg:color-mix(in srgb,var(--s-niepowodzenie) 14%,var(--s-pow));
   --p:var(--s-akcent); --p-bg:color-mix(in srgb,var(--s-akcent) 22%,var(--s-pow));
   --ex:var(--s-akcent); --ex-bg:color-mix(in srgb,var(--s-akcent) 14%,var(--s-pow));
@@ -180,17 +180,17 @@ html[data-narzedzie="woop"]:root{
 }
 /* Plany: typy kroków w bursztynie, eskalacja w błękicie */
 html[data-narzedzie="plany"]:root{
-  --t-trigger:var(--s-akcent); --t-question:color-mix(in oklch,var(--s-akcent) 70%,var(--s-tusz));
-  --t-choice:color-mix(in oklch,var(--s-akcent) 50%,var(--s-tusz)); --t-action:var(--s-tusz-2);
+  --t-trigger:var(--s-akcent); --t-question:color-mix(in srgb,var(--s-akcent) 70%,var(--s-tusz));
+  --t-choice:color-mix(in srgb,var(--s-akcent) 50%,var(--s-tusz)); --t-action:var(--s-tusz-2);
   --t-escalate:var(--s-niepowodzenie); --none:var(--s-przygaszony); --none-bg:var(--s-pow-2);
 }
 /* Tablica: trudność zadań jako coraz mocniejszy bursztyn (zamiast zieleni, żółci, pomarańczu i czerwieni) */
 html[data-narzedzie="tablica"]:root{
-  --t1:color-mix(in oklch,var(--s-akcent) 45%,var(--s-tusz-2)); --t2:color-mix(in oklch,var(--s-akcent) 70%,var(--s-tusz));
-  --t3:var(--s-akcent); --t4:color-mix(in oklch,var(--s-akcent) 80%,#ff6a00);
+  --t1:color-mix(in srgb,var(--s-akcent) 45%,var(--s-tusz-2)); --t2:color-mix(in srgb,var(--s-akcent) 70%,var(--s-tusz));
+  --t3:var(--s-akcent); --t4:color-mix(in srgb,var(--s-akcent) 80%,#ff6a00);
   --t1-bg:color-mix(in srgb,var(--s-akcent) 8%,var(--s-pow)); --t2-bg:color-mix(in srgb,var(--s-akcent) 14%,var(--s-pow));
   --t3-bg:color-mix(in srgb,var(--s-akcent) 20%,var(--s-pow)); --t4-bg:color-mix(in srgb,var(--s-akcent) 28%,var(--s-pow));
-  --gold:var(--s-akcent); --gold-soft:var(--s-akcent-tlo); --goldwash:color-mix(in oklch,var(--s-akcent) 13%,transparent);
+  --gold:var(--s-akcent); --gold-soft:var(--s-akcent-tlo); --goldwash:color-mix(in srgb,var(--s-akcent) 13%,transparent);
   --total:var(--s-akcent); --good:var(--s-ok); --bar-soft:var(--s-akcent-40);
 }
 /* CYBER: ta sama zasada na neonach — akcent żółty (--s-akcent), dopełnienie cyjan (--s-niepowodzenie) */
