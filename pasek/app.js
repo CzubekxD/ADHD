@@ -69,13 +69,13 @@ function czyWolny(iso, dniWolne) {
 function przygas(hex, ile) {
   const n = parseInt(hex.slice(1), 16);
   const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-  const jasne = window.matchMedia('(prefers-color-scheme: dark)').matches ? 20 : 245;
+  const jasne = 20;   // jeden motyw: ciemny
   const mix = c => Math.round(c * (1 - ile) + jasne * ile);
   return '#' + [mix(r), mix(g), mix(b)].map(c => dwie(c.toString(16))).join('');
 }
 
 function czyCiemnyMotyw() {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return true;   // jeden motyw: ciemny
 }
 
 /* ===== stan ===== */
