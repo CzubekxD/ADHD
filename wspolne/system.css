@@ -38,12 +38,12 @@
   /* jeden akcent dla wszystkich narzędzi: bursztyn. Narzędzia rozróżniają faktury (wzory), nie kolory */
   --s-akcent:var(--k-bursztyn); --s-akcent-tlo:var(--k-bursztyn-tlo);
   /* bursztyn w 40%: wypełnienie przycisków i wzorów; ramki kart i przycisków w tym samym kolorze */
-  --s-akcent-40:color-mix(in oklch,var(--s-akcent) 40%,var(--s-tlo));
-  --s-ramka:color-mix(in oklch,var(--s-akcent) 40%,var(--s-pow));
+  --s-akcent-40:color-mix(in srgb,var(--s-akcent) 40%,var(--s-tlo));
+  --s-ramka:color-mix(in srgb,var(--s-akcent) 40%,var(--s-pow));
   /* niepowodzenia (nie zadziałało, pominięty dzień): dopełnienie bursztynu na kole barw — wybija się, a zostaje w palecie */
-  --s-niepowodzenie:#8FB2EB; --s-niepowodzenie-tlo:color-mix(in oklch,#8FB2EB 18%,transparent);
+  --s-niepowodzenie:#8FB2EB; --s-niepowodzenie-tlo:color-mix(in srgb,#8FB2EB 18%,transparent);
   /* tło strony: kręgi w kolorze dopełnienia, 40% */
-  --s-kregi:color-mix(in oklch,var(--s-niepowodzenie) 40%,var(--s-tlo));
+  --s-kregi:color-mix(in srgb,var(--s-niepowodzenie) 40%,var(--s-tlo));
 
   /* pismo: jeden krój, sześć rozmiarów */
   --s-kroj:"Host Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -208,16 +208,16 @@ header.pg{display:block;flex-wrap:nowrap;gap:0;padding:0;margin:0 calc(-1 * var(
 /* pomidor (wspolne/pomidor.js): naczynie z cieczą. --pm-f = ile bloku zostało; ciecz opada jak spuszczana woda
    i odsłania tło. Praca: złoto-czarna (bursztyn), przerwa: błękit dopełnienia. Mały pomidor w pasku: to samo bez fali. */
 .pm-ikona{--pm-kolor:var(--s-akcent);position:relative;display:block;aspect-ratio:1;border-radius:50%;overflow:hidden;
-  border:2px solid color-mix(in oklch,var(--pm-kolor) 55%,transparent);box-shadow:inset 0 0 0 4px rgb(0 0 0 / .22);transition:border-color .6s}
+  border:2px solid color-mix(in srgb,var(--pm-kolor) 55%,transparent);box-shadow:inset 0 0 0 4px rgb(0 0 0 / .22);transition:border-color .6s}
 [data-faza="przerwa"] .pm-ikona{--pm-kolor:var(--s-niepowodzenie)}
 .pm-ciecz{position:absolute;left:0;right:0;bottom:0;height:calc(var(--pm-f,1) * 100%);transition:height 1s linear;
   background:repeating-linear-gradient(-45deg,transparent 0 6px,rgb(0 0 0 / .22) 6px 8px),
-    linear-gradient(color-mix(in oklch,var(--pm-kolor) 75%,#000),color-mix(in oklch,var(--pm-kolor) 8%,#000) 85%)}
+    linear-gradient(color-mix(in srgb,var(--pm-kolor) 75%,#000),color-mix(in srgb,var(--pm-kolor) 8%,#000) 85%)}
 /* duża tarcza: powierzchnia z falą (maska), druga warstwa fali płynie w kontrze */
 .pm-tarcza .pm-ciecz,.pm-tarcza .pm-ciecz::after{
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='14'%3E%3Cpath d='M0 7Q15 0 30 7T60 7T90 7T120 7V14H0Z'/%3E%3C/svg%3E") repeat-x 0 0/120px 14px,linear-gradient(#000 0 0) no-repeat 0 13px/100% 100%;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='14'%3E%3Cpath d='M0 7Q15 0 30 7T60 7T90 7T120 7V14H0Z'/%3E%3C/svg%3E") repeat-x 0 0/120px 14px,linear-gradient(#000 0 0) no-repeat 0 13px/100% 100%}
-.pm-tarcza .pm-ciecz::after{content:"";position:absolute;left:0;right:0;top:0;height:22px;background:color-mix(in oklch,var(--pm-kolor) 55%,#fff);opacity:.22}
+.pm-tarcza .pm-ciecz::after{content:"";position:absolute;left:0;right:0;top:0;height:22px;background:color-mix(in srgb,var(--pm-kolor) 55%,#fff);opacity:.22}
 @keyframes pm-plyn{to{-webkit-mask-position:120px 0,0 13px;mask-position:120px 0,0 13px}}
 @media (prefers-reduced-motion:no-preference){.pm-tarcza .pm-ciecz{animation:pm-plyn 2.4s linear infinite}.pm-tarcza .pm-ciecz::after{animation:pm-plyn 3.7s linear infinite reverse}}
 @media (prefers-reduced-motion:reduce){.pm-ciecz{transition:none}}
@@ -252,7 +252,7 @@ html[data-skin="cyber"]:root{
   --k-oliwka:#C6FF3D; --k-oliwka-tlo:#1E2A06;
   --k-lupek:#A8B8FF; --k-lupek-tlo:#141A33;
   --s-akcent-tusz:#07060D;
-  --s-niepowodzenie:#00F0FF; --s-niepowodzenie-tlo:color-mix(in oklch,#00F0FF 16%,transparent);
+  --s-niepowodzenie:#00F0FF; --s-niepowodzenie-tlo:color-mix(in srgb,#00F0FF 16%,transparent);
   --s-zaokr:2px; --s-zaokr-duze:0px;
   color-scheme:dark}
 html[data-skin="cyber"] .s-tytul,html[data-skin="cyber"] .s-naglowek,html[data-skin="cyber"] .pg-narzedzie{font-family:"Chakra Petch",var(--s-kroj);text-transform:uppercase;letter-spacing:.03em}
