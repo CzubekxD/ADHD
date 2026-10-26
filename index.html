@@ -304,6 +304,7 @@ html[data-skin="cyber"] .pp-akcja.cicha{box-shadow:none}
     <a href="https://github.com/czubekxd/ADHD" target="_blank" rel="noopener">kod na GitHubie ↗</a>
     <a href="https://github.com/czubekxd/ADHD/blob/main/LICENSE" target="_blank" rel="noopener">licencja niekomercyjna</a>
     <a href="./prywatnosc.html">prywatność</a>
+    <a href="#" data-wstep-otworz>jak to działa?</a>
     <a href="https://buycoffee.to/czubekxd" target="_blank" rel="noopener">postaw kawę ☕</a>
   </footer>
 </main>
@@ -383,18 +384,14 @@ odswiezPulpit();
   ustaw();
 })();
 
-/* dolne bloki: przytrzymanie kursora ~0,7 s rozwija (zjechanie zwija);
-   klik albo Enter/spacja przełącza i przypina stan, aż klikniesz znowu */
+/* dolne bloki: rozwijają się i zwijają tylko kliknięciem albo Enter/spacją */
 document.querySelectorAll(".note").forEach(b => {
-  let timer = 0, przypiety = b.classList.contains("otwarte");   // rozwinięty z góry (przypomnienie o kopii) zostaje
   const przycisk = b.querySelector(".note-przelacz");
   const ustaw = o => { b.classList.toggle("otwarte", o); przycisk.setAttribute("aria-expanded", String(o)); };
-  b.addEventListener("mouseenter", () => { if (przypiety) return; clearTimeout(timer); timer = setTimeout(() => ustaw(true), 700); });
-  b.addEventListener("mouseleave", () => { clearTimeout(timer); if (!przypiety) ustaw(false); });
   const przelacz = e => {
     const cel = e.target.closest("button, a, input, select");
     if (cel && cel !== przycisk) return;   // przyciski i linki w treści działają normalnie
-    clearTimeout(timer); const o = !b.classList.contains("otwarte"); ustaw(o); przypiety = o;
+    ustaw(!b.classList.contains("otwarte"));
   };
   b.addEventListener("click", przelacz);
 });
@@ -488,6 +485,79 @@ $k("kopia-tak").addEventListener("click", () => {
   odswiezPulpit();
   Skrzynka.rysuj();
 });
+</script>
+<!-- wprowadzenie dla nowych osób: pokazuje się raz, potem ze stopki „jak to działa?” -->
+<style>
+ .wstep{max-width:440px;width:calc(100% - 32px);padding:22px;background:var(--s-pow);color:var(--s-tusz);border:1.5px solid var(--s-ramka,var(--s-linia));border-radius:var(--s-zaokr-duze,16px);font-family:var(--s-kroj)}
+ .wstep::backdrop{background:color-mix(in srgb,var(--s-tlo) 80%,transparent)}
+ .wstep-gora{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:13px}
+ .wstep-licznik{color:var(--k-bursztyn)}
+ .wstep-pomin{border:0;background:none;color:var(--s-przygaszony);font:inherit;cursor:pointer;padding:6px}
+ .wstep-ikona{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--k-bursztyn-tlo);color:var(--k-bursztyn);margin-bottom:12px}
+ .wstep-ikona svg,.wstep-lista svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+ .wstep h2{margin:0 0 8px;font-size:20px}
+ .wstep p{margin:0 0 14px;color:var(--s-tusz-2);line-height:1.55}
+ .wstep-lista{list-style:none;margin:0 0 14px;padding:0}
+ .wstep-lista li{display:flex;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--s-linia);font-size:14px}
+ .wstep-lista svg{flex:none;width:20px;height:20px;color:var(--k-bursztyn)}
+ .wstep-lista small{color:var(--s-przygaszony);font-size:13px}
+ .wstep-kropki{display:flex;gap:6px;margin-bottom:16px}
+ .wstep-kropki i{height:6px;width:6px;border-radius:3px;background:var(--s-linia-mocna);transition:width .2s}
+ .wstep-kropki i.tu{width:20px;background:var(--k-bursztyn)}
+ .wstep-dol{display:flex;gap:8px;justify-content:flex-end}
+ .wstep-dol button{min-height:40px;padding:0 16px;border-radius:var(--s-zaokr,10px);font:600 15px var(--s-kroj);cursor:pointer}
+ .wstep-wstecz{background:var(--s-pow-2);color:var(--s-tusz);border:1.5px solid var(--s-linia)}
+ .wstep-dalej{background:var(--k-bursztyn);color:var(--s-akcent-tusz);border:0}
+</style>
+<dialog class="wstep" id="wstep" aria-labelledby="wstep-tytul">
+  <div class="wstep-gora"><span class="wstep-licznik"></span><button class="wstep-pomin" type="button">Pomiń</button></div>
+  <div class="wstep-ikona" aria-hidden="true"></div>
+  <h2 id="wstep-tytul"></h2>
+  <p></p>
+  <ul class="wstep-lista"></ul>
+  <div class="wstep-kropki" aria-hidden="true"></div>
+  <div class="wstep-dol"><button class="wstep-wstecz" type="button">← Wstecz</button><button class="wstep-dalej" type="button"></button></div>
+</dialog>
+<script>
+(() => {
+  const KLUCZ = "adhd.wstep.v1", d = document.getElementById("wstep");
+  if (!d || !d.showModal) return;
+  const svg = s => `<svg viewBox="0 0 24 24">${s}</svg>`;
+  const narz = (window.NARZEDZIA || []).map(n => `<li>${svg(n.ikona || "")}<span><b>${n.nazwa}</b><br><small>${n.opis}</small></span></li>`).join("");
+  const K = [
+    ['<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12M11 11.5v-7a1.5 1.5 0 0 1 3 0V12M14 6.5a1.5 1.5 0 0 1 3 0V12M17 8.5a1.5 1.5 0 0 1 3 0V16a6 6 0 0 1-6 6h-2a6 6 0 0 1-5-2.7L4.3 15a1.5 1.5 0 0 1 2.4-1.8L8 15"/>',
+     "Cześć! To zestaw narzędzi dla głowy z ADHD", "Małe, proste aplikacje, które pomagają ogarnąć energię, zadania i trudne chwile. Bez kont i bez logowania."],
+    ['<rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><rect x="14" y="14" width="6" height="6" rx="1.5"/>',
+     "Co tu znajdziesz", "Każdy kafelek to osobne narzędzie. Możesz używać jednego albo wszystkich.", narz],
+    ['<path d="M7 7h13l-3-3M17 17H4l3 3"/>',
+     "Jak się poruszać", "Kliknij kafelek, żeby wejść do narzędzia. Pasek na górze przełącza między nimi, a na pulpicie widzisz skrót z każdego."],
+    ['<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+     "Twoje dane są u ciebie", "Wszystko zapisuje się w tej przeglądarce — serwera nie ma. Jeśli chcesz mieć dane na telefonie i komputerze, w menu ⋯ włączysz zapis na Google Drive."],
+    ['<path d="M7 4v16l13-8z"/>',
+     "Od czego zacząć", "Nie wiesz, co wybrać? Zacznij od Paska zdrowia — jeden wpis dziennie wystarczy. To wprowadzenie otworzysz znowu w stopce: „jak to działa?”."]
+  ];
+  let i = 0;
+  const $ = s => d.querySelector(s);
+  const pokaz = () => {
+    const [ik, t, p, lista] = K[i];
+    $(".wstep-licznik").textContent = `${i + 1} z ${K.length}`;
+    $(".wstep-ikona").innerHTML = svg(ik);
+    $("h2").textContent = t; $("p").textContent = p;
+    $(".wstep-lista").innerHTML = lista || ""; $(".wstep-lista").hidden = !lista;
+    $(".wstep-kropki").innerHTML = K.map((_, k) => `<i class="${k === i ? "tu" : ""}"></i>`).join("");
+    $(".wstep-wstecz").style.visibility = i ? "visible" : "hidden";
+    $(".wstep-dalej").textContent = i === K.length - 1 ? "Zaczynam" : "Dalej →";
+  };
+  const otworz = () => { i = 0; pokaz(); d.showModal(); };
+  const zamknij = () => d.close();
+  d.addEventListener("close", () => { try { localStorage.setItem(KLUCZ, "1"); } catch (e) {} });
+  $(".wstep-pomin").addEventListener("click", zamknij);
+  $(".wstep-wstecz").addEventListener("click", () => { if (i) { i--; pokaz(); } });
+  $(".wstep-dalej").addEventListener("click", () => { if (i < K.length - 1) { i++; pokaz(); } else zamknij(); });
+  document.querySelectorAll("[data-wstep-otworz]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); otworz(); }));
+  let widziane = false; try { widziane = !!localStorage.getItem(KLUCZ); } catch (e) {}
+  if (!widziane) otworz();
+})();
 </script>
 </body>
 </html>
