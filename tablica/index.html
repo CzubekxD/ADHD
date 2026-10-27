@@ -62,6 +62,11 @@ header .spacer { flex:1; }
 }
 .iconbtn:hover { color:var(--ink); border-color:var(--axis); }
 .iconbtn.warn { color:var(--t3); border-color:var(--t3); }
+.zablok { opacity:.45; filter:grayscale(.6); pointer-events:none; user-select:none; }
+.banner.zmiana { flex-direction:column; align-items:stretch; }
+.banner .akcje { display:flex; gap:8px; flex-wrap:wrap; }
+.modal input[type=date] { font:inherit; padding:8px 10px; min-height:44px; border-radius:8px; border:1px solid var(--ring); background:var(--card); color:var(--ink); margin-top:10px; }
+.modal .skutki { margin-top:12px; font-size:14px; line-height:1.5; color:var(--ink-2); white-space:pre-line; }
 .iconbtn.warn::after { content:"•"; margin-left:5px; color:var(--t3); }
 
 nav { display:flex; gap:4px; border-bottom:1px solid var(--grid); margin-bottom:18px; overflow-x:auto; }
@@ -523,7 +528,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
 
 <header>
   <h1>Tablica scoringowa</h1>
-  <span class="sub" id="todayLabel"></span>
+  <button class="iconbtn" id="todayLabel" title="Zmień datę tablicy" aria-label="Data tablicy — zmień"></button>
   <span class="sub" id="verTag" title="wersja tablicy"></span>
   <span class="spacer"></span>
   <button class="iconbtn" id="btnExport" title="Kopia danych">Eksport</button>
@@ -549,7 +554,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
       <div class="big" id="heroPct">0%</div>
       <div class="meta" id="heroMeta"></div>
       <span class="spacer" style="flex:1"></span>
-      <div class="row">
+      <div class="row" id="dayBtns">
         <button class="act primary" id="btnSave">Zapisz wynik</button>
         <button class="act" id="btnSaveRoll">Zapisz i przerzuć na jutro</button>
         <button class="act ghost danger" id="btnReset">Resetuj</button>
@@ -558,7 +563,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
     <div id="nudge"></div>
   </div>
 
-  <div class="card">
+  <div class="card" id="todayCard">
     <table id="tblToday">
       <thead><tr>
         <th class="num">#</th><th>Zadanie</th><th>Kategoria</th><th>Punkty</th>
@@ -997,7 +1002,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
 <script>
 "use strict";
 const KEY = "tablica-scoringowa-v1";
-const APP_VER = "16";
+const APP_VER = "17";
 const SCALE = 2;
 const APP_DATA_VER = 3;                 // wersja skali punktowej
 const PTS = [1,3,8,21];          // skala wykładnicza: drobiazg / zwykłe / wymagające / ciężkie
@@ -1962,24 +1967,114 @@ function rollUnfinished(toDate) {
   return n;
 }
 
-/* rollover banner */
+/* rollover banner — tablica z innego dnia jest zablokowana, dopóki człowiek nie zdecyduje, czym jest */
+let zostanPrzy = null;                                   // „Zostań przy [data]" — do końca sesji (karty)
+const tablicaZablokowana = () => S.today.date !== todayISO() && zostanPrzy !== S.today.date;
 function renderRollover() {
   const host = document.getElementById("rollover");
-  if (S.today.date === todayISO()) { host.innerHTML = ""; return; }
+  const zab = tablicaZablokowana();
+  ["todayCard", "dayBtns"].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.toggle("zablok", zab);
+    if (zab) el.setAttribute("inert", ""); else el.removeAttribute("inert");
+  });
+  if (!zab) { host.innerHTML = ""; return; }
   const saved = S.history.some(h => h.date === S.today.date);
-  host.innerHTML = `<div class="banner">
-    <div class="txt"><b>Tablica jest z dnia ${plDate(S.today.date)}.</b> ${saved ? "Wynik tamtego dnia jest już zapisany." : "Wynik nie został zapisany."}
-    Nowy dzień startuje ze stałą pozycją i listą z zakładki Jutro; niezamknięte zadania trafią na Jutro.</div>
-    <button class="act primary" id="rollSave">${saved ? "Zacznij nowy dzień" : "Zapisz i zacznij nowy dzień"}</button>
-    ${saved ? "" : '<button class="act ghost" id="rollSkip">Zacznij bez zapisu</button>'}
+  const data = plDate(S.today.date);
+  host.innerHTML = `<div class="banner zmiana">
+    <div class="txt"><b>Tablica jest z dnia ${data}, a dziś jest ${plDate(todayISO())}.</b> ${saved ? "Wynik tamtego dnia jest już zapisany." : "Wynik nie został zapisany."}
+    Zdecyduj, czym jest ta tablica — do tego czasu zadania są zablokowane.</div>
+    <div class="akcje">
+      <button class="act primary" id="rollSave">${saved ? "Zamknij " + data + " i zacznij dziś" : "Zapisz " + data + " i zacznij dziś"}</button>
+      <button class="act" id="rollToday">To jest tablica na dziś</button>
+      <button class="act ghost" id="rollStay">Zostań przy ${data}</button>
+    </div>
   </div>`;
-  const go = () => { rollUnfinished(); freshBoard(true); renderAll(); toast("Nowy dzień: " + plDate(S.today.date)); };
   document.getElementById("rollSave").addEventListener("click", () => {
     if (!saved) saveScore(true);
-    go();
+    rollUnfinished(); freshBoard(true); renderAll(); toast("Nowy dzień: " + plDate(S.today.date));
   });
-  document.getElementById("rollSkip")?.addEventListener("click", go);
+  document.getElementById("rollToday").addEventListener("click", () => przeniesTablice(todayISO()));
+  document.getElementById("rollStay").addEventListener("click", () => {
+    zostanPrzy = S.today.date; renderAll(); toast("Zostajesz przy " + data + " do końca sesji");
+  });
 }
+
+/* ---------- zmiana daty tablicy ---------- */
+function skutkiZmiany(nowa) {                            // co się stanie, zanim się stanie
+  const stara = S.today.date;
+  const naTablicy = new Set(S.today.tasks.map(t => fold(t.name)).filter(Boolean));
+  const zPlanu = (S.plan[nowa] || []).filter(t => (t.name||"").trim());
+  const dojda = zPlanu.filter(t => { const k = fold(t.name); if (naTablicy.has(k)) return false; naTablicy.add(k); return true; });
+  return {
+    stara, nowa, zPlanu, dojda,
+    zadan: S.today.tasks.length,
+    rozpoczete: S.today.tasks.filter(t => t.started && t.startDay === stara).length,
+    wHistorii: S.history.some(h => h.date === nowa)
+  };
+}
+function opisSkutkow(k) {
+  if (!k.nowa) return "Wybierz datę.";
+  if (k.nowa === k.stara) return "To już jest data tej tablicy.";
+  const d = new Date(k.nowa + "T12:00:00");
+  const linie = [`${ile(k.zadan, "zadanie", "zadania", "zadań")} przejdzie na ${plDate(k.nowa)}, ${DOW[d.getDay()]} — z punktami i zaznaczeniami.`];
+  if (k.zPlanu.length) linie.push(`Z planu na ten dzień dojdzie ${ile(k.dojda.length, "zadanie", "zadania", "zadań")}` +
+    (k.zPlanu.length > k.dojda.length ? ` (${k.zPlanu.length - k.dojda.length} już jest na tablicy)` : "") + "; plan tego dnia zniknie z kalendarza.");
+  if (k.rozpoczete) linie.push(`Rozpoczęte zadania: ${k.rozpoczete} — zachowają punkty za start.`);
+  if (k.wHistorii) linie.push(`W historii jest już zapis z ${plDate(k.nowa)} — zapytam, czy go zastąpić.`);
+  return linie.join("\n");
+}
+function askDate() {
+  return new Promise(res => {
+    const wrap = document.createElement("div");
+    wrap.className = "modal";
+    wrap.innerHTML = `<div class="box" role="dialog" aria-modal="true" aria-labelledby="dataTytul">
+      <div class="msg" id="dataTytul"><b>Data tablicy</b></div>
+      <label class="sub" for="dataPole">Na który dzień jest ta tablica?</label><br>
+      <input type="date" id="dataPole">
+      <div class="skutki" id="dataSkutki" aria-live="polite"></div>
+      <div class="row" style="justify-content:flex-end; margin-top:18px">
+        <button class="act ghost" data-a="0">Anuluj</button><button class="act primary" data-a="1">Zmień datę</button></div></div>`;
+    const pole = wrap.querySelector("#dataPole"), ok = wrap.querySelector('[data-a="1"]');
+    pole.value = S.today.date;
+    const odswiez = () => {
+      wrap.querySelector("#dataSkutki").textContent = opisSkutkow(skutkiZmiany(pole.value));
+      ok.disabled = !pole.value || pole.value === S.today.date;
+    };
+    pole.addEventListener("input", odswiez); pole.addEventListener("change", odswiez); odswiez();
+    const done = v => { document.removeEventListener("keydown", onKey); wrap.remove(); res(v); };
+    const onKey = e => { if (e.key === "Escape") done(null); else if (e.key === "Enter" && !ok.disabled) done(pole.value); };
+    wrap.addEventListener("click", e => {
+      const b = e.target.closest("button[data-a]");
+      if (b) done(b.dataset.a === "1" ? pole.value : null); else if (e.target === wrap) done(null);
+    });
+    document.addEventListener("keydown", onKey);
+    document.body.appendChild(wrap);
+    pole.focus();
+  });
+}
+async function przeniesTablice(nowa) {
+  if (!nowa || nowa === S.today.date) return false;
+  const k = skutkiZmiany(nowa);
+  if (k.wHistorii && !await ask(`W historii jest już zapis z ${plDate(nowa)}. Zastąpić go tą tablicą? Stary zapis zniknie z historii (Cofnij go przywróci).`, "Zastąp", "Anuluj")) return false;
+  if (k.wHistorii) S.history = S.history.filter(h => h.date !== nowa);
+  k.dojda.forEach(t => S.today.tasks.push(planCopy(t)));          // planCopy zachowuje carry i start z planu
+  delete S.plan[nowa];
+  S.today.tasks.forEach(t => {                                    // start „tego dnia" idzie razem z dniem
+    if (t.started && t.startDay === k.stara) t.startDay = nowa;
+  });
+  S.today.date = nowa;
+  if (nowa !== todayISO()) zostanPrzy = nowa;               // świadomie wybrana data nie blokuje się znowu
+  S = bindS(S);
+  planClean(); save(); renderAll();
+  const tekst = "Tablica jest teraz na " + plDate(nowa) + (k.dojda.length ? ", z planu doszło " + ile(k.dojda.length, "zadanie", "zadania", "zadań") : "");
+  if (window.Skroty) Skroty.komunikat(tekst, { akcja: "Cofnij", fn: Skroty.cofnij }); else toast(tekst);
+  return true;
+}
+document.getElementById("todayLabel").addEventListener("click", async () => {
+  const nowa = await askDate();
+  if (nowa) przeniesTablice(nowa);
+});
 
 /* ---------- eksport / import ---------- */
 function exportName() { return `tablica-scoringowa_${todayISO()}.json`; }
