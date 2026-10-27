@@ -1,5 +1,5 @@
 <!doctype html><html lang="pl" data-theme="dark" data-narzedzie="plany" data-kolor="bursztyn"><head><meta name="adhd-wersja" content="dev"><script src="../wspolne/wersja.js"></script><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="stylesheet" href="../wspolne/cyber.css"><link rel="stylesheet" href="../wspolne/system.css"><script src="../wspolne/cyber.js"></script><script src="../wspolne/chmura.js"></script><script src="../wspolne/odmiana.js"></script><script src="../wspolne/skroty.js"></script><script src="../wspolne/skrzynka.js"></script><script src="../wspolne/kopia.js"></script></head><body>
-<title>Plany Jeżeli… to…</title>
+<title>Plany „Jeżeli… to…” — co zrobić w trudnej chwili przy ADHD</title><meta name="description" content="Zbuduj gotowe ścieżki na trudne momenty i przejdź je krok po kroku, gdy przyjdzie potrzeba. Darmowe, bez konta."><link rel="canonical" href="https://czubekxd.github.io/ADHD/plany/"><meta property="og:type" content="website"><meta property="og:locale" content="pl_PL"><meta property="og:site_name" content="Narzędzia ADHD"><meta property="og:title" content="Plany „Jeżeli… to…” — co zrobić w trudnej chwili przy ADHD"><meta property="og:description" content="Zbuduj gotowe ścieżki na trudne momenty i przejdź je krok po kroku, gdy przyjdzie potrzeba. Darmowe, bez konta."><meta property="og:url" content="https://czubekxd.github.io/ADHD/plany/">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600;800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
 /* Layout: jedna kolumna mobile-first (max 640px), zakładki na dole pod kciukiem, jeden węzeł na ekran w trybie Teraz */
@@ -514,7 +514,7 @@ function vSummary(){
 function vPlans(){
   return`<div class="edhead"><h1 class="grow">Plany</h1><button class="btn small primary" data-act="newPlan">+ Nowy plan</button></div>
   ${S.plans.length?'':'<p class="empty">Brak planów. Dodaj pierwszy albo skopiuj przykład z zakładki Przykład.</p>'}
-  ${S.plans.map(p=>{const t=tally(p.root);return`<article class="plan" data-act="editTx" data-id="${p.id}" style="cursor:pointer" title="Kliknij, żeby edytować opis">
+  ${S.plans.map(p=>{const t=tally(p.root);return`<article class="plan" data-id="${p.id}">
     <span class="eyebrow">${ic('trigger')}${lab('trigger')}…${p.szop?` <span class="chip">${esc(p.szop)}</span>`:''}</span>
     <div class="tx">${esc(p.root.text||'(bez opisu)')}</div>
     <div class="tally">${t.ok?badge('ok').replace(ST.ok.word,t.ok+' '+ST.ok.word):''}${t.bad?badge('bad').replace(ST.bad.word,t.bad+' '+ST.bad.word):''}<span class="st st-none">${ile(countN(p.root)-1,'krok','kroki','kroków')}</span><span class="st st-none">uruchomiony ${p.runs.length}×</span></div>
@@ -969,8 +969,6 @@ document.addEventListener('click',e=>{
     case'exView':EXV=el.dataset.k;render();break;
     case'copyEx':{const c=clonePlan(EXAMPLE);S.plans.unshift(c);save();ED={planId:c.id,sel:null,view:'canvas',pick:null,z:1};TAB='plans';window.scrollTo(0,0);render();fitZoom(1.2);break;}
     case'edit':ED={planId:id,sel:null,view:ED.view||'canvas',pick:null,z:1};CONF=null;window.scrollTo(0,0);render();fitZoom(1.2);break;
-    /* klik w kartę planu: edytor z otwartym opisem wyzwalacza */
-    case'editTx':{const p=plan(id);if(!p)break;ED={planId:id,sel:p.root.id,view:ED.view||'canvas',pick:null,z:1};CONF=null;window.scrollTo(0,0);render();fitZoom(1.2);const f=document.getElementById('f-text-'+p.root.id);if(f){f.focus();f.select();}break;}
     case'closeEd':ED.planId=null;CONF=null;render();break;
     case'view':ED.view=el.dataset.k;ED.pick=null;render();break;
     case'sel':ED.sel=ED.sel===id?null:id;ED.pick=null;CONF=null;render();break;
