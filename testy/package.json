@@ -6,8 +6,9 @@
     "jednostkowe": "node jednostkowe.js",
     "strony": "node strony.js ..",
     "porownaj": "node porownaj.js",
+    "datetest": "node datetest.js",
     "synchronizacja": "node synchronizacja.js ..",
-    "wszystko": "npm run jednostkowe && npm run strony && npm run synchronizacja"
+    "wszystko": "npm run jednostkowe && npm run datetest && npm run strony && npm run synchronizacja"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.10.0",
