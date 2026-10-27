@@ -2,6 +2,7 @@
 #   1. testy jednostkowe (jsdom) — wszystkie pliki testów z CLAUDE.md
 #   2. strony w przeglądarce — 7 stron × 1100/390 px × ciemny/CYBER × Chromium i Safari (WebKit): konsola,
 #      poziome przewijanie, dostępność (axe, WCAG 2 AA), kontrast i barwa tokenów; twarde progi, PR nie przejdzie z błędem
+#   2b. synchronizacja — dwa urządzenia i udawany Google Drive: skrzynka, „zrobione”, otwarta karta, Ctrl+Z, WOOP
 #   3. zmiany wyglądu — zrzuty PR porównane ze zrzutami gałęzi bazowej; nie blokuje, tylko pokazuje
 # Wyniki: podsumowanie przebiegu (zakładka Summary) i artefakt „zrzuty” ze zrzutami oraz obrazami różnic.
 # Wszystko lokalnie: cd testy && npm ci && npx playwright install chromium && npm run wszystko
@@ -61,6 +62,12 @@ jobs:
       - name: Strony (twarde progi)
         id: strony
         run: node strony.js .. --wyniki wyniki
+        env:
+          PRZEGLADARKI: chromium,webkit
+        working-directory: pr/testy
+      - name: Synchronizacja dwóch urządzeń (udawany Google Drive)
+        if: always()
+        run: node synchronizacja.js ..
         env:
           PRZEGLADARKI: chromium,webkit
         working-directory: pr/testy

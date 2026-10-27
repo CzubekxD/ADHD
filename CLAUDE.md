@@ -41,7 +41,8 @@ Linki do `.css` i `.js` piszemy bez numerów wersji; workflow publikacji dopisuj
 Sprawdzają to **strażnicy** (`testy/`, workflow `Strażnicy` przy każdym PR):
 testy jednostkowe jsdom, każda strona przy 1100 i 390 px w motywie ciemnym i CYBER, w Chromium i Safari (WebKit)
 (zero błędów w konsoli, brak poziomego przewijania, zero poważnych naruszeń dostępności axe WCAG AA, kontrast tokenów
-≥ 4,5:1, tokeny mieszane w kolorze prostej mieszanki sRGB — `color-mix` pisz `in srgb`, nie `in oklch`)
-i porównanie zrzutów z gałęzią bazową. PR z czerwonym strażnikiem nie jest gotowy.
+≥ 4,5:1, tokeny mieszane w kolorze prostej mieszanki sRGB — `color-mix` pisz `in srgb`, nie `in oklch`),
+synchronizacja dwóch urządzeń przez udawany Google Drive (`testy/synchronizacja.js`) i porównanie zrzutów
+z gałęzią bazową. PR z czerwonym strażnikiem nie jest gotowy.
 Lokalnie: `cd testy && npm ci && npx playwright install chromium && npm run wszystko`.
 Ręcznie zostaje: Ctrl+Z cofa nową zmianę. Zrzuty i obrazy różnic są w artefakcie „zrzuty” przebiegu.

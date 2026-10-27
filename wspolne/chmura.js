@@ -24,6 +24,8 @@
   // skrzynka-v1: skrzynka na myśli z pulpitu (wspolne/skrzynka.js) — nie jest narzędziem z rejestru
   const DOMYSLNE = ['mcz.dane.v1', 'tablica-scoringowa-v1', 'plany-jezeli-v1', 'woop-v1', 'skrzynka-v1'];
   const OPOZNIENIE = 2500;   // tyle ms po ostatniej zmianie wysyłamy na Drive
+  const SPRAWDZAJ = 60000;   // co tyle ms otwarta karta sprawdza, czy na Drive są zmiany z innego urządzenia
+  const POWROT = 15000;      // po powrocie na kartę sprawdzamy, jeśli od ostatniej synchronizacji minęło tyle ms
 
   const ls = window.localStorage;
   const orygSet = Storage.prototype.setItem;
@@ -232,6 +234,10 @@
     ustawUI({ s: 'pracuje' });
     const moznaPrzeladowac = powod === 'polacz' || powod === 'wczytaj' || (powod === 'start' && !interakcja && performance.now() - start < 8000);
     let przeladuj = false, noweZDrive = false, zapisano = false;
+    // dane narzędzia otwartego na tej stronie wymagają przeładowania (narzędzie trzyma je w pamięci);
+    // pozostałe klucze (skrzynka, inne narzędzia, wszystko na pulpicie) wczytujemy od razu i dajemy znać zdarzeniem storage
+    const otwarte = ((window.NARZEDZIA || []).find(n => n.id === document.documentElement.dataset.narzedzie) || {}).klucz;
+    const wczytane = [];
     try {
       const pliki = await lista();
       stan.pliki = stan.pliki || {};
@@ -260,13 +266,19 @@
         }
         if (wynik === lok) { ustawBaze(k, naDrive, wynik); continue; }
         // ta przeglądarka musi dostać zmiany z Drive
-        if (moznaPrzeladowac) { piszWewn(k, wynik); ustawBaze(k, naDrive, wynik); przeladuj = true; }
+        if (moznaPrzeladowac && k === otwarte) { piszWewn(k, wynik); ustawBaze(k, naDrive, wynik); przeladuj = true; }
+        else if (k !== otwarte) { piszWewn(k, wynik); ustawBaze(k, naDrive, wynik); wczytane.push({ k, stary: lok, nowy: wynik }); }
         else noweZDrive = true;          // baza zostaje stara — to nadal ostatnia wspólna wersja
       }
       zapiszStan();
       ostatnia = Date.now();
       oczekujace = noweZDrive;
       if (przeladuj) { blokada = true; ustawUI({ s: 'pracuje' }); location.reload(); return; }
+      // strona rysuje się na nowo tak samo jak po zmianie z innej karty (skrzynka, pulpit, pomidor słuchają storage)
+      wczytane.forEach(({ k, stary, nowy }) => {
+        try { dispatchEvent(new StorageEvent('storage', { key: k, oldValue: stary, newValue: nowy, storageArea: ls, url: location.href })); } catch (e) {}
+      });
+      if (wczytane.length && window.Skroty && Skroty.zewnetrzne) Skroty.zewnetrzne();
       ustawUI(oczekujace ? { s: 'nowe' } : { s: 'ok', czas: new Date() });
       // drugie urządzenie mogło zapisać w tej samej chwili — krótka kontrola naprawia to od razu
       if (zapisano && powod !== 'kontrola') setTimeout(() => synchronizuj('kontrola'), 6000);
@@ -367,10 +379,14 @@
     setTimeout(() => synchronizuj('start'), 200);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', uruchom); else uruchom();
+  // otwarta, widoczna karta co minutę sprawdza Drive — zmiana z telefonu pojawia się na komputerze bez przeładowania
+  setInterval(() => {
+    if (wlaczona() && document.visibilityState === 'visible' && navigator.onLine && Date.now() - ostatnia >= SPRAWDZAJ - 1000) synchronizuj('okresowo');
+  }, SPRAWDZAJ);
   addEventListener('online', () => synchronizuj('online'));
   addEventListener('offline', () => wlaczona() && ustawUI({ s: 'offline' }));
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && Date.now() - ostatnia > 60000) synchronizuj('powrot');
+    if (document.visibilityState === 'visible' && Date.now() - ostatnia > POWROT) synchronizuj('powrot');
     if (document.visibilityState === 'hidden' && timer && stanUI.s === 'czeka-wysylka') { clearTimeout(timer); synchronizuj('zmiana'); }
   });
 

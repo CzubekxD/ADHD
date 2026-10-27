@@ -174,6 +174,13 @@
       try { ostatni = c.snapshot(); } catch (e) { ostatni = null; }
     },
     zapisano,
+    // dane zmieniły się z zewnątrz (synchronizacja z innego urządzenia): nowy punkt wyjścia, bez kroku cofania —
+    // inaczej Ctrl+Z przywróciłby stan sprzed synchronizacji i skasował cudzą zmianę
+    zewnetrzne() {
+      if (!cfg) return;
+      wstecz = []; naprzod = [];
+      try { ostatni = cfg.snapshot(); } catch (e) { ostatni = null; }
+    },
     cofnij,
     ponow,
     komunikat
