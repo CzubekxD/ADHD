@@ -64,6 +64,7 @@ async function scenariusz(silnik, adres) {
     await c.addInitScript(() => {
       if (!localStorage.getItem('adhd.chmura')) localStorage.setItem('adhd.chmura', JSON.stringify({ wlaczona: true, email: 'test@example.org', pliki: {} }));
       localStorage.setItem('adhd.chmura.token', JSON.stringify({ t: 'token-testowy', exp: Date.now() + 3600e3 }));
+      localStorage.setItem('adhd.wstep.v1', '1');   // wprowadzenie dla nowych osób już widziane — nie zasłania pulpitu
     });
     const p = await c.newPage();
     p.on('pageerror', e => bledy.push(`${nazwa}: ${e.message}`));
