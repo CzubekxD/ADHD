@@ -4,7 +4,7 @@
 <meta name="adhd-wersja" content="dev"><script src="../wspolne/wersja.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tablica scoringowa — zadania dnia z punktami przy ADHD</title><meta name="description" content="Dzienna tablica zadań z punktacją, plan tygodnia i historia. Darmowe narzędzie dla osób z ADHD, bez konta."><link rel="canonical" href="https://czubekxd.github.io/ADHD/tablica/"><meta property="og:type" content="website"><meta property="og:locale" content="pl_PL"><meta property="og:site_name" content="Narzędzia ADHD"><meta property="og:title" content="Tablica scoringowa — zadania dnia z punktami przy ADHD"><meta property="og:description" content="Dzienna tablica zadań z punktacją, plan tygodnia i historia. Darmowe narzędzie dla osób z ADHD, bez konta."><meta property="og:url" content="https://czubekxd.github.io/ADHD/tablica/">
+<title>Tablica z zadaniami — plan dnia z punktami przy ADHD</title><meta name="description" content="Dzienna tablica zadań z punktacją, plan tygodnia i historia. Darmowe narzędzie dla osób z ADHD, bez konta."><link rel="canonical" href="https://czubekxd.github.io/ADHD/tablica/"><meta property="og:type" content="website"><meta property="og:locale" content="pl_PL"><meta property="og:site_name" content="Narzędzia ADHD"><meta property="og:title" content="Tablica z zadaniami — plan dnia z punktami przy ADHD"><meta property="og:description" content="Dzienna tablica zadań z punktacją, plan tygodnia i historia. Darmowe narzędzie dla osób z ADHD, bez konta."><meta property="og:url" content="https://czubekxd.github.io/ADHD/tablica/">
 <style>
 :root {
   color-scheme: light;
@@ -527,7 +527,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
 <div class="wrap">
 
 <header>
-  <h1>Tablica scoringowa</h1>
+  <h1>Tablica z zadaniami</h1>
   <button class="iconbtn" id="todayLabel" title="Zmień datę tablicy" aria-label="Data tablicy — zmień"></button>
   <span class="sub" id="verTag" title="wersja tablicy"></span>
   <span class="spacer"></span>
@@ -985,7 +985,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
 </section>
 
 <footer class="foot s-stopka">
-  <span>Tablica scoringowa · <span id="verFoot"></span></span>
+  <span>Tablica z zadaniami · <span id="verFoot"></span></span>
   <a href="../">wszystkie narzędzia</a>
   <a href="https://github.com/czubekxd/ADHD" target="_blank" rel="noopener">kod na GitHubie ↗</a>
   <a href="https://buycoffee.to/czubekxd" target="_blank" rel="noopener">postaw kawę ☕</a>
@@ -2077,7 +2077,7 @@ document.getElementById("todayLabel").addEventListener("click", async () => {
 });
 
 /* ---------- eksport / import ---------- */
-function exportName() { return `tablica-scoringowa_${todayISO()}.json`; }
+function exportName() { return `tablica-z-zadaniami_${todayISO()}.json`; }
 function exportText() {
   S.lastExport = new Date().toISOString(); save(); renderData();
   return JSON.stringify(S, null, 2);
@@ -2104,10 +2104,10 @@ async function doShare() {                        // telefon: wyślij plik do Pl
   try {
     const file = new File([text], exportName(), { type:"application/json" });
     if (navigator.canShare && navigator.canShare({ files:[file] })) {
-      await navigator.share({ files:[file], title:"Kopia tablicy scoringowej" });
+      await navigator.share({ files:[file], title:"Kopia tablicy z zadaniami" });
       return;
     }
-    await navigator.share({ title:"Kopia tablicy scoringowej", text });
+    await navigator.share({ title:"Kopia tablicy z zadaniami", text });
   } catch (e) {
     if (e && e.name === "AbortError") return;
     toast("Udostępnianie nie wyszło — użyj „Pokaż JSON”");
@@ -2798,7 +2798,7 @@ async function backupPick() {
   if (!FS_OK) { toast("Ta przeglądarka nie umie zapisywać do wskazanego pliku — użyj zwykłego eksportu"); return; }
   try {
     const h = await window.showSaveFilePicker({
-      suggestedName: "tablica-scoringowa.json",
+      suggestedName: "tablica-z-zadaniami.json",
       types: [{ description: "Kopia tablicy (JSON)", accept: { "application/json": [".json"] } }]
     });
     fsHandle = h; S.backupName = h.name || "kopia.json"; save();

@@ -16,7 +16,7 @@
   const KLUCZ = 'przypomnienia-v1';
   const DLUGOSC_MIN = 10;
   const LISTA = [
-    { id: 'rano', godz: '08:00', tytul: 'Ułóż tablicę i zrób pierwszy wpis baterii', narzedzie: 'tablica', nazwa: 'Tablica scoringowa' },
+    { id: 'rano', godz: '08:00', tytul: 'Ułóż tablicę i zrób pierwszy wpis baterii', narzedzie: 'tablica', nazwa: 'Tablica z zadaniami' },
     { id: 'dzien', godz: '14:00', tytul: 'Wpis baterii', narzedzie: 'pasek', nazwa: 'Pasek zdrowia × SZOP' },
     { id: 'wieczor', godz: '20:00', tytul: 'Czy plan WOOP zadziałał? Przejrzyj skrzynkę', narzedzie: 'woop', nazwa: 'WOOP' }
   ];

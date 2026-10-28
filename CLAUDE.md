@@ -1,6 +1,6 @@
 # Narzędzia ADHD — zasady pracy
 
-Publiczny zestaw małych narzędzi dla osób z ADHD (Pasek zdrowia × SZOP, Tablica scoringowa, Plany Jeżeli… to…, WOOP)
+Publiczny zestaw małych narzędzi dla osób z ADHD (Pasek zdrowia × SZOP, Tablica z zadaniami, Plany Jeżeli… to…, WOOP)
 i pulpit dnia na stronie startowej. Statyczne strony na GitHub Pages: bez serwera, bez kroku budowania, dane w
 `localStorage` przeglądarki i opcjonalnie w ukrytym folderze aplikacji na Google Drive użytkownika.
 

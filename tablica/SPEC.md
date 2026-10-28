@@ -1,4 +1,4 @@
-# Tablica scoringowa — specyfikacja (wersja 13)
+# Tablica z zadaniami — specyfikacja (wersja 13)
 
 Jeden plik HTML, bez zewnętrznych bibliotek i assetów (wyjątek: opcjonalny OCR), dane w `localStorage` (klucz `tablica-scoringowa-v1`). Docelowo `tablica/index.html` w repo `czubekxd/ADHD`.
 

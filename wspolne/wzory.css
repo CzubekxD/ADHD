@@ -70,7 +70,7 @@
   --mask-d:var(--d);
 }
 
-/* 17 — łuki i kręgi (Tablica scoringowa) */
+/* 17 — łuki i kręgi (Tablica z zadaniami) */
 .s-wzor-17{--d:5em;--ang:135deg}
 .s-wzor-17::before,.s-wzor-17::after{
   --strip-end:var(--c0);

@@ -65,7 +65,7 @@
     };
   }
 
-  /* ---------- Tablica scoringowa ---------- */
+  /* ---------- Tablica z zadaniami ---------- */
   function tablica(d) {
     if (!d || !d.today) return null;
     const kat = id => (d.categories || []).find(c => c.id === id);
