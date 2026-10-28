@@ -37,7 +37,7 @@ html[data-skin="cyber"]:root{
   --ok:var(--cy-green); --ok-bg:#03281D; --bad:var(--cy-pink); --bad-bg:#2E0A18; --none:#6B6790; --none-bg:#15122A;
   --t-trigger:var(--cy-cyan); --t-question:var(--cy-yellow); --t-choice:var(--cy-violet); --t-action:#8FD3FF; --t-escalate:var(--cy-pink);
 
-  /* Tablica scoringowa i strona startowa */
+  /* Tablica z zadaniami i strona startowa */
   --page:var(--cy-bg); --card:var(--cy-surface); --surface-1:#100E1F; --ink-2:#C6D6EA;
   --grid:#211C42; --axis:#3A3270; --ring:rgb(0 240 255 / .22); --rest:#1A1636; --goldwash:rgb(252 238 10 / .08);
   --bar:var(--cy-cyan); --bar-soft:#06343A; --total:var(--cy-pink); --gold:var(--cy-yellow); --gold-soft:#2A2805; --silver:#C8D0E0;

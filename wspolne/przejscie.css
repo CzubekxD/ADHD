@@ -38,7 +38,7 @@ html[data-narzedzie="pasek"] nav.zakladki button{min-height:var(--s-cel);flex:no
 html[data-narzedzie="pasek"] .przycisk{min-height:var(--s-cel)}
 html[data-narzedzie="pasek"] body{font-variant-numeric:tabular-nums}
 
-/* ---------- Tablica scoringowa ---------- */
+/* ---------- Tablica z zadaniami ---------- */
 html[data-narzedzie="tablica"]:root:not([data-skin="cyber"]){
   --page:var(--s-tlo); --card:var(--s-pow); --surface-1:var(--s-pow);
   --ink:var(--s-tusz); --ink-2:var(--s-tusz-2); --muted:var(--s-przygaszony);

@@ -30,7 +30,7 @@ window.NARZEDZIA = [
     mini: [14, 26, 20, 40, 52, 34, 22, 46, 30, 18, 12].map((h, i) =>
         `<rect class="k" opacity="${(.4 + .08 * (i % 4)).toFixed(2)}" x="${22 + i * 16}" y="${78 - h}" width="10" height="${h}" rx="2"/>`).join('') +
       '<polyline class="ts" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="27,22 43,26 59,24 75,40 91,52 107,46 123,36 139,48 155,40 171,30 187,24"/><circle class="t" cx="187" cy="24" r="3.5"/>' },
-  { id: 'tablica', nazwa: 'Tablica scoringowa', znak: 'TS', kolor: 'bursztyn', wzor: 17, klucz: 'tablica-scoringowa-v1', href: 'tablica/',
+  { id: 'tablica', nazwa: 'Tablica z zadaniami', znak: 'TZ', kolor: 'bursztyn', wzor: 17, klucz: 'tablica-scoringowa-v1', href: 'tablica/',
     opis: 'Dzienna tablica zadań z punktacją, plan tygodnia i historia.',
     start: 'Ułóż dzisiejszą tablicę', pytanie: 'Co dziś domkniesz?',
     ikona: '<path d="M4.5 20v-3M9.5 20v-6.5M14.5 20v-10M19.5 20V4"/>',

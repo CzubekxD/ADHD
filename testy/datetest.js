@@ -1,4 +1,4 @@
-/* DATETEST — świadoma zmiana daty tablicy (Tablica scoringowa v13 specyfikacji)
+/* DATETEST — świadoma zmiana daty tablicy (Tablica z zadaniami v13 specyfikacji)
    Stały zegar: dziś = 2026-10-20, tablica z 2026-10-19.
    Sprawdza: blokadę przy starej dacie, przeniesienie na dziś bez utraty zadań i punktów,
    scalenie z planem (z dedupem), konflikt z historią (zastąp / anuluj) i Cofnij.

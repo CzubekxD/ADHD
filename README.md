@@ -8,7 +8,7 @@ Strona startowa ze wszystkimi narzędziami: **https://czubekxd.github.io/ADHD/**
 | Narzędzie | Otwórz w przeglądarce | Kod |
 |---|---|---|
 | **Pasek zdrowia × SZOP** — energia, czynniki SZOP, czerwone flagi, regeneracja (opis niżej) | **https://czubekxd.github.io/ADHD/pasek/** | [`pasek/`](pasek/) |
-| **Tablica scoringowa** — dzienna tablica zadań z punktacją 1/3/8/21, plan tygodnia, historia; specyfikacja w [`tablica/SPEC.md`](tablica/SPEC.md) | **https://czubekxd.github.io/ADHD/tablica/** | [`tablica/`](tablica/) |
+| **Tablica z zadaniami** — dzienna tablica zadań z punktacją 1/3/8/21, plan tygodnia, historia; specyfikacja w [`tablica/SPEC.md`](tablica/SPEC.md) | **https://czubekxd.github.io/ADHD/tablica/** | [`tablica/`](tablica/) |
 | **Plany Jeżeli… to…** — drzewa kroków na trudne momenty, tryb „Teraz”, ćwiczenia z kart | **https://czubekxd.github.io/ADHD/plany/** | [`plany/`](plany/) |
 | **WOOP** — życzenie, efekt, przeszkoda, plan; kreator krok po kroku i codzienny wpis, czy plan działa | **https://czubekxd.github.io/ADHD/woop/** | [`woop/`](woop/) |
 
