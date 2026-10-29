@@ -101,6 +101,14 @@ const S = page => page.evaluate(k => JSON.parse(localStorage.getItem(k)), KEY);
   sprawdz(jutro2.length === 0, 'stałe nie trafiły do planu z premią');
   sprawdz(s.today.tasks.filter(t => t.daily).length === 2, 'czysta tablica ma od razu stałe zadania');
 
+  console.log('\n5. „Zamknij i zacznij nowy dzień” wciąga z Planu zadania na dziś');
+  const dzis = staraKopia(); dzis.today.date = DZIS;
+  const page2 = await strona(przegladarka, adres, dzis);
+  await page2.click('#btnSaveRoll');
+  s = await S(page2);
+  sprawdz(s.today.tasks.some(t => t.name === 'Z planu'), 'zadanie z Planu na dziś jest na tablicy');
+  sprawdz(!(s.plan[DZIS] || []).length, 'kubełek planu na dziś opróżniony');
+
   sprawdz(page.bledy.length === 0, 'brak błędów na stronie' + (page.bledy.length ? ': ' + page.bledy.join('; ') : ''));
   await przegladarka.close(); srv.close();
   console.log(`\n${ok} ok, ${zle} błędów`);
