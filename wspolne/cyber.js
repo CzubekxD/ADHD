@@ -62,6 +62,64 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', zamontuj);
   else zamontuj();
 
+  /* Bloki na klikalnym tekście: po najechaniu litery zamieniają się w losowe ░▒▓█
+     i wracają na miejsce w przypadkowej kolejności. Tylko w CYBER, tylko z myszą,
+     bez animacji przy prefers-reduced-motion. Zmieniamy same węzły tekstu, więc ikony,
+     pola i nasłuchiwacze w środku zostają nietknięte. */
+  const KLIKALNE = 'a[href],button,[role="button"],[role="tab"],summary,label';
+  const BLOKI = '░▒▓█';
+  const trwa = new Map(); // element → funkcja kończąca animację
+
+  function tekstyW(el) {
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => n.nodeValue.trim() && !n.parentElement.closest('input,textarea,select,svg,[contenteditable]')
+        ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT
+    });
+    const wynik = [];
+    while (w.nextNode()) wynik.push(w.currentNode);
+    return wynik;
+  }
+
+  function bloki(el) {
+    if (trwa.has(el)) return;
+    const wezly = tekstyW(el);
+    if (!wezly.length) return;
+    const oryginaly = wezly.map(n => n.nodeValue);
+    // każda litera dostaje własny, losowy moment powrotu
+    const momenty = oryginaly.map(t => [...t].map(() => 3 + Math.random() * 16 | 0));
+    const ostatni = Math.max(...momenty.flat());
+    // blokujemy wymiary, żeby bloki o innej szerokości nie przesuwały układu
+    // getComputedStyle podaje wymiary zgodne z box-sizing elementu
+    const cs = getComputedStyle(el);
+    const styl = { width: el.style.width, height: el.style.height };
+    if (cs.display !== 'inline') { el.style.width = cs.width; el.style.height = cs.height; }
+    let k = 0;
+    const koniec = () => {
+      clearInterval(licznik);
+      wezly.forEach((n, i) => { n.nodeValue = oryginaly[i]; });
+      el.style.width = styl.width; el.style.height = styl.height;
+      trwa.delete(el);
+    };
+    const licznik = setInterval(() => {
+      if (++k > ostatni || !el.isConnected) return koniec();
+      wezly.forEach((n, i) => {
+        n.nodeValue = [...oryginaly[i]].map((z, j) =>
+          k >= momenty[i][j] || !z.trim() ? z : BLOKI[Math.random() * 4 | 0]).join('');
+      });
+    }, 28);
+    trwa.set(el, koniec);
+  }
+
+  document.addEventListener('pointerover', e => {
+    if (e.pointerType !== 'mouse' || !czytaj() || spokojnie()) return;
+    const el = e.target.closest && e.target.closest(KLIKALNE);
+    // tylko przy wejściu w element, nie przy ruchu między jego dziećmi
+    if (!el || (e.relatedTarget && el.contains(e.relatedTarget))) return;
+    bloki(el);
+  });
+  // kliknięcie w trakcie animacji: najpierw przywracamy prawdziwy tekst
+  document.addEventListener('pointerdown', () => { trwa.forEach(koniec => koniec()); }, true);
+
   // zmiana w innej karcie przeglądarki
   addEventListener('storage', e => { if (e.key === KLUCZ) ustaw(czytaj()); });
 
