@@ -45,3 +45,13 @@ const sb = k.querySelector('.powt-dni input[value="5"]'); sb.checked = false; sb
 sprawdz('ostatniego dnia nie da się odznaczyć', sb.checked && ost.dni.length === 1);
 typ.value = 'miesiac'; typ.dispatchEvent(new w.Event('change', { bubbles: true }));
 sprawdz('co miesiąc pokazuje dzień miesiąca', !k.querySelector('.powt-m').hidden && k.querySelector('.powt-dni').hidden && ost.typ === 'miesiac');
+
+/* pytanie „czy plan zadziałał” dopasowane do powtarzania (dziś 2026-10-29, czwartek) */
+sprawdz('codziennie → dziś', P.kiedy(null) === 'dziś' && P.biezacy(null, '2026-10-29') === '2026-10-29');
+sprawdz('w soboty → w tym tygodniu', P.kiedy(sob) === 'w tym tygodniu');
+sprawdz('w czwartek sobota jeszcze nie wypadła', P.biezacy(sob, '2026-10-29') === null);
+sprawdz('w niedzielę pytamy o sobotę', P.biezacy(sob, '2026-11-01') === '2026-10-31');
+sprawdz('w poniedziałek nowy tydzień', P.biezacy(sob, '2026-11-02') === null);
+sprawdz('co miesiąc → w tym miesiącu', P.kiedy({ typ: 'miesiac', dzien: 5 }) === 'w tym miesiącu' && P.biezacy({ typ: 'miesiac', dzien: 5 }, '2026-10-29') === '2026-10-05');
+sprawdz('co 3 dni → tym razem, ostatni raz', P.kiedy(co3) === 'tym razem' && P.biezacy(co3, '2026-10-31') === '2026-10-29');
+sprawdz('kilka dni tygodnia → tym razem', P.kiedy({ typ: 'tydzien', dni: [0, 3] }) === 'tym razem');

@@ -61,6 +61,38 @@
     return null;
   }
 
+  function ostatni(r, do_) {
+    const d = naDate(do_ || dzisISO());
+    for (let i = 0; i < 400; i++) { const k = iso(d); if (pasuje(r, k)) return k; d.setDate(d.getDate() - 1); }
+    return null;
+  }
+
+  /* o jaki okres pytamy „czy plan zadziałał”: codzienne → dziś, raz w tygodniu → w tym tygodniu,
+     co miesiąc → w tym miesiącu, nieregularne (kilka dni tygodnia, co N dni) → tym razem */
+  function okres(r) {
+    r = norm(r);
+    if (r.typ === 'codziennie' || r.typ === 'robocze' || (r.typ === 'coN' && r.co === 1)) return 'dzis';
+    if (r.typ === 'tydzien') return r.dni.length === 1 ? 'tydzien' : r.dni.length === 7 ? 'dzis' : 'raz';
+    if (r.typ === 'miesiac') return 'miesiac';
+    return 'raz';
+  }
+  const KIEDY = { dzis: 'dziś', tydzien: 'w tym tygodniu', miesiac: 'w tym miesiącu', raz: 'tym razem' };
+  const kiedy = r => KIEDY[okres(r)];
+
+  /* dzień, o który teraz pytamy (już minął albo jest dziś); null, gdy w tym okresie plan jeszcze nie wypadł */
+  function biezacy(r, dzis) {
+    dzis = dzis || dzisISO();
+    const o = okres(r), k = ostatni(r, dzis);
+    if (!k) return null;
+    if (o === 'dzis') return k === dzis ? k : null;
+    if (o === 'miesiac') return k.slice(0, 7) === dzis.slice(0, 7) ? k : null;
+    if (o === 'tydzien') {
+      const pon = naDate(dzis); pon.setDate(pon.getDate() - (pon.getDay() + 6) % 7);
+      return k >= iso(pon) ? k : null;
+    }
+    return k;
+  }
+
   function opis(r) {
     r = norm(r);
     switch (r.typ) {
@@ -115,5 +147,5 @@
     return kontener;
   }
 
-  window.Powtarzanie = { norm, pasuje, najblizszy, opis, html, czytaj, podepnij, DNI_DL };
+  window.Powtarzanie = { norm, pasuje, najblizszy, ostatni, okres, kiedy, biezacy, opis, html, czytaj, podepnij, DNI_DL };
 })();

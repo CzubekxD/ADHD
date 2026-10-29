@@ -574,8 +574,11 @@ const planSentence=x=>`<span class="p1"><b>JEŻELI</b> ${x.ifText?esc(x.ifText):
 function streak(x){let n=0;const d=new Date();d.setHours(12,0,0,0);if(!x.checks[dkey(d)])d.setDate(d.getDate()-1);
   for(let g=0;g<400;g++){const k=dkey(d),s=x.checks[k];if(s==='ok')n++;else if(s!=='skip'&&Powtarzanie.pasuje(x.powt,k))break;d.setDate(d.getDate()-1);}return n;}
 
+/* dzień, o który karta pyta na start: dziś, a przy rzadszym planie jego ostatni dzień w tym okresie */
+function domyslnyDzien(x){return Powtarzanie.biezacy(x.powt,today())||today();}
+const KIEDY_DUZE=x=>{const k=Powtarzanie.kiedy(x.powt);return k.charAt(0).toUpperCase()+k.slice(1);};
 function card(x,isEx){
-  const t=today();const dz=(DZIEN_W[x.id]&&DZIEN_W[x.id]<=t)?DZIEN_W[x.id]:t;const st=x.checks[dz]||'';
+  const t=today(),dom=domyslnyDzien(x);const dz=(DZIEN_W[x.id]&&DZIEN_W[x.id]<=t)?DZIEN_W[x.id]:dom;const st=x.checks[dz]||'';
   const opisStanu=s=>({ok:'zadziałało',miss:'nie zadziałało',skip:'nie było okazji'})[s]||'brak wpisu';
   const days=daysBack(14);
   const cnt={ok:0,miss:0,skip:0};days.forEach(k=>{const s=x.checks[k];if(s)cnt[s]++;});
@@ -600,7 +603,7 @@ function card(x,isEx){
     <div class="w-side">
     ${isEx?`<div class="stack"><button class="btn primary" data-act="rehearse" data-id="${x.id}">Przejdź przykład krok po kroku</button><button class="btn" data-act="newWoop">Ułóż własny WOOP</button></div></div>`:`
     <div class="check">
-      <span class="q">${dz===t?'Dziś':esc(fmtDay(dz))+(dz===daysBack(2)[0]?' (wczoraj)':'')}, ${wPlanie(dz)?'gdy pojawiła się przeszkoda, plan…':`plan nie obowiązuje (${esc(Powtarzanie.opis(x.powt))}), najbliżej ${esc(fmtDay(Powtarzanie.najblizszy(x.powt,dz)))}. Gdyby jednak przeszkoda się pojawiła, plan…`}${dz===t?'':` <button type="button" class="wroc" data-act="pickDay" data-id="${x.id}" data-d="${t}">wróć do dziś</button>`}</span>
+      <span class="q">${dz===dom&&wPlanie(dz)?KIEDY_DUZE(x)+(dz===t?'':' ('+esc(fmtDay(dz))+')'):dz===t?'Dziś':esc(fmtDay(dz))+(dz===daysBack(2)[0]?' (wczoraj)':'')}, ${wPlanie(dz)?'gdy pojawiła się przeszkoda, plan…':`plan nie obowiązuje (${esc(Powtarzanie.opis(x.powt))}), najbliżej ${esc(fmtDay(Powtarzanie.najblizszy(x.powt,dz)))}. Gdyby jednak przeszkoda się pojawiła, plan…`}${dz===dom?'':` <button type="button" class="wroc" data-act="pickDay" data-id="${x.id}" data-d="${dom}">wróć do ${dom===t?'dziś':esc(fmtDay(dom))}</button>`}</span>
       <div class="seg3" role="group" aria-label="Wynik planu: ${dz===t?'dzisiaj':esc(fmtDay(dz))}">${seg('ok','zadziałał')}${seg('miss','nie zadziałał')}${seg('skip','nie było okazji')}</div>
       <div class="dots" role="group" aria-label="Ostatnie 14 dni — kliknij dzień, żeby uzupełnić wynik">${dots}</div><span class="meta">Ostatnie 14 dni${codz?'':` (${ile(nPlan,'dzień','dni','dni')} w planie)`}: ${cnt.ok}✓ ${cnt.miss}✕${sk>=2?` · <span class="streak">seria ${sk} ✓</span>`:''}${x.rehearsals?` · przećwiczony ${x.rehearsals}×`:''}</span>
     </div>
@@ -649,8 +652,8 @@ function vList(){
     ${introBox()}
     <p class="ex-note">To przykłady. Znikną, gdy zapiszesz swój pierwszy WOOP.</p>
     <div class="cards">${EXAMPLES.map(x=>card(x,true)).join('')}</div>`;
-  const doneToday=act.filter(x=>x.checks[today()]).length;
-  return`${warn}<div class="row"><div class="grow"><h1>Twoje WOOP-y</h1><p class="lede">${act.length?`Dziś zaznaczone: ${doneToday} z ${act.length}.`:'Wszystkie są w archiwum.'}</p></div><button class="btn small primary" data-act="newWoop">+ Nowy</button></div>
+  const doneToday=act.filter(x=>{const b=Powtarzanie.biezacy(x.powt,today());return b&&x.checks[b];}).length;   /* bieżący dzień planu: dziś, w tym tygodniu, w tym miesiącu albo tym razem */
+  return`${warn}<div class="row"><div class="grow"><h1>Twoje WOOP-y</h1><p class="lede">${act.length?`Zaznaczone teraz: ${doneToday} z ${act.length}.`:'Wszystkie są w archiwum.'}</p></div><button class="btn small primary" data-act="newWoop">+ Nowy</button></div>
     ${introBox()}
     ${act.length?`<div class="cards">${act.map(x=>card(x)).join('')}</div>`:''}
     ${arch.length?`<button class="btn ghost" data-act="toggleArch">${SHOW_ARCH?'Ukryj':'Pokaż'} archiwum (${arch.length})</button>${SHOW_ARCH?`<div class="cards">${arch.map(x=>card(x)).join('')}</div>`:''}`:''}`;
@@ -840,7 +843,7 @@ document.addEventListener('click',e=>{
       toast(WIZ.editId?'Zapisano zmiany':'Zapisano WOOP');WIZ=null;saveDraft();TAB='moje';go('',true);break;}
     case'imagine':{const k=el.dataset.k;if(IMG&&IMG.k===k){IMG=null;}else IMG={k,end:Date.now()+30000};render();break;}
     case'check':{const x=byId(id);if(!x)break;const t=(el.dataset.d&&el.dataset.d<=today())?el.dataset.d:today();x.checks[t]=x.checks[t]===el.dataset.s?undefined:el.dataset.s;if(!x.checks[t])delete x.checks[t];save();JUST=id;render();JUST=null;break;}
-    case'pickDay':{const d=el.dataset.d;if(!d||d>today())break;if(d===today())delete DZIEN_W[id];else DZIEN_W[id]=d;render();const b=document.querySelector(`.woop[data-id="${id}"] .dot[data-d="${d}"]`);if(b)b.focus();break;}
+    case'pickDay':{const d=el.dataset.d;if(!d||d>today())break;{const x=byId(id);if(x&&d===domyslnyDzien(x))delete DZIEN_W[id];else DZIEN_W[id]=d;}render();const b=document.querySelector(`.woop[data-id="${id}"] .dot[data-d="${d}"]`);if(b)b.focus();break;}
     case'rehearse':RUN={id,step:0};IMG=null;go('',true);break;
     case'runStep':{const i=+el.dataset.i;const dir=i>RUN.step?'next':i<RUN.step?'prev':'';RUN.step=i;IMG=null;go(dir);break;}
     case'runNext':RUN.step++;IMG=null;if(RUN.step>=4){const x=byId(RUN.id);if(x&&!isEx(x)){x.rehearsals=(x.rehearsals||0)+1;x.lastRehearsal=Date.now();save();}}go('next',true);break;
