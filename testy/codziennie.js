@@ -101,8 +101,7 @@ const S = page => page.evaluate(k => JSON.parse(localStorage.getItem(k)), KEY);
   sprawdz(jutro2.length === 0, 'stałe nie trafiły do planu z premią');
   sprawdz(s.today.tasks.filter(t => t.daily).length === 2, 'czysta tablica ma od razu stałe zadania');
 
-  console.log('
-5. „Zamknij i zacznij nowy dzień” wciąga z Planu zadania na dziś');
+  console.log('\n5. „Zamknij i zacznij nowy dzień” wciąga z Planu zadania na dziś');
   const dzis = staraKopia(); dzis.today.date = DZIS;
   const page2 = await strona(przegladarka, adres, dzis);
   await page2.click('#btnSaveRoll');
