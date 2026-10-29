@@ -262,3 +262,18 @@ html[data-skin="cyber"] .s-karta{clip-path:polygon(0 0,calc(100% - 16px) 0,100% 
 html[data-skin="cyber"] .pg{background:rgb(7 6 13 / .92);border-bottom-color:color-mix(in srgb,var(--s-akcent) 45%,transparent);box-shadow:0 1px 18px -6px var(--s-akcent)}
 
 @media (prefers-reduced-motion: reduce){.s-przycisk,.s-przelacznik .tor,.s-przelacznik .tor::after,.s-komunikat{transition:none}}
+
+/* powtarzanie (wspolne/powtarzanie.js): jak często coś wraca */
+.powt{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.powt select,.powt input[type=number],.powt input[type=date]{font:400 var(--s-r-tekst)/1.4 var(--s-kroj);color:var(--s-tusz);background:var(--s-pow);
+  border:1px solid var(--s-linia-mocna);border-radius:var(--s-zaokr);min-height:44px;padding:6px 10px;box-sizing:border-box}
+.powt input[type=number]{width:5.5em}
+.powt select:focus,.powt input:focus-visible{outline:2px solid var(--s-akcent);outline-offset:0}
+.powt-dni{display:flex;flex-wrap:wrap;gap:4px}
+.powt-dzien{position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:0 6px;
+  border:1px solid var(--s-linia-mocna);border-radius:var(--s-zaokr);cursor:pointer;font-weight:600;color:var(--s-tusz);box-sizing:border-box}
+.powt-dzien input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.powt-dzien:has(input:checked){background:var(--s-akcent);border-color:var(--s-akcent);color:var(--s-akcent-tusz)}
+.powt-dzien:has(input:focus-visible){outline:2px solid var(--s-akcent);outline-offset:2px}
+.powt-n,.powt-m{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;color:var(--s-tusz)}
+.powt [hidden]{display:none}

@@ -116,6 +116,7 @@ td.rep { width:62px; text-align:center; }
 td.rep input[type=checkbox] { accent-color:var(--t3); width:17px; height:17px; }
 tr.done td.rep input { opacity:.6; }
 td.del { width:34px; }
+#dailyRows tr.kiedy td { border-top:0; padding-bottom:12px; }
 /* pomidor przy zadaniu: licznik ukończonych bloków (wspolne/pomidor.js) */
 .taskwrap { display:flex; align-items:center; gap:6px; min-width:0; }
 .taskwrap input { flex:1; min-width:0; }
@@ -519,6 +520,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
 <script src="../wspolne/cyber.js"></script>
 <script src="../wspolne/chmura.js"></script>
 <script src="../wspolne/odmiana.js"></script>
+<script src="../wspolne/powtarzanie.js"></script>
 <script src="../wspolne/skroty.js"></script>
 <script src="../wspolne/skrzynka.js"></script>
 <script src="../wspolne/pomidor.js"></script>
@@ -540,7 +542,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
 <nav id="tabs" role="tablist" aria-label="Widoki tablicy">
   <button role="tab" data-tab="dzis" aria-selected="true">Dziś</button>
   <button role="tab" data-tab="plan" aria-selected="false">Plan <span id="tomCount" class="sub"></span></button>
-  <button role="tab" data-tab="codziennie" aria-selected="false">Codziennie</button>
+  <button role="tab" data-tab="codziennie" aria-selected="false">Stałe zadania</button>
   <button role="tab" data-tab="historia" aria-selected="false">Historia</button>
   <button role="tab" data-tab="kategorie" aria-selected="false">Kategorie</button>
   <button role="tab" data-tab="import" aria-selected="false">Import</button>
@@ -608,14 +610,14 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
 <!-- ============ CODZIENNIE ============ -->
 <section id="tab-codziennie" hidden>
   <div class="card">
-    <h2>Codziennie</h2>
-    <div class="sub">Te zadania wjeżdżają na tablicę na początku każdego dnia, przed zadaniami z Planu, i zostają na górze. Niezrobione nie przechodzą na jutro z premią — rano wracają świeże.</div>
+    <h2>Stałe zadania</h2>
+    <div class="sub">Te zadania wjeżdżają na tablicę na początku dnia, w którym wypadają (codziennie, w wybrane dni tygodnia, co kilka dni albo co miesiąc), przed zadaniami z Planu, i zostają na górze. Niezrobione nie przechodzą na jutro z premią — wracają świeże w kolejnym swoim dniu.</div>
     <table style="margin-top:10px">
       <thead><tr><th class="num">#</th><th>Zadanie</th><th>Kategoria</th><th></th></tr></thead>
       <tbody id="dailyRows"></tbody>
     </table>
     <div class="row" style="margin-top:12px">
-      <button class="act" id="btnAddDaily">+ Dodaj zadanie codzienne</button>
+      <button class="act" id="btnAddDaily">+ Dodaj stałe zadanie</button>
     </div>
   </div>
 </section>
@@ -926,7 +928,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
       <h3>Cykl dnia</h3>
       <p><b>Zapisz wynik</b> odkłada zdjęcie dnia do Historii pod dzisiejszą datą. <b>Zapisz i przerzuć na jutro</b> robi to samo,
       a niezamknięte zadania przenosi na zakładkę Jutro z podbitą wartością. <b>Resetuj</b> czyści tablicę bez zapisu.
-      Po północy tablica sama się zorientuje i zaproponuje start nowego dnia: najpierw wjeżdżają zadania z zakładki Codziennie (zostają na górze), potem lista z Planu.
+      Po północy tablica sama się zorientuje i zaproponuje start nowego dnia: najpierw wjeżdżają stałe zadania, które wypadają tego dnia (zostają na górze), potem lista z Planu.
       Zakładka <b>Plan</b> trzyma wszystko, co przychodzi w ciągu dnia i nie jest na dziś.</p>
 
       <h3>Historia</h3>
@@ -1125,13 +1127,13 @@ function migrateDo3(p) {
   p.version = 3; p.__migrated = true;
   return p;
 }
-function seedFirstRun(s) { s.today.tasks = dailyTasks(s); return s; }
+function seedFirstRun(s) { s.today.tasks = dailyTasks(s, s.today.date); return s; }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); if (window.Skroty) Skroty.zapisano(); } catch(e){ toast("Nie udało się zapisać danych w przeglądarce"); } }
 
 function catByName(n, s=S) { return s.categories.find(c => fold(c.name) === fold(n)); }
 function catById(id) { return S.categories.find(c => c.id === id) || null; }
-function dailyTasks(s=S) {                      // szablon Codziennie -> zadania na świeżą tablicę (zostają na górze)
-  return (s.daily || []).filter(d => (d.name || "").trim())
+function dailyTasks(s=S, date=todayISO()) {    // stałe zadania wypadające tego dnia -> świeża tablica (zostają na górze)
+  return (s.daily || []).filter(d => (d.name || "").trim() && Powtarzanie.pasuje(d.powt, date))
     .map(d => ({ id:uid(), name:d.name, catId:d.catId || null, points:null, done:false, carry:0, pin:true, daily:true }));
 }
 function basePoints(t) {
@@ -1816,7 +1818,7 @@ function renderDaily() {
   tb.innerHTML = "";
   if (!S.daily.length) {
     const tr = document.createElement("tr"), td = document.createElement("td");
-    td.colSpan = 4; td.className = "sub"; td.textContent = "Nic tu jeszcze nie ma. Dodaj zadanie, które ma wracać każdego dnia.";
+    td.colSpan = 4; td.className = "sub"; td.textContent = "Nic tu jeszcze nie ma. Dodaj zadanie, które ma wracać regularnie.";
     tr.appendChild(td); tb.appendChild(tr);
     return;
   }
@@ -1825,18 +1827,23 @@ function renderDaily() {
     const tdN = document.createElement("td"); tdN.className = "num"; tdN.textContent = (i+1) + ".";
     const tdName = document.createElement("td");
     const inp = document.createElement("input"); inp.type = "text"; inp.value = d.name;
-    inp.setAttribute("aria-label", "Nazwa zadania codziennego " + (i+1));
+    inp.setAttribute("aria-label", "Nazwa stałego zadania " + (i+1));
     inp.addEventListener("input", () => { d.name = inp.value; save(); });
     tdName.appendChild(inp);
     const tdCat = document.createElement("td");
     tdCat.appendChild(combo(d.catId, id => { d.catId = id; save(); renderDaily(); }));
     const tdD = document.createElement("td"); tdD.className = "del";
     const del = document.createElement("button"); del.className = "delbtn"; del.textContent = "×";
-    del.title = "usuń z codziennych"; del.setAttribute("aria-label", "Usuń z codziennych: " + (d.name || "bez nazwy"));
+    del.title = "usuń ze stałych"; del.setAttribute("aria-label", "Usuń ze stałych zadań: " + (d.name || "bez nazwy"));
     del.addEventListener("click", () => { S.daily.splice(i, 1); save(); renderDaily(); });
     tdD.appendChild(del);
     tr.append(tdN, tdName, tdCat, tdD);
-    tb.appendChild(tr);
+    const trK = document.createElement("tr"); trK.className = "kiedy";   // jak często wraca — pełna szerokość, też na telefonie
+    const tdK = document.createElement("td"); tdK.colSpan = 3;
+    tdK.innerHTML = Powtarzanie.html(d.powt, "Jak często: " + (d.name || "zadanie " + (i+1)));
+    Powtarzanie.podepnij(tdK, r => { d.powt = r; save(); });
+    trK.append(document.createElement("td"), tdK);
+    tb.append(tr, trK);
   });
 }
 
@@ -2256,9 +2263,9 @@ async function applyImport(raw) {
         if (sameDay) { S.today.tasks.push(copy); addToday++; }
         else if (!t.done) { S.tomorrow.push(copy); addTom++; }   // kopia z innego dnia -> na Jutro
       });
-      (p.daily || []).forEach(d => {                // szablon Codziennie z kopii: dopisz brakujące (po nazwie)
+      (p.daily || []).forEach(d => {                // stałe zadania z kopii: dopisz brakujące (po nazwie)
         const key = fold(d.name);
-        if (key && !S.daily.some(x => fold(x.name) === key)) S.daily.push({ id:uid(), name:d.name, catId:cid(d) });
+        if (key && !S.daily.some(x => fold(x.name) === key)) S.daily.push({ id:uid(), name:d.name, catId:cid(d), powt:Powtarzanie.norm(d.powt) });
       });
       const newCats = S.categories.length - befCats;
       save(); renderAll(); renderData();
@@ -2293,8 +2300,8 @@ document.getElementById("tabs").addEventListener("click", e => {
 });
 document.getElementById("btnAdd").addEventListener("click", () => addTask());
 document.getElementById("btnAddDaily").addEventListener("click", () => {
-  S.daily.push({ id:uid(), name:"", catId:null }); save(); renderDaily();
-  const rows = document.querySelectorAll("#dailyRows tr");
+  S.daily.push({ id:uid(), name:"", catId:null, powt:{ typ:"codziennie" } }); save(); renderDaily();
+  const rows = document.querySelectorAll("#dailyRows tr:not(.kiedy)");
   rows[rows.length-1]?.querySelector("input")?.focus();
 });
 document.getElementById("btnSortHeavy").addEventListener("click", () => {

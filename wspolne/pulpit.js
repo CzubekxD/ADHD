@@ -133,16 +133,23 @@
     // każdy dzień to przycisk: klik przełącza wynik (zadziałało → nie zadziałało → nie było okazji → brak), z Ctrl+Z
     const kropki = `<div class="pp-dni" role="group" aria-label="Ostatnie 7 dni — kliknij dzień, żeby zmienić wynik">${dni.map((s, i) =>
       `<button type="button" class="pp-dzien" data-woop-id="${esc(glowny.id)}" data-woop-dzien="${klucze[i]}" title="${esc(dzienTyg(klucze[i]))}: ${OPIS[s]}" aria-label="${esc(dzienTyg(klucze[i]))}: ${OPIS[s]}. Kliknij, żeby zmienić"><i class="${s}"></i></button>`).join('')}</div>`;
-    const dzisiaj = ch[dzis()];
     const reszta = aktywne.length - 1;
+    // pytanie dopasowane do powtarzania: „dziś”, „w tym tygodniu”, „w tym miesiącu” albo „tym razem”
+    const P = window.Powtarzanie;
+    const kiedy = P ? P.kiedy(glowny.powt) : 'dziś';
+    const biez = P ? P.biezacy(glowny.powt, dzis()) : dzis();
+    const wynik = biez && ch[biez];
+    const Kiedy = kiedy.charAt(0).toUpperCase() + kiedy.slice(1);
     return {
       zyczenie: glowny.wish,
       podpis: reszta ? `+ ${reszta} ${odmiana(reszta, 'inny WOOP', 'inne WOOP', 'innych WOOP')}` : 'Ostatnie 7 dni',
       obok: kropki,
-      srodek: dzisiaj
-        ? `<div class="pp-pytanie gotowe"><span>Dziś: ${OPIS[dzisiaj]}</span></div>`
-        : `<div class="pp-pytanie"><span>Czy plan dziś zadziałał?</span></div>`,
-      akcja: { tekst: dzisiaj ? 'Otwórz WOOP' : 'Odpowiedz w WOOP', href: 'woop/', glowna: !dzisiaj }
+      srodek: !biez
+        ? `<div class="pp-pytanie gotowe"><span>Plan ${esc(P.opis(glowny.powt))} · najbliżej ${esc(dzienTyg(P.najblizszy(glowny.powt, dzis())))}</span></div>`
+        : wynik
+        ? `<div class="pp-pytanie gotowe"><span>${Kiedy}: ${OPIS[wynik]}</span></div>`
+        : `<div class="pp-pytanie"><span>Czy plan ${kiedy} zadziałał?</span></div>`,
+      akcja: { tekst: wynik || !biez ? 'Otwórz WOOP' : 'Odpowiedz w WOOP', href: 'woop/', glowna: !!biez && !wynik }
     };
   }
 
