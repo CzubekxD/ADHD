@@ -188,6 +188,9 @@ p{margin:0}
 .dot:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .check .wroc{all:unset;cursor:pointer;color:var(--accent);text-decoration:underline;text-underline-offset:2px;font-weight:600;margin-left:4px}
 .check .wroc:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+.dot.poza{opacity:.4;border-style:dashed}
+.lab-powt{font-weight:600}
+.pomoc-powt{color:var(--muted);font-size:14px}
 .dot.ok{background:var(--ok);border-color:var(--ok)} .dot.miss{background:var(--miss);border-color:var(--miss)} .dot.skip{background:var(--skip);border-color:var(--skip)}
 .dot.today{outline:2px solid var(--ink);outline-offset:1px}
 .dot.pop{animation:popBig .45s var(--spring)}
@@ -399,6 +402,7 @@ html.vt-skin::view-transition-old(root),html.vt-skin::view-transition-new(root){
 <script src="../wspolne/cyber.js"></script>
 <script src="../wspolne/chmura.js"></script>
 <script src="../wspolne/odmiana.js"></script>
+<script src="../wspolne/powtarzanie.js"></script>
 <script src="../wspolne/skroty.js"></script>
 <script src="../wspolne/skrzynka.js"></script>
 <script src="../wspolne/kopia.js"></script>
@@ -470,7 +474,7 @@ const isEx=x=>EXAMPLES.some(e=>e.id===x.id);
 function fresh(){return{version:1,items:[],config:{}};}
 function normItem(x){return{id:x.id||uid(),wish:x.wish||'',outcome:x.outcome||'',obstacle:x.obstacle||'',ifText:x.ifText||'',thenText:x.thenText||'',
   szop:x.szop||'',created:x.created||Date.now(),updated:x.updated||Date.now(),archived:!!x.archived,
-  checks:(x.checks&&typeof x.checks==='object')?x.checks:{},rehearsals:+x.rehearsals||0,lastRehearsal:x.lastRehearsal||null};}
+  checks:(x.checks&&typeof x.checks==='object')?x.checks:{},powt:Powtarzanie.norm(x.powt),rehearsals:+x.rehearsals||0,lastRehearsal:x.lastRehearsal||null};}
 function normalize(d){const f=fresh();d=d&&typeof d==='object'?d:f;
   d.version=1;d.items=Array.isArray(d.items)?d.items.filter(x=>x&&typeof x==='object').map(normItem):[];
   d.config=Object.assign(f.config,d.config&&typeof d.config==='object'?d.config:{});return d;}
@@ -488,7 +492,7 @@ let JUST=null;      /* świeżo kliknięty wpis dnia — tylko on dostaje animac
    więc da się uzupełnić dzień, w którym nie zaznaczyłeś wyniku, a seria liczy prawdziwe dni */
 const DZIEN_W={};
 let PREV_PROG=0;    /* poprzedni stan paska postępu, żeby przejść od niego do nowego */
-function newDraft(src){return{editId:src?src.id:null,step:0,d:{wish:'',outcome:'',obstacle:'',ifText:'',thenText:'',szop:'',...(src?{wish:src.wish,outcome:src.outcome,obstacle:src.obstacle,ifText:src.ifText,thenText:src.thenText,szop:src.szop}:{})}};}
+function newDraft(src){return{editId:src?src.id:null,step:0,d:{wish:'',outcome:'',obstacle:'',ifText:'',thenText:'',szop:'',powt:{typ:'codziennie'},...(src?{wish:src.wish,outcome:src.outcome,obstacle:src.obstacle,ifText:src.ifText,thenText:src.thenText,szop:src.szop,powt:Powtarzanie.norm(src.powt)}:{})}};}
 /* szkic kreatora przeżywa odświeżenie strony */
 function saveDraft(){try{if(WIZ)sessionStorage.setItem(KEY+'-draft',JSON.stringify(WIZ));else sessionStorage.removeItem(KEY+'-draft');}catch(e){}}
 try{const r=sessionStorage.getItem(KEY+'-draft');if(r){WIZ=JSON.parse(r);TAB='nowy';}}catch(e){}
@@ -545,6 +549,7 @@ function render(){
   else if(TAB==='metoda')m.innerHTML=vMethod();
   else if(TAB==='o')m.innerHTML=vAbout();
   else m.innerHTML=vData();
+  if(!RUN&&TAB==='nowy'&&WIZ)Powtarzanie.podepnij(m,r=>{WIZ.d.powt=r;saveDraft();});
   m.insertAdjacentHTML('beforeend',`<footer class="foot s-stopka"><a href="../">wszystkie narzędzia</a><a href="../plany/">Plany Jeżeli… to…</a><a href="https://buycoffee.to/czubekxd" target="_blank" rel="noopener">postaw kawę ☕</a><span>czubekxd · licencja niekomercyjna</span></footer>`);
   if(fsel){const n=m.querySelector(fsel);if(n)try{n.focus({preventScroll:true});}catch(e){}}
   /* pasek postępu: start od poprzedniej wartości, żeby było widać przejście */
@@ -565,23 +570,25 @@ function go(dir,scroll){
 
 const planSentence=x=>`<span class="p1"><b>JEŻELI</b> ${x.ifText?esc(x.ifText):'<span class="lede">…</span>'},</span> <span class="p2"><b>TO</b> <span class="then">${x.thenText?esc(x.thenText):'…'}</span>.</span>`;
 
-/* seria: kolejne dni z „zadziałał”; „nie było okazji” jej nie przerywa */
+/* seria: kolejne dni z „zadziałał”; „nie było okazji” i dni poza planem (np. nie-soboty) jej nie przerywają */
 function streak(x){let n=0;const d=new Date();d.setHours(12,0,0,0);if(!x.checks[dkey(d)])d.setDate(d.getDate()-1);
-  for(let g=0;g<400;g++){const s=x.checks[dkey(d)];if(s==='ok')n++;else if(s!=='skip')break;d.setDate(d.getDate()-1);}return n;}
+  for(let g=0;g<400;g++){const k=dkey(d),s=x.checks[k];if(s==='ok')n++;else if(s!=='skip'&&Powtarzanie.pasuje(x.powt,k))break;d.setDate(d.getDate()-1);}return n;}
 
 function card(x,isEx){
   const t=today();const dz=(DZIEN_W[x.id]&&DZIEN_W[x.id]<=t)?DZIEN_W[x.id]:t;const st=x.checks[dz]||'';
   const opisStanu=s=>({ok:'zadziałało',miss:'nie zadziałało',skip:'nie było okazji'})[s]||'brak wpisu';
   const days=daysBack(14);
   const cnt={ok:0,miss:0,skip:0};days.forEach(k=>{const s=x.checks[k];if(s)cnt[s]++;});
+  const wPlanie=k=>Powtarzanie.pasuje(x.powt,k), codz=Powtarzanie.norm(x.powt).typ==='codziennie';
+  const nPlan=days.filter(wPlanie).length, opisDnia=k=>wPlanie(k)||x.checks[k]?opisStanu(x.checks[k]):'poza planem';
   const fresh=JUST===x.id&&st;
-  const dots=days.map(k=>`<button type="button" class="dot ${x.checks[k]||''} ${k===t?'today':''} ${k===dz?'wybrany':''} ${k===dz&&fresh?'pop':''}" data-act="pickDay" data-id="${x.id}" data-d="${k}" aria-pressed="${k===dz}" title="${fmtDay(k)}: ${opisStanu(x.checks[k])}" aria-label="${fmtDay(k)}: ${opisStanu(x.checks[k])}. Wybierz ten dzień"></button>`).join('');
+  const dots=days.map(k=>`<button type="button" class="dot ${x.checks[k]||''} ${k===t?'today':''} ${wPlanie(k)?'':'poza'} ${k===dz?'wybrany':''} ${k===dz&&fresh?'pop':''}" data-act="pickDay" data-id="${x.id}" data-d="${k}" aria-pressed="${k===dz}" title="${fmtDay(k)}: ${opisDnia(k)}" aria-label="${fmtDay(k)}: ${opisDnia(k)}. Wybierz ten dzień"></button>`).join('');
   const sk=isEx?0:streak(x);
   const conf=CONF==='del:'+x.id?`<div class="confirm"><p>Usunąć ten WOOP razem z historią?</p><div class="row"><button class="btn small danger" data-act="del" data-id="${x.id}">Usuń</button><button class="btn small" data-act="noConf">Anuluj</button></div></div>`:'';
   const seg=(s,l)=>`<button data-act="check" data-id="${x.id}" data-d="${dz}" data-s="${s}" aria-pressed="${st===s}" class="${fresh&&st===s?'pop':''}">${l}</button>`;
   return`<article class="woop ${isEx?'ex':''}" data-id="${x.id}">
     <div class="head"><span class="lt k-wish">W</span><div class="grow"><div class="wish">${esc(x.wish)||'<span class="lede">(bez życzenia)</span>'}</div>
-      <div class="row" style="margin-top:6px">${isEx?'<span class="tag ex">przykład</span>':''}${x.archived?'<span class="tag">w archiwum</span>':''}</div></div></div>
+      <div class="row" style="margin-top:6px">${isEx?'<span class="tag ex">przykład</span>':''}${codz?'':`<span class="tag">${esc(Powtarzanie.opis(x.powt))}</span>`}${x.archived?'<span class="tag">w archiwum</span>':''}</div></div></div>
     <div class="w-main">
     <div class="contrast">
       <div class="half k-outcome"><span class="lab">O · efekt</span><span class="tx">${esc(x.outcome)||'…'}</span></div>
@@ -593,9 +600,9 @@ function card(x,isEx){
     <div class="w-side">
     ${isEx?`<div class="stack"><button class="btn primary" data-act="rehearse" data-id="${x.id}">Przejdź przykład krok po kroku</button><button class="btn" data-act="newWoop">Ułóż własny WOOP</button></div></div>`:`
     <div class="check">
-      <span class="q">${dz===t?'Dziś':esc(fmtDay(dz))+(dz===daysBack(2)[0]?' (wczoraj)':'')}, gdy pojawiła się przeszkoda, plan…${dz===t?'':` <button type="button" class="wroc" data-act="pickDay" data-id="${x.id}" data-d="${t}">wróć do dziś</button>`}</span>
+      <span class="q">${dz===t?'Dziś':esc(fmtDay(dz))+(dz===daysBack(2)[0]?' (wczoraj)':'')}, ${wPlanie(dz)?'gdy pojawiła się przeszkoda, plan…':`plan nie obowiązuje (${esc(Powtarzanie.opis(x.powt))}), najbliżej ${esc(fmtDay(Powtarzanie.najblizszy(x.powt,dz)))}. Gdyby jednak przeszkoda się pojawiła, plan…`}${dz===t?'':` <button type="button" class="wroc" data-act="pickDay" data-id="${x.id}" data-d="${t}">wróć do dziś</button>`}</span>
       <div class="seg3" role="group" aria-label="Wynik planu: ${dz===t?'dzisiaj':esc(fmtDay(dz))}">${seg('ok','zadziałał')}${seg('miss','nie zadziałał')}${seg('skip','nie było okazji')}</div>
-      <div class="dots" role="group" aria-label="Ostatnie 14 dni — kliknij dzień, żeby uzupełnić wynik">${dots}</div><span class="meta">Ostatnie 14 dni: ${cnt.ok}✓ ${cnt.miss}✕${sk>=2?` · <span class="streak">seria ${sk} ✓</span>`:''}${x.rehearsals?` · przećwiczony ${x.rehearsals}×`:''}</span>
+      <div class="dots" role="group" aria-label="Ostatnie 14 dni — kliknij dzień, żeby uzupełnić wynik">${dots}</div><span class="meta">Ostatnie 14 dni${codz?'':` (${ile(nPlan,'dzień','dni','dni')} w planie)`}: ${cnt.ok}✓ ${cnt.miss}✕${sk>=2?` · <span class="streak">seria ${sk} ✓</span>`:''}${x.rehearsals?` · przećwiczony ${x.rehearsals}×`:''}</span>
     </div>
     <div class="row">
       <button class="btn small primary" data-act="rehearse" data-id="${x.id}">Przećwicz</button>
@@ -670,6 +677,7 @@ function vWizard(){
     body=`<div class="field"><label class="big" for="f-if">JEŻELI…</label><textarea id="f-if" data-f="ifText" rows="2" placeholder="${esc(st.ifPh)}">${esc(d.ifText)}</textarea></div>
       ${!d.ifText.trim()&&d.obstacle.trim()?`<button class="btn small ghost" data-act="ifFromObstacle">Wstaw moją przeszkodę jako „Jeżeli”</button>`:''}
       <div class="field"><label class="big" for="f-then">…TO</label><textarea id="f-then" data-f="thenText" rows="2" placeholder="${esc(st.thenPh)}">${esc(d.thenText)}</textarea></div>
+      <div class="field"><span class="lab-powt">Kiedy ten plan obowiązuje?</span>${Powtarzanie.html(d.powt,'Kiedy ten plan obowiązuje')}<span class="pomoc-powt">Na przykład zakupy tylko w soboty — w inne dni plan nie liczy się do wyników.</span></div>
       <div class="preview" id="pv">${d.ifText.trim()||d.thenText.trim()?planSentence(d):'<span class="empty">Tu złoży się Twoje zdanie „Jeżeli…, to…”.</span>'}</div>`;
   }else{
     body=`<div class="field"><label for="f-${st.k}">${st.name}</label><textarea id="f-${st.k}" data-f="${st.k}" rows="3" placeholder="${esc(st.ph)}">${esc(d[st.k])}</textarea></div>
@@ -826,8 +834,8 @@ document.addEventListener('click',e=>{
     case'prev':WIZ.step=Math.max(0,WIZ.step-1);IMG=null;saveDraft();go('prev',true);break;
     case'ifFromObstacle':{const o=WIZ.d.obstacle.trim().replace(/[.!]+$/,'');WIZ.d.ifText=o.charAt(0).toLocaleLowerCase('pl')+o.slice(1);}saveDraft();render();break;
     case'saveWiz':{const d=WIZ.d;
-      if(WIZ.editId){const x=byId(WIZ.editId);if(x){Object.assign(x,{wish:d.wish.trim(),outcome:d.outcome.trim(),obstacle:d.obstacle.trim(),ifText:d.ifText.trim(),thenText:d.thenText.trim(),szop:d.szop,updated:Date.now()});}}
-      else S.items.unshift(normItem({wish:d.wish.trim(),outcome:d.outcome.trim(),obstacle:d.obstacle.trim(),ifText:d.ifText.trim(),thenText:d.thenText.trim(),szop:d.szop}));
+      if(WIZ.editId){const x=byId(WIZ.editId);if(x){Object.assign(x,{wish:d.wish.trim(),outcome:d.outcome.trim(),obstacle:d.obstacle.trim(),ifText:d.ifText.trim(),thenText:d.thenText.trim(),szop:d.szop,powt:Powtarzanie.norm(d.powt),updated:Date.now()});}}
+      else S.items.unshift(normItem({wish:d.wish.trim(),outcome:d.outcome.trim(),obstacle:d.obstacle.trim(),ifText:d.ifText.trim(),thenText:d.thenText.trim(),szop:d.szop,powt:Powtarzanie.norm(d.powt)}));
       save();if(WIZ.zSkrzynki&&window.Skrzynka)Skrzynka.przeniesiono(WIZ.zSkrzynki);   /* karteczka ze skrzynki znika dopiero teraz */
       toast(WIZ.editId?'Zapisano zmiany':'Zapisano WOOP');WIZ=null;saveDraft();TAB='moje';go('',true);break;}
     case'imagine':{const k=el.dataset.k;if(IMG&&IMG.k===k){IMG=null;}else IMG={k,end:Date.now()+30000};render();break;}

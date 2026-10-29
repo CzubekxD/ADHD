@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 
 const KORZEN = path.join(__dirname, '..');
-const PLIKI = ['pasek/test.js', 'wspolne/pulpit.test.js', 'wspolne/skrzynka.test.js', 'wspolne/pomidor.test.js', 'wspolne/przypomnienia.test.js'];
+const PLIKI = ['pasek/test.js', 'wspolne/pulpit.test.js', 'wspolne/skrzynka.test.js', 'wspolne/pomidor.test.js', 'wspolne/przypomnienia.test.js', 'wspolne/powtarzanie.test.js'];
 
 const wyniki = PLIKI.map(plik => {
   const r = spawnSync(process.execPath, [path.join(KORZEN, plik)], {

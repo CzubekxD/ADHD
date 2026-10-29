@@ -135,14 +135,19 @@
       `<button type="button" class="pp-dzien" data-woop-id="${esc(glowny.id)}" data-woop-dzien="${klucze[i]}" title="${esc(dzienTyg(klucze[i]))}: ${OPIS[s]}" aria-label="${esc(dzienTyg(klucze[i]))}: ${OPIS[s]}. Kliknij, żeby zmienić"><i class="${s}"></i></button>`).join('')}</div>`;
     const dzisiaj = ch[dzis()];
     const reszta = aktywne.length - 1;
+    // plan z powtarzaniem (np. tylko w soboty): w inne dni nie pytamy, tylko mówimy, kiedy wraca
+    const P = window.Powtarzanie;
+    const pozaPlanem = !dzisiaj && P && !P.pasuje(glowny.powt, dzis());
     return {
       zyczenie: glowny.wish,
       podpis: reszta ? `+ ${reszta} ${odmiana(reszta, 'inny WOOP', 'inne WOOP', 'innych WOOP')}` : 'Ostatnie 7 dni',
       obok: kropki,
-      srodek: dzisiaj
+      srodek: pozaPlanem
+        ? `<div class="pp-pytanie gotowe"><span>Dziś bez tego planu · ${esc(P.opis(glowny.powt))}</span></div>`
+        : dzisiaj
         ? `<div class="pp-pytanie gotowe"><span>Dziś: ${OPIS[dzisiaj]}</span></div>`
         : `<div class="pp-pytanie"><span>Czy plan dziś zadziałał?</span></div>`,
-      akcja: { tekst: dzisiaj ? 'Otwórz WOOP' : 'Odpowiedz w WOOP', href: 'woop/', glowna: !dzisiaj }
+      akcja: { tekst: dzisiaj || pozaPlanem ? 'Otwórz WOOP' : 'Odpowiedz w WOOP', href: 'woop/', glowna: !dzisiaj && !pozaPlanem }
     };
   }
 

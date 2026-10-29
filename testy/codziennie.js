@@ -73,13 +73,13 @@ const S = page => page.evaluate(k => JSON.parse(localStorage.getItem(k)), KEY);
   sprawdz(!('pinned' in s), 'pole pinned zniknęło');
   sprawdz(s.daily.length === 1 && s.daily[0].name === 'SZOP' && s.daily[0].catId === 'k3', 'SZOP w szablonie, z kategorią');
 
-  console.log('\n2. Dodawanie w zakładce Codziennie');
+  console.log('\n2. Dodawanie w zakładce Stałe zadania');
   await page.click('button[data-tab="codziennie"]');
   await page.click('#btnAddDaily');
   await page.keyboard.type('Leki');
   s = await S(page);
   sprawdz(s.daily.length === 2 && s.daily[1].name === 'Leki', 'nowe zadanie zapisane w szablonie');
-  sprawdz(await page.locator('#dailyRows tr').count() === 2, 'dwa wiersze na liście');
+  sprawdz(await page.locator('#dailyRows tr:not(.kiedy)').count() === 2, 'dwa wiersze na liście');
 
   console.log('\n3. Nowy dzień: Codziennie przed Planem, stałe niezamknięte nie idą na jutro');
   await page.click('button[data-tab="dzis"]');
@@ -108,6 +108,20 @@ const S = page => page.evaluate(k => JSON.parse(localStorage.getItem(k)), KEY);
   s = await S(page2);
   sprawdz(s.today.tasks.some(t => t.name === 'Z planu'), 'zadanie z Planu na dziś jest na tablicy');
   sprawdz(!(s.plan[DZIS] || []).length, 'kubełek planu na dziś opróżniony');
+
+  console.log('\n6. Powtarzanie: stałe zadanie tylko w soboty nie wjeżdża we wtorek');
+  await page2.click('button[data-tab="codziennie"]');
+  const wiersz = page2.locator('#dailyRows tr.kiedy').first();
+  await wiersz.locator('.powt-typ').selectOption('tydzien');
+  await wiersz.locator('.powt-dzien[title="sobota"]').click();
+  await wiersz.locator('.powt-dzien[title="wtorek"]').click();
+  s = await S(page2);
+  sprawdz(JSON.stringify(s.daily[0].powt) === JSON.stringify({ typ: 'tydzien', dni: [5] }), 'zapisane: w soboty (jest: ' + JSON.stringify(s.daily[0].powt) + ')');
+  await page2.click('button[data-tab="dzis"]');
+  await page2.click('#btnSaveRoll');
+  s = await S(page2);
+  sprawdz(!s.today.tasks.some(t => t.name === 'SZOP'), 'we wtorek SZOP (w soboty) nie ma na tablicy');
+  sprawdz(page2.bledy.length === 0, 'brak błędów na drugiej stronie' + (page2.bledy.length ? ': ' + page2.bledy.join('; ') : ''));
 
   sprawdz(page.bledy.length === 0, 'brak błędów na stronie' + (page.bledy.length ? ': ' + page.bledy.join('; ') : ''));
   await przegladarka.close(); srv.close();
