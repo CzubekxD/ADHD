@@ -373,6 +373,7 @@ textarea:focus { outline:2px solid var(--bar); outline-offset:-1px; border-color
 .ptask.flyR { animation:flyR .2s ease forwards; }
 .ptask.flyL { animation:flyL .2s ease forwards; }
 .ptask.fade { animation:fadeOut .2s ease forwards; }
+.ptask:has(.combo .pop) { position:relative; z-index:70; }  /* otwarta lista kategorii nad kolejnymi zadaniami */
 @keyframes flyR { to { opacity:0; transform:translateX(34px) scale(.95); } }
 @keyframes flyL { to { opacity:0; transform:translateX(-34px) scale(.95); } }
 @keyframes fadeOut { to { opacity:0; transform:scale(.95); } }
