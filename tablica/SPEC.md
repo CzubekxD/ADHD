@@ -2,11 +2,11 @@
 
 Jeden plik HTML, bez zewnętrznych bibliotek i assetów (wyjątek: opcjonalny OCR), dane w `localStorage` (klucz `tablica-scoringowa-v1`). Docelowo `tablica/index.html` w repo `czubekxd/ADHD`.
 
-## Model danych (schemat 3)
+## Model danych (schemat 4)
 
 ```
-{ version:3, fx, lastExport, autoBackup, backupName, importMode,
-  categories:[{id,name,points}], pinned:{on,name,catName},
+{ version:4, fx, lastExport, autoBackup, backupName, importMode,
+  categories:[{id,name,points}], daily:[{id,name,catId}],
   today:{date, goldShown, silverShown, tasks:[{id,name,catId,points,done,doneAt,started,startDay,carry,repeat,src,pin}]},
   plan:{ "YYYY-MM-DD":[task] },            // zastąpiło płaskie `tomorrow`
   history:[{date,savedAt,earned,possible,done,total,perfect,allDone,heavyDone,heavyTotal,scale,order,cats}],
@@ -35,7 +35,8 @@ Data tablicy zmienia się tylko świadomie.
 **Dziś** — zadania, combobox kategorii, wykres dnia (szary = do zdobycia, kolor rośnie; kategorie/trudność), wykres kolejności domykania, trzy przyciski dnia, baner nowego dnia. Ciężkie zadania wyróżnione typograficznie: 21 pkt = złote, bold, 18px, akcent na krawędzi, połysk plakietki, przycisk „+6" zamiast kwadracika, podpowiedź „Ruszam to" w nagłówku. Kolumna **→ jutro** (`t.repeat`) kopiuje zadanie do jutrzejszej kolumny planu (kopia nosi `src` = id źródła, odznaczenie ją usuwa, zmiana nazwy ją aktualizuje).
 **Plan** (v12, dawniej Jutro) — siedem kolumn pn–nd, weekend wyszarzony; strzałki ‹ › przesuwają zadanie o dobę, „→ dziś" ściąga całą kolumnę na tablicę, nawigacja po tygodniach. `freshBoard(true)` zabiera wszystkie kubełki o dacie ≤ dziś, więc zaległości nie giną w kalendarzu.
 **Historia** — okresy, wykres dzień po dniu ze złotymi i srebrnymi dniami, bilans kategorii, 6 statystyk, kolejność domykania zbiorczo, tabela dni.
-**Kategorie** — punktacja, stała pozycja, poziomy Check, świętowanie, dane i kopie.
+**Codziennie** (v17) — szablon stałych zadań (`daily:[{id,name,catId}]`, schemat 4; dawna „stała pozycja” przeszła tu migracją). Wchodzą na świeżą tablicę przed zadaniami z Planu, z `pin`+`daily`, liczą się do kompletu i medalu; `rollUnfinished` ich nie przerzuca (bez premii), bo rano wracają z szablonu.
+**Kategorie** — punktacja, poziomy Check, świętowanie, dane i kopie.
 **Import** — CSV/TSV z Asany, wklejona lista (dzieli też po `;`, `\t`, ` | `), screen przez tesseract.js; podgląd z dedupem.
 **Jak to działa** — mechanika, uzasadnienie z badań, dane i prywatność, buycoffee, źródła, raport diagnostyczny.
 

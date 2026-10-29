@@ -539,6 +539,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
 <nav id="tabs" role="tablist" aria-label="Widoki tablicy">
   <button role="tab" data-tab="dzis" aria-selected="true">Dziś</button>
   <button role="tab" data-tab="plan" aria-selected="false">Plan <span id="tomCount" class="sub"></span></button>
+  <button role="tab" data-tab="codziennie" aria-selected="false">Codziennie</button>
   <button role="tab" data-tab="historia" aria-selected="false">Historia</button>
   <button role="tab" data-tab="kategorie" aria-selected="false">Kategorie</button>
   <button role="tab" data-tab="import" aria-selected="false">Import</button>
@@ -600,6 +601,21 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
     </div>
     <div id="orderChart"></div>
     <div class="sub" id="orderNote" style="margin-top:10px"></div>
+  </div>
+</section>
+
+<!-- ============ CODZIENNIE ============ -->
+<section id="tab-codziennie" hidden>
+  <div class="card">
+    <h2>Codziennie</h2>
+    <div class="sub">Te zadania wjeżdżają na tablicę na początku każdego dnia, przed zadaniami z Planu, i zostają na górze. Niezrobione nie przechodzą na jutro z premią — rano wracają świeże.</div>
+    <table style="margin-top:10px">
+      <thead><tr><th class="num">#</th><th>Zadanie</th><th>Kategoria</th><th></th></tr></thead>
+      <tbody id="dailyRows"></tbody>
+    </table>
+    <div class="row" style="margin-top:12px">
+      <button class="act" id="btnAddDaily">+ Dodaj zadanie codzienne</button>
+    </div>
   </div>
 </section>
 
@@ -705,15 +721,6 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
     <div class="row" style="margin-top:12px">
       <button class="act" id="btnAddCat">+ Dodaj kategorię</button>
       <button class="act ghost" id="btnAddChecks">+ Poziomy Check (L1 / L2 / L3)</button>
-    </div>
-  </div>
-  <div class="card">
-    <h2>Stała pozycja dnia</h2>
-    <div class="sub">Każdy nowy dzień startuje z tym zadaniem na pierwszej pozycji.</div>
-    <div class="row" style="margin-top:10px">
-      <div style="flex:2; min-width:200px"><input type="text" id="pinName"></div>
-      <div style="flex:1; min-width:160px" id="pinCatSlot"></div>
-      <label class="sub"><input type="checkbox" id="pinOn" style="vertical-align:-4px"> włączona</label>
     </div>
   </div>
   <div class="card">
@@ -918,7 +925,7 @@ circle.dotIn { animation:dotIn .4s cubic-bezier(.2,1.5,.4,1) both; transform-box
       <h3>Cykl dnia</h3>
       <p><b>Zapisz wynik</b> odkłada zdjęcie dnia do Historii pod dzisiejszą datą. <b>Zapisz i przerzuć na jutro</b> robi to samo,
       a niezamknięte zadania przenosi na zakładkę Jutro z podbitą wartością. <b>Resetuj</b> czyści tablicę bez zapisu.
-      Po północy tablica sama się zorientuje i zaproponuje start nowego dnia: stała pozycja wraca na górę, lista z Jutra wjeżdża na tablicę.
+      Po północy tablica sama się zorientuje i zaproponuje start nowego dnia: najpierw wjeżdżają zadania z zakładki Codziennie (zostają na górze), potem lista z Planu.
       Zakładka <b>Plan</b> trzyma wszystko, co przychodzi w ciągu dnia i nie jest na dziś.</p>
 
       <h3>Historia</h3>
@@ -1042,10 +1049,8 @@ function bindS(o) {                                      // S.tomorrow = widok n
   return o;
 }
 
-const DEFAULTS = () => ({
-  version: 3,
-  plan: {},
-  categories: [
+const DEFAULTS = () => {
+  const categories = [
     { id:uid(), name:"praca administracyjna", points:3 },
     { id:uid(), name:"dom", points:1 },
     { id:uid(), name:"zdrowie i regeneracja", points:1 },
@@ -1054,8 +1059,12 @@ const DEFAULTS = () => ({
     { id:uid(), name:"Check L1 czat", points:1 },
     { id:uid(), name:"Check L2 telefon / przełożony", points:3 },
     { id:uid(), name:"Check L3 wizyta osobista", points:8 },
-  ],
-  pinned: { on:true, name:"Wypełnienie tablicy", catName:"praca administracyjna" },
+  ];
+  return {
+  version: 4,
+  plan: {},
+  categories,
+  daily: [{ id:uid(), name:"Wypełnienie tablicy", catId:categories[0].id }],
   today: { date: todayISO(), tasks: [] },
   history: [],
   recent: [],
@@ -1067,7 +1076,8 @@ const DEFAULTS = () => ({
   lastExport: null, autoBackup: false, backupName: "", importMode: "merge",
   period: "7",
   fixFrom: "", fixTo: ""
-});
+  };
+};
 
 let S = bindS(load());
 if (S.__migrated) { delete S.__migrated; save(); }
@@ -1081,6 +1091,18 @@ function load() {
   } catch (e) { return seedFirstRun(DEFAULTS()); }
 }
 function migrate(p) {
+  p = migrateDo3(p);
+  if (p && (p.version || 1) < 4) {                       // stała pozycja -> pierwsze zadanie szablonu Codziennie
+    const pin = p.pinned;
+    const c = pin && (p.categories || []).find(x => fold(x.name) === fold(pin.catName));
+    p.daily = Array.isArray(p.daily) ? p.daily : [];
+    if (pin && pin.on && (pin.name || "").trim()) p.daily.unshift({ id:uid(), name:pin.name, catId:c ? c.id : null });
+    delete p.pinned;
+    p.version = 4; p.__migrated = true;
+  }
+  return p;
+}
+function migrateDo3(p) {
   if (!p) return p;
   if ((p.version || 1) < 3) {                            // jutro -> plan dni
     const base = (p.today && p.today.date) || todayISO();
@@ -1102,14 +1124,14 @@ function migrate(p) {
   p.version = 3; p.__migrated = true;
   return p;
 }
-function seedFirstRun(s) { s.today.tasks = [pinnedTask(s)]; return s; }
+function seedFirstRun(s) { s.today.tasks = dailyTasks(s); return s; }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); if (window.Skroty) Skroty.zapisano(); } catch(e){ toast("Nie udało się zapisać danych w przeglądarce"); } }
 
 function catByName(n, s=S) { return s.categories.find(c => fold(c.name) === fold(n)); }
 function catById(id) { return S.categories.find(c => c.id === id) || null; }
-function pinnedTask(s=S) {
-  const c = s.categories.find(x => fold(x.name) === fold(s.pinned.catName));
-  return { id:uid(), name:s.pinned.name, catId:c?c.id:null, points:null, done:false, carry:0, pin:true };
+function dailyTasks(s=S) {                      // szablon Codziennie -> zadania na świeżą tablicę (zostają na górze)
+  return (s.daily || []).filter(d => (d.name || "").trim())
+    .map(d => ({ id:uid(), name:d.name, catId:d.catId || null, points:null, done:false, carry:0, pin:true, daily:true }));
 }
 function basePoints(t) {
   if (t.points != null) return t.points;
@@ -1785,15 +1807,36 @@ function renderCats() {
     tr.append(tdN, tdName, tdP, tdU, tdD);
     tb.appendChild(tr);
   });
-  // stała pozycja
-  document.getElementById("pinName").value = S.pinned.name;
-  document.getElementById("pinOn").checked = !!S.pinned.on;
-  const slot = document.getElementById("pinCatSlot");
-  slot.innerHTML = "";
-  const pc = catByName(S.pinned.catName);
-  slot.appendChild(combo(pc ? pc.id : null, id => {
-    const c = catById(id); S.pinned.catName = c ? c.name : ""; save(); renderCats();
-  }));
+}
+
+/* ---------- CODZIENNIE ---------- */
+function renderDaily() {
+  const tb = document.getElementById("dailyRows");
+  tb.innerHTML = "";
+  if (!S.daily.length) {
+    const tr = document.createElement("tr"), td = document.createElement("td");
+    td.colSpan = 4; td.className = "sub"; td.textContent = "Nic tu jeszcze nie ma. Dodaj zadanie, które ma wracać każdego dnia.";
+    tr.appendChild(td); tb.appendChild(tr);
+    return;
+  }
+  S.daily.forEach((d, i) => {
+    const tr = document.createElement("tr");
+    const tdN = document.createElement("td"); tdN.className = "num"; tdN.textContent = (i+1) + ".";
+    const tdName = document.createElement("td");
+    const inp = document.createElement("input"); inp.type = "text"; inp.value = d.name;
+    inp.setAttribute("aria-label", "Nazwa zadania codziennego " + (i+1));
+    inp.addEventListener("input", () => { d.name = inp.value; save(); });
+    tdName.appendChild(inp);
+    const tdCat = document.createElement("td");
+    tdCat.appendChild(combo(d.catId, id => { d.catId = id; save(); renderDaily(); }));
+    const tdD = document.createElement("td"); tdD.className = "del";
+    const del = document.createElement("button"); del.className = "delbtn"; del.textContent = "×";
+    del.title = "usuń z codziennych"; del.setAttribute("aria-label", "Usuń z codziennych: " + (d.name || "bez nazwy"));
+    del.addEventListener("click", () => { S.daily.splice(i, 1); save(); renderDaily(); });
+    tdD.appendChild(del);
+    tr.append(tdN, tdName, tdCat, tdD);
+    tb.appendChild(tr);
+  });
 }
 
 /* ---------- HISTORIA ---------- */
@@ -1941,7 +1984,7 @@ function planCopy(t, extraCarry) {
 }
 function freshBoard(pullPlanned) {
   const tasks = [];
-  if (S.pinned.on) tasks.push(pinnedTask());
+  tasks.push(...dailyTasks());
   if (pullPlanned) {
     const today = todayISO();
     Object.keys(S.plan).filter(d => d <= today).sort().forEach(d => {
@@ -1956,7 +1999,7 @@ function rollUnfinished(toDate) {
   const d = toDate || nextISO(S.today.date);
   const bucket = planFor(d);
   const have = new Set(bucket.map(t => fold(t.name)).filter(Boolean));
-  const left = S.today.tasks.filter(t => !t.done && (t.name||"").trim());
+  const left = S.today.tasks.filter(t => !t.done && !t.daily && !t.pin && (t.name||"").trim());   // stałe wracają rano z szablonu, bez premii
   let n = 0;
   left.forEach(t => {
     if (have.has(fold(t.name))) return;                  // już tam wpisane (np. „wróć do tego jutro")
@@ -2206,13 +2249,16 @@ async function applyImport(raw) {
           return;
         }
         have.add(key);
-        const copy = { id:uid(), name:t.name, catId:cid(t), points:t.points??null, carry:t.carry||0, pin:!!t.pin,
+        const copy = { id:uid(), name:t.name, catId:cid(t), points:t.points??null, carry:t.carry||0, pin:!!t.pin, daily:!!t.daily,
           done: sameDay ? !!t.done : false, doneAt: sameDay ? (t.doneAt||null) : null,
           started: sameDay ? !!t.started : false, startDay: sameDay ? (t.startDay||null) : null };
         if (sameDay) { S.today.tasks.push(copy); addToday++; }
         else if (!t.done) { S.tomorrow.push(copy); addTom++; }   // kopia z innego dnia -> na Jutro
       });
-      if (p.pinned) S.pinned = p.pinned;
+      (p.daily || []).forEach(d => {                // szablon Codziennie z kopii: dopisz brakujące (po nazwie)
+        const key = fold(d.name);
+        if (key && !S.daily.some(x => fold(x.name) === key)) S.daily.push({ id:uid(), name:d.name, catId:cid(d) });
+      });
       const newCats = S.categories.length - befCats;
       save(); renderAll(); renderData();
       toast(`Dołączono kopię — dziś +${addToday}, jutro +${addTom}, kategorie +${newCats}, dni historii +${added}`);
@@ -2223,11 +2269,12 @@ async function applyImport(raw) {
 /* ---------- zakładki / motyw ---------- */
 function showTab(name) {
   document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === name));
-  ["dzis","plan","historia","kategorie","import","info"].forEach(t => document.getElementById("tab-"+t).hidden = (t !== name));
+  ["dzis","plan","codziennie","historia","kategorie","import","info"].forEach(t => document.getElementById("tab-"+t).hidden = (t !== name));
   if (name === "dzis") renderOrderChart();
   if (name === "historia") renderHistory();
   if (name === "kategorie") renderCats();
   if (name === "plan") renderPlan();
+  if (name === "codziennie") renderDaily();
 }
 function applyTheme() {
   // jeden motyw na całej stronie: ciemny (zapisany wcześniej wybór motywu w danych tablicy jest pomijany)
@@ -2236,7 +2283,7 @@ function applyTheme() {
 }
 
 function renderAll() {
-  renderRollover(); renderToday(); renderTomorrow(); renderCats(); renderHistory(); applyTheme(); renderData();
+  renderRollover(); renderToday(); renderTomorrow(); renderCats(); renderDaily(); renderHistory(); applyTheme(); renderData();
 }
 
 /* ---------- eventy ---------- */
@@ -2244,6 +2291,11 @@ document.getElementById("tabs").addEventListener("click", e => {
   const b = e.target.closest("button[data-tab]"); if (b) showTab(b.dataset.tab);
 });
 document.getElementById("btnAdd").addEventListener("click", () => addTask());
+document.getElementById("btnAddDaily").addEventListener("click", () => {
+  S.daily.push({ id:uid(), name:"", catId:null }); save(); renderDaily();
+  const rows = document.querySelectorAll("#dailyRows tr");
+  rows[rows.length-1]?.querySelector("input")?.focus();
+});
 document.getElementById("btnSortHeavy").addEventListener("click", () => {
   S.today.tasks.sort((a, b) => {
     if (!!a.done !== !!b.done) return a.done ? 1 : -1;              // domknięte na dół
@@ -2307,8 +2359,6 @@ document.getElementById("periodSeg").addEventListener("click", e => {
 });
 document.getElementById("fixFrom").addEventListener("change", e => { S.fixFrom = e.target.value; save(); renderHistory(); });
 document.getElementById("fixTo").addEventListener("change", e => { S.fixTo = e.target.value; save(); renderHistory(); });
-document.getElementById("pinName").addEventListener("input", e => { S.pinned.name = e.target.value; save(); });
-document.getElementById("pinOn").addEventListener("change", e => { S.pinned.on = e.target.checked; save(); });
 const fileIn = document.getElementById("fileIn");
 fileIn.addEventListener("change", () => { if (fileIn.files[0]) doImport(fileIn.files[0]); fileIn.value = ""; });
 document.getElementById("btnExport").addEventListener("click", () => backupWrite());
