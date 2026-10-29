@@ -2338,7 +2338,7 @@ document.getElementById("btnSaveRoll").addEventListener("click", () => {
   const s0 = score(S.today.tasks);
   const saved = s0.total ? saveScore(true) : false;
   const n = rollUnfinished();
-  freshBoard(false);
+  freshBoard(true);                                      // z Planu wchodzi to, co na dziś lub wcześniej (jak po „Zapisz i zacznij dziś”)
   renderAll();
   toast((saved ? `Zapisano ${s0.earned}/${s0.possible} pkt. ` : "")
     + (n ? `${n} ${odm(n, "niezamknięte zadanie poszło", "niezamknięte zadania poszły", "niezamkniętych zadań poszło")} na Jutro.` : "Wszystko domknięte — nic nie poszło na jutro. ★"));
