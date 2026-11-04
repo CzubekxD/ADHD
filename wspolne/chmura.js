@@ -210,7 +210,7 @@
   let oczekujace = false;                 // na Drive są zmiany, których ta karta jeszcze nie pokazuje
   let stanUI = { s: 'wyl' };
   const zdalneCache = {};                 // klucz → {mod, tekst}: nie pobieramy dwa razy tego samego
-  addEventListener('pointerdown', () => { interakcja = true; }, { capture: true });
+  addEventListener('pointerdown', e => { interakcja = true; odnowPoKliknieciu(e); }, { capture: true });
   addEventListener('keydown', () => { interakcja = true; }, { capture: true });
 
   // zapisy narzędzi do localStorage → wyślij na Drive chwilę po ostatniej zmianie
@@ -321,6 +321,23 @@
     komunikat('Rozłączono. Dane zostają w tej przeglądarce i na Twoim Drive.');
   }
 
+  /* Token Google żyje godzinę i bez serwera nie da się go odnowić w tle — Google otwiera okienko
+     tylko po kliknięciu. Dlatego pierwsze kliknięcie gdziekolwiek na stronie po wygaśnięciu odnawia
+     token (okienko samo się zamyka, zgoda już jest) i synchronizacja rusza dalej sama: skrzynka
+     i pulpit dostają zmiany z drugiego urządzenia bez szukania znaczka chmury.
+     Próbujemy raz na otwarcie strony — jeśli ktoś zamknie okienko, zostaje znaczek „Połącz”. */
+  let odnawiano = false;
+  function odnowPoKliknieciu(e) {
+    if (odnawiano || !wlaczona() || token() || !(stan && stan.email)) return;
+    if (e && e.target && e.target.closest && e.target.closest('[data-chmura]')) return;   // znaczek sam łączy
+    odnawiano = true;
+    zaloguj(false).then(() => synchronizuj('odnowienie')).catch(e => console.warn('[chmura] odnowienie', e));
+  }
+  // biblioteka Google ładuje się zawczasu, żeby okienko otworzyło się jeszcze w ramach kliknięcia
+  function przygotujOdnowienie() {
+    if (wlaczona() && stan && stan.email) zaladujGIS().catch(() => {});
+  }
+
   /* ================= WYGLĄD (pasek górny) ================= */
   const IKONA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5z"/><path class="ch-znak" d=""/></svg>';
   const ZNAKI = { ok: 'm9.5 13.5 2 2 3.5-3.5', nowe: 'M12 11v5m-2.5-2.5L12 16l2.5-2.5', 'czeka-wysylka': 'M12 16v-5m-2.5 2.5L12 11l2.5 2.5', logowanie: 'M12 11v2.5m0 2.3v.2', blad: 'M12 11v2.5m0 2.3v.2', offline: 'M9.5 11.5l5 5m0-5-5 5', pracuje: 'M9 13.5h6' };
@@ -375,6 +392,7 @@
   /* ================= START ================= */
   function uruchom() {
     if (!wlaczona()) { ustawUI({ s: 'wyl' }); return; }
+    przygotujOdnowienie();
     ustawUI({ s: token() ? 'pracuje' : 'logowanie' });
     setTimeout(() => synchronizuj('start'), 200);
   }
