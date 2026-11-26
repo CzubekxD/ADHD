@@ -24,7 +24,7 @@ concurrency:
 jobs:
   jednostkowe:
     name: Testy jednostkowe
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # Playwright z testy/package.json nie zna pakietów Ubuntu 26.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -39,7 +39,7 @@ jobs:
 
   strony:
     name: Strony w przeglądarce
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # Playwright z testy/package.json nie zna pakietów Ubuntu 26.04
     steps:
       - uses: actions/checkout@v4
         with:
